@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2BMatch — Encuentra lo que tu negocio necesita</title>
+    <link rel="stylesheet" href="../empresa/perfilEmpresa.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+
+    <!-- ===================== -->
+    <!-- Barra de navegación -->
+    <!-- ===================== -->
+    <nav class="nav">
+
+        <!-- Logo del sitio -->
+        <div class="nav-logo">
+            <div class="nav-logo-box">B2B</div>
+            B2BMatch
+        </div>
+
+        <!-- Menú de navegación -->
+        <div class="nav-links">
+            <a href="../index.html">Inicio</a>
+            <a href="ofertas-publicadas.html">Ofertas Empresas</a>
+            <a href="perfil.html" class="on">Mi Perfil</a>
+        </div>
+
+        <!-- Botón para cerrar sesión -->
+        <button class="hamburger">☰</button>
+        <div class="nav-r">
+            <button class="btn-n-solid" onclick="cerrarSesion()">
+                Cerrar sesión
+            </button>
+        </div>
+    </nav>
+
+
+    <!-- <div class="card">
+  <div class="card-body">
+    Consultora Óptimo Horizonte. Especialistas en consultoría organizacional y RRHH.
+  </div>
+</div> -->
+
+
+    <!-- carta de Benjamin -->
+    <section class="container py-5">
+
+        <div class="row justify-content-center">
+
+            <div class="col-lg-7">
+
+                <!-- Tarjeta que contiene toda la información -->
+                <div class="ai-card">
+
+                    <!-- Encabezado de la tarjeta -->
+                    <div class="ai-bar">
+                        <div class="ai-dot"></div>
+                        <span class="ai-lbl">Vista empresarial</span>
+                    </div>
+
+                    <div class="p-4">
+
+                        <h2 class="mb-4">Perfil de Empresa</h2>
+
+                        <!-- ===================== -->
+                        <!-- Vista normal del perfil -->
+                        <!-- ===================== -->
+                        <div id="view-mode">
+
+                            <!-- Nombre del usuario -->
+                            <div class="mb-4">
+                                <small class="text-secondary">Nombre de Empresa</small>
+                                <h4 id="display-name">Consultora Óptimo Horizonte</h4>
+                                
+                            </div>
+
+                            <!-- Profesión o cargo -->
+                            <div class="mb-4">
+                                <small class="text-secondary">Categoria</small>
+                                <h5 id="display-role">
+                                    Recursos humanos
+                                </h5>
+                            </div>
+
+                            <div>
+                                <small class="text-secondary">Verificación</small><br>
+                                <span class="verificacionGold">Verificacion Gold</span>
+                            </div>
+                            <!-- verificación -->
+                            <!-- <div class="mb-4">
+                                <small class="text-secondary">Verificación</small>
+                                <h5 id="display-verificacion">
+                                    Gold
+                                </h5>
+                            </div> -->
+                            
+
+                            <!-- otros -->
+                            <div class="mb-4">
+                                <small class="text-secondary">Otros</small>
+                                <p id="display-otros">
+                                    <strong>Ubicación</strong>📍: Concepción, Chile. <br>
+                                    Fundada en 2018 📅,
+                                    250 empresas atendidas 👥 <br>
+                                    con cobertura nacional.<br>
+
+                                    <strong>Misión:</strong><br>
+
+                                    Potenciar el crecimiento sostenible de las organizaciones mediante soluciones
+                                    integrales en gestión de personas, entregando procesos confiables, objetivos y
+                                    orientados a resultados que generen valor para nuestros clientes y sus equipos.<br>
+
+                                    <strong>Visión:</strong><br>
+
+                                    Ser una de las consultoras de referencia en Chile en soluciones de capital humano,
+                                    reconocida por la innovación, la excelencia técnica y la capacidad de construir
+                                    relaciones de largo plazo con empresas de todos los tamaños.
+                                </p>
+                            </div>
+
+                            <!-- mini cards -->
+                            <!-- <div class="row">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Reclutamiento</h5>
+                                            <p class="card-text">📌Búsqueda y evaluación de candidatos para cargos operativos, administrativos y profesionales. <br>Desde $350.000 </p>
+<!-- 🟢 Activo</p> (posible boton que muestre servicio disponible o inactivo)-->
+                            <!-- <a href="#" class="card-action">Editar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Assessment</h5>
+                                            <p class="card-text">Evaluación integral mediante entrevistas, dinámicas grupales y pruebas psicolaborales. <br>Desde $600.000</p>
+                                            <a href="#" class="card-action">Editar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Capacitación</h5>
+                                            <p class="card-text">Programas personalizados en liderazgo, comunicación, trabajo en equipo y gestión.<br> Desde $700.000</p>
+                                            <a href="#" class="card-action">Editar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Desarrollo Organizacional</h5>
+                                            <p class="card-text">Diagnóstico organizacional, clima laboral, gestión del cambio y diseño de estructuras. <br>Desde $1.500.000</p>
+                                            <a href="#" class="card-action">Editar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+
+                            <!-- Botón para editar -->
+                            <button class="card-action w-100" onclick="toggleEdit()">
+                                Editar Información
+                            </button>
+
+                        </div>
+
+                        <!-- ===================== -->
+                        <!-- Formulario para editar -->
+                        <!-- ===================== -->
+                        <div id="edit-mode" style="display:none;">
+
+                            <!-- Campo para modificar el nombre -->
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    Nombre completo
+                                </label>
+
+                                <input type="text" id="input-name" class="form-control">
+                            </div>
+
+                            <!-- Campo para modificar el rol -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    Rol Profesional
+                                </label>
+
+                                <input type="text" id="input-role" class="form-control">
+                            </div>
+
+                            <!-- para modificar verificación, no funcional, seguir viendo -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    Verificación
+                                </label>
+
+                                <input type="text" id="input-verificacion" class="form-control">
+                            </div>
+
+                            <!-- modificacion de otros -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    Otros
+                                </label>
+
+                                <input type="text" id="input-otros" class="form-control">
+                            </div>
+
+                            <!-- Botones del formulario -->
+                            <div class="d-grid gap-3">
+
+                                <button class="filter-btn filter-company" onclick="saveProfile()">
+                                    Guardar Cambios
+                                </button>
+
+                                <button class="filter-btn filter-all" onclick="toggleEdit()">
+                                    Cancelar
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- carta con imagen y texto a la derecha -->
+    <!-- <div class="card mb-3" style="max-width: 300px;">
+  <div class="row g-0">
+    <div class="col-md-4">
+      <img src="https://tomicconsultores.cl/wp-content/uploads/2021/02/Como-ayuda-una-consultora-de-recursos-humanos-1024x1024.jpg" class="img-fluid rounded-start" alt="...">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">Consultora Óptimo Horizonte</h5>
+        <p class="card-text">Especialistas en consultoría organizacional y RRHH.</p>
+        <p class="card-text"><small class="text-body-secondary">2026 marca registrada</small></p>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+    <div class="card" id="cardcentral">
+        <div class="card-header" id="tituloCardcentral">
+            Soluciones y Servicios
+        </div>
+
+        <!-- <div class="card-body" id="tituloCardcentral">
+            <h6>Soluciones y servicios</h6>
+        </div> -->
+
+        <!--  <div class="ai-bar">
+            <div class="ai-dot"></div>
+            <span class="ai-lbl">Soluciones y servicios</span>
+        </div> --> <!-- opcion 2 para titulo precesor a las minicards, poner luego de cardcentral -->
+
+
+
+        <!-- grid de doble carta con botones, puede ser modificado a columnas o filas -->
+        <div class="row">
+            <div class="col-sm-6 mb-3 mb-sm-0" id="mini-card1">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title1" id="card-title1">Reclutamiento</h5>
+                        <p id="card-text1">Búsqueda y evaluación de candidatos para cargos operativos, administrativos y
+                            profesionales. <br>Desde $350.000 </p>
+                        <!-- 🟢 Activo</p> (posible boton que muestre servicio disponible o inactivo)-->
+                        <!-- Este es el inputCard1 -->
+
+                        <textarea id="inputTitle1" type="text" class="form-control mb2"
+                            style="display: none;"></textarea>
+                        <textarea id="inputCard1" class="form-control" style="display: none;" rows="3"></textarea>
+                        <button href="#" class="card-action" id="editarCard1">Editar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6" id="mini-card2">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title2" id="card-title2">Assessment</h5>
+                        <p id="card-text2">Evaluación integral mediante entrevistas, dinámicas grupales y pruebas
+                            psicolaborales. <br>Desde $600.000</p>
+                        <!-- Este es el inputCard2 -->
+                        <textarea id="inputTitle2" type="text" class="form-control mb2"
+                            style="display: none;"></textarea>
+                        <textarea id="inputCard2" class="form-control" style="display: none;" rows="3"></textarea>
+
+                        <button href="#" class="card-action" id="editarCard2">Editar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-sm-6 mb-3 mb-sm-0" id="mini-card3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title3" id="card-title3">Capacitación</h5>
+                        <p id="card-text3">Programas personalizados en liderazgo, comunicación, trabajo en equipo y
+                            gestión.<br> Desde $700.000</p>
+                        <!-- Este es el inputCard3 -->
+                        <textarea id="inputTitle3" type="text" class="form-control mb2"
+                            style="display: none;"></textarea>
+                        <textarea id="inputCard3" class="form-control" style="display: none;" rows="3"></textarea>
+
+                        <button href="#" class="card-action" id="editarCard3">Editar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6" id="mini-card4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title4" id="card-title4">Desarrollo Organizacional</h5>
+                        <p id="card-text4">Diagnóstico organizacional, clima laboral, gestión del cambio y diseño de
+                            estructuras. <br>Desde $1.500.000</p>
+                        <!-- Este es el inputCard4 -->
+                        <textarea id="inputTitle4" type="text" class="form-control mb2"
+                            style="display: none;"></textarea>
+                        <textarea id="inputCard4" class="form-control" style="display: none;" rows="3"></textarea>
+
+                        <button href="#" class="card-action" id="editarCard4">Editar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- termino del div que envuelve las mini cards abajo -->
+
+
+    <br>
+
+    <div class="card" id="opinionesClientes"> <!-- nota de cliente satisfecho? -->
+        <div class="card-header">
+            Opiniones de clientes
+        </div>
+        <div class="card-body">
+            <figure>
+                <blockquote class="blockquote">
+                    <p>⭐⭐⭐⭐⭐ <br>"Excelente capacidad para
+                        seleccionar perfiles idóneos y bien capacitados."</p>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                    Empresa <cite title="Source Title">XYZ</cite>
+                </figcaption>
+            </figure>
+        </div>
+        <div class="card-body">
+            <figure>
+                <blockquote class="blockquote">
+                    <p>⭐⭐⭐⭐⭐<br>"El proceso de reclutamiento fue ágil y transparente. Los candidatos presentados se
+                        ajustaban al
+                        perfil que buscábamos, lo que redujo significativamente nuestros tiempos de contratación."</p>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                    Gerencia de Personas, <cite title="Source Title">TecnoSur SpA</cite>
+                </figcaption>
+            </figure>
+        </div>
+        <div class="card-body">
+            <figure>
+                <blockquote class="blockquote">
+                    <p>⭐⭐⭐⭐☆<br>"Informes claros y entregados dentro de los plazos acordados."</p>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                    Empresa <cite title="Source Title">Constructora Andina</cite>
+                </figcaption>
+            </figure>
+        </div>
+    </div>
+
+    <!-- varias cards en colores -->
+    <!-- <section id="colorCards">
+<div class="card text-bg-primary mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Primary card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+<div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Secondary card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+<div class="card text-bg-success mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Success card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+<div class="card text-bg-danger mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Danger card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+<div class="card text-bg-warning mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Warning card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+<div class="card text-bg-info mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Info card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+<div class="card text-bg-light mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Light card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+<div class="card text-bg-dark mb-3" style="max-width: 18rem;">
+  <div class="card-header">Header</div>
+  <div class="card-body">
+    <h5 class="card-title">Dark card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+  </div>
+</div>
+</section> -->
+
+    <script>
+
+        // =============================
+        // Cargar los datos guardados
+        // =============================
+        // Cuando la página abre, revisa si existen datos
+        // guardados en el navegador y los muestra.
+
+        window.onload = () => {
+
+            const nombre = localStorage.getItem("userName");
+            if (nombre) {
+                document.getElementById("display-name").textContent = nombre;
+            }
+
+            const rol = localStorage.getItem("userRole");
+            if (rol) {
+                document.getElementById("display-role").textContent = rol;
+            }
+
+            /* const verificacion = localStorage.getItem("userVerificacion");
+            if (verificacion) {
+                document.getElementById("display-verificacion").textContent = verificacion;
+            } */
+
+            const otros = localStorage.getItem("userOtros");
+            if (otros) {
+                document.getElementById("display-otros").textContent = otros;
+            }
+
+        };
+
+        // =============================
+        // Mostrar u ocultar el formulario
+        // =============================
+        // Cambia entre la vista normal y la vista de edición.
+
+        function toggleEdit() {
+
+            const viewMode = document.getElementById('view-mode');
+            const editMode = document.getElementById('edit-mode');
+
+            if (editMode.style.display === 'none') {
+
+                // Copia los datos actuales a los campos de texto
+
+                document.getElementById('input-name').value =
+                    document.getElementById('display-name').textContent;
+
+                document.getElementById('input-role').value =
+                    document.getElementById('display-role').textContent;
+
+                /* document.getElementById('input-verificacion').value =
+                    document.getElementById('display-verificacion').textContent; */
+
+                document.getElementById('input-otros').value =
+                    document.getElementById('display-otros').textContent;
+
+                viewMode.style.display = 'none';
+                editMode.style.display = 'block';
+
+            } else {
+
+                viewMode.style.display = 'block';
+                editMode.style.display = 'none';
+
+            }
+
+        }
+
+        // =============================
+        // Guardar los cambios del perfil
+        // =============================
+        // Actualiza la información en pantalla y la guarda
+        // para que permanezca al volver a abrir la página.
+
+        function saveProfile() {
+
+            const name = document.getElementById('input-name').value;
+            const role = document.getElementById('input-role').value;
+            /* const verificacion = document.getElementById('input-verificacion').value; */
+            const otros = document.getElementById('input-otros').value;
+
+            // Actualiza la información visible
+
+            document.getElementById('display-name').textContent = name;
+            document.getElementById('display-role').textContent = role;
+            /* document.getElementById('display-verificacion').textContent = verificacion; */
+            document.getElementById('display-otros').textContent = otros;
+
+            // Guarda los datos en el navegador
+
+            localStorage.setItem('userName', name);
+            localStorage.setItem('userRole', role);
+            /* localStorage.setItem('userVerificacion', verificacion); */
+            localStorage.setItem('userOtros', otros);
+
+            // Regresa a la vista del perfil
+
+            toggleEdit();
+
+        }
+
+        // =============================
+        // Cerrar sesión
+        // =============================
+        // Borra la información guardada y vuelve
+        // a la página principal.
+
+        function cerrarSesion() {
+
+            localStorage.clear();
+
+            window.location.href = "../index.html";
+
+        }
+
+
+        /* funcion para editar una card */
+        function editarCard(numero) {
+
+            const texto = document.getElementById("card-text" + numero);
+            const input = document.getElementById("inputCard" + numero);
+            const boton = document.getElementById("editarCard" + numero);
+
+            //para los titulos
+            const titulo = document.getElementById('card-title' + numero);
+            const inputTitulo = document.getElementById('inputTitle' + numero);
+
+            if (input.style.display === "none") {
+
+                //copiar info a los inputs
+                inputTitulo.value = titulo.textContent.trim()
+                input.value = texto.textContent.trim();
+
+                //ocultar texto original
+                titulo.style.display = 'none';
+                texto.style.display = "none";
+
+                //mostrar los nuevos inputs
+                inputTitulo.style.display = 'block';
+                input.style.display = "block";
+
+                boton.textContent = "Guardar";
+
+            } else {
+
+                //guardar cambios
+                titulo.textContent = inputTitulo.value;
+                texto.textContent = input.value;
+
+                //volver a mostrar texto
+                titulo.style.display = "block";
+                texto.style.display = "block";
+
+                //ocultar los inputs
+                inputTitulo.style.display = "none";
+                input.style.display = "none";
+
+                boton.textContent = "Editar";
+
+            }
+
+        }
+
+        // Listeners de los botones
+
+        document.getElementById("editarCard1").addEventListener("click", function () {
+            editarCard(1);
+        });
+
+        document.getElementById("editarCard2").addEventListener("click", function () {
+            editarCard(2);
+        });
+
+        document.getElementById("editarCard3").addEventListener("click", function () {
+            editarCard(3);
+        });
+
+        document.getElementById("editarCard4").addEventListener("click", function () {
+            editarCard(4);
+        });
+
+    </script>
+
+    <script src="../assets/js/script.js"></script>
+    <script src="../empresa/perfilEmpresa.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,171 @@
+/* ===========================
+    OFERTAS
+    (Sección donde se muestran las tarjetas de trabajos u ofertas)
+=========================== */
+
+/* Tarjeta principal de cada oferta de trabajo */
+.job-card{
+
+    /* Usa flexbox para organizar los elementos en fila */
+    display:flex;
+
+    /* Separa el contenido a los extremos (izquierda y derecha) */
+    justify-content:space-between;
+
+    /* Centra verticalmente los elementos dentro de la tarjeta */
+    align-items:center;
+
+    /* Espacio interno dentro de la tarjeta */
+    padding:25px;
+
+    /* Borde suave alrededor de la tarjeta */
+    border:1px solid var(--border);
+
+    /* Bordes redondeados */
+    border-radius:12px;
+
+    /* Espacio entre una tarjeta y otra */
+    margin-bottom:20px;
+
+    /* Animación suave cuando cambia de estado (hover) */
+    transition:.25s;
+
+    /* Fondo blanco */
+    background:white;
+}
+
+/* Efecto cuando el mouse pasa por encima de la tarjeta */
+.job-card:hover{
+
+    /* Mueve un poco la tarjeta hacia arriba (efecto flotante) */
+    transform:translateY(-3px);
+
+    /* Sombra suave para dar efecto de elevación */
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+/* Título principal dentro de la tarjeta (nombre del trabajo) */
+.job-card h4{
+
+    /* Color del texto (variable definida en otro lugar) */
+    color:var(--g800);
+
+    /* Espacio debajo del título */
+    margin-bottom:5px;
+}
+
+/* Nombre de la empresa */
+.empresa{
+
+    /* Color gris/verde según la variable */
+    color:var(--g700);
+
+    /* Texto en negrita */
+    font-weight:600;
+}
+
+/* Descripción del trabajo */
+.descripcion{
+
+    /* Color más suave para no destacar tanto */
+    color:var(--txt3);
+
+    /* Limita el ancho del texto para que no sea muy largo */
+    max-width:550px;
+}
+
+/* Contenedor de etiquetas (tags) */
+.tags{
+
+    /* Espacio arriba de las etiquetas */
+    margin-top:15px;
+}
+
+/* Cada etiqueta individual */
+.tags span{
+
+    /* Hace que las etiquetas estén en línea */
+    display:inline-block;
+
+    /* Fondo verde muy claro */
+    background:#EDF4ED;
+
+    /* Color del texto dentro de la etiqueta */
+    color:var(--g800);
+
+    /* Borde suave */
+    border:1px solid var(--g200);
+
+    /* Espaciado interno de la etiqueta */
+    padding:5px 12px;
+
+    /* Bordes redondeados tipo "pastilla" */
+    border-radius:30px;
+
+    /* Espacio entre etiquetas */
+    margin-right:8px;
+    margin-bottom:8px;
+
+    /* Tamaño de letra pequeño */
+    font-size:.85rem;
+}
+
+/* Precio o valor destacado dentro de la tarjeta */
+.job-card h5{
+
+    /* Color llamativo (probablemente naranja/coral) */
+    color:var(--coral);
+
+    /* Negrita para destacar */
+    font-weight:bold;
+}
+
+/* Párrafos dentro de la tarjeta */
+.job-card p{
+
+    /* Espacio inferior para separar textos */
+    margin-bottom:15px;
+}
+
+/* Botón de aplicar */
+.aplicar{
+
+    width: auto;
+    min-width: 140px;
+    padding: 8px 18px;
+}
+
+/* Estilo cuando el botón está desactivado */
+.aplicar:disabled{
+
+    /* Cambia el cursor (ya no parece clickeable) */
+    cursor:default;
+
+    /* Mantiene la opacidad normal (no lo vuelve transparente) */
+    opacity:1;
+}
+
+/* Responsive: cuando la pantalla es pequeña (celulares o tablets) */
+@media(max-width:768px){
+
+    .job-card{
+
+        /* Cambia de fila a columna (todo se apila verticalmente) */
+        flex-direction:column;
+
+        /* Centra todo el texto */
+        text-align:center;
+
+        /* Espacio entre elementos dentro de la tarjeta */
+        gap:20px;
+    }
+
+    .aplicar{ width:100%; }
+
+}
+
+@media(max-width:480px){
+    .job-card{ padding:16px; }
+    .job-card h4{ font-size:1rem; }
+    .tags span{ font-size:.75rem; }
+}

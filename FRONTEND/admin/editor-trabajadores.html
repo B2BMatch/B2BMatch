@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Trabajadores registrados — Admin · ExpertConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700;800&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .trabajador-fila {
+      display: grid;
+      grid-template-columns: 48px 1fr 1.2fr 120px 110px 80px;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.2s;
+    }
+    .trabajador-fila:hover { background: rgba(255,255,255,0.03); }
+    .trabajador-info { min-width: 0; }
+    .trabajador-nombre {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .trabajador-correo {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin: 2px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .trabajador-rubro {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      margin: 0;
+    }
+    .trabajador-habilidades {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin: 2px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .trabajador-fecha {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+    }
+    .trabajador-editar {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .trabajador-editar:hover { color: var(--white); }
+    .status-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="cabecera">
+    <svg class="hero-svg" viewBox="0 0 1400 400" preserveAspectRatio="xMidYMid slice"
+      xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="cg" cx="50%" cy="20%" r="70%">
+          <stop offset="0%" stop-color="#5A7A50" stop-opacity="0.45" />
+          <stop offset="100%" stop-color="#2B3F29" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="1400" height="400" fill="url(#cg)" />
+      <circle cx="1220" cy="60" r="42" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2" />
+      <circle cx="240" cy="330" r="3.5" fill="rgba(255,255,255,0.22)" />
+      <circle cx="420" cy="370" r="3" fill="rgba(255,255,255,0.18)" />
+    </svg>
+
+    <nav class="nav">
+      <a class="nav-logo" href="../index.html">
+        <span class="nav-logo-box">EC</span> ExpertConnect <span class="nav-admin-label">/ Admin</span>
+      </a>
+      <div class="nav-links">
+        <a href="editor-empresas.html">Empresas</a>
+        <a class="on" href="editor-trabajadores.html">Trabajadores</a>
+        <a href="editor-usuarios.html">Usuarios</a>
+        <a href="#">Reportes</a>
+      </div>
+      <button class="hamburger">☰</button>
+      <div class="nav-r">
+        <button class="btn-n-ghost">Notificaciones</button>
+        <button class="btn-n-solid">Cerrar sesión</button>
+      </div>
+    </nav>
+
+    <div class="cabecera-contenido">
+      <p class="ruta">Admin / Trabajadores</p>
+      <div class="cabecera-fila">
+        <div class="cabecera-titulo">
+          <span class="icono"><span class="sym sym-lg">handyman</span></span>
+          <div class="titulo-texto">
+            <p class="titulo">Trabajadores registrados</p>
+            <p class="subtitulo">Gestiona, verifica y edita todos los trabajadores independientes de la plataforma</p>
+          </div>
+        </div>
+        <div class="acciones">
+          <label class="buscador">
+            <span class="sym">search</span>
+            <input type="text" id="search-comp" placeholder="Buscar por nombre o correo...">
+          </label>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenido">
+
+    <div class="estadisticas">
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">handyman</span></span>
+        <p class="estadistica-numero">8</p>
+        <p class="estadistica-label">Trabajadores totales</p>
+      </div>
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">check_circle</span></span>
+        <p class="estadistica-numero">6</p>
+        <p class="estadistica-label">Activos</p>
+      </div>
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">hourglass_empty</span></span>
+        <p class="estadistica-numero">1</p>
+        <p class="estadistica-label">Pendientes</p>
+      </div>
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">block</span></span>
+        <p class="estadistica-numero">1</p>
+        <p class="estadistica-label">Suspendidos</p>
+      </div>
+    </div>
+
+    <div class="tabla">
+      <div class="tabla-barra">
+        <div class="tabla-filtros">
+          <button class="filtro act" data-filter="todas">Todos</button>
+          <button class="filtro" data-filter="activa">Activos</button>
+          <button class="filtro" data-filter="pendiente">Pendientes</button>
+          <button class="filtro" data-filter="suspendida">Suspendidos</button>
+        </div>
+        <p class="tabla-conteo"><strong id="r-count">8</strong> trabajadores encontrados</p>
+      </div>
+
+      <ul id="worker-list">
+
+        <li class="trabajador-fila" data-status="activa" data-name="juan perez juan.perez@gmail.com">
+          <span class="ava ava-wo">JP</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">Juan Pérez</p>
+            <p class="trabajador-correo">juan.perez@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Desarrollador web freelance</p>
+          <p class="trabajador-habilidades">HTML, CSS, JavaScript, React</p>
+          <span class="status-pill status-active">Activo</span>
+          <span class="trabajador-fecha">14 mar 2023</span>
+        </li>
+
+        <li class="trabajador-fila" data-status="activa" data-name="andrea lagos andrea.lagos@gmail.com">
+          <span class="ava ava-wo">AL</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">Andrea Lagos</p>
+            <p class="trabajador-correo">andrea.lagos@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Diseñadora gráfica</p>
+          <p class="trabajador-habilidades">Illustrator, Figma, Canva, Photoshop</p>
+          <span class="status-pill status-active">Activo</span>
+          <span class="trabajador-fecha">02 jun 2023</span>
+        </li>
+
+        <li class="trabajador-fila" data-status="activa" data-name="roberto muñoz roberto.munoz@gmail.com">
+          <span class="ava ava-wo">RM</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">Roberto Muñoz</p>
+            <p class="trabajador-correo">roberto.munoz@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Gasfíter certificado</p>
+          <p class="trabajador-habilidades">Residencial, Comercial, Urgencias</p>
+          <span class="status-pill status-active">Activo</span>
+          <span class="trabajador-fecha">21 ago 2023</span>
+        </li>
+
+        <li class="trabajador-fila" data-status="activa" data-name="valeria pinto valeria.pinto@gmail.com">
+          <span class="ava ava-wo">VP</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">Valeria Pinto</p>
+            <p class="trabajador-correo">valeria.pinto@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Contadora independiente</p>
+          <p class="trabajador-habilidades">Contabilidad, IVA, Renta, PYMES</p>
+          <span class="status-pill status-active">Activo</span>
+          <span class="trabajador-fecha">09 ene 2024</span>
+        </li>
+
+        <li class="trabajador-fila" data-status="pendiente" data-name="carlos muñoz carlos.munoz@gmail.com">
+          <span class="ava ava-wo">CM</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">Carlos Muñoz</p>
+            <p class="trabajador-correo">carlos.munoz@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Desarrollador Full Stack</p>
+          <p class="trabajador-habilidades">Node.js, Python, Django, PostgreSQL</p>
+          <span class="status-pill status-pending">Pendiente</span>
+          <span class="trabajador-fecha">28 may 2025</span>
+        </li>
+
+        <li class="trabajador-fila" data-status="suspendida" data-name="pedro ramirez pedro.ramirez@gmail.com">
+          <span class="ava ava-wo">PR</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">Pedro Ramírez</p>
+            <p class="trabajador-correo">pedro.ramirez@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Electricista</p>
+          <p class="trabajador-habilidades">Instalaciones, Mantención, Emergencias</p>
+          <span class="status-pill status-suspended">Suspendido</span>
+          <span class="trabajador-fecha">11 nov 2022</span>
+        </li>
+
+        <li class="trabajador-fila" data-status="activa" data-name="maria gonzalez maria.gonzalez@gmail.com">
+          <span class="ava ava-wo">MG</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">María González</p>
+            <p class="trabajador-correo">maria.gonzalez@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Marketing digital</p>
+          <p class="trabajador-habilidades">SEO, Google Ads, Meta, Redes sociales</p>
+          <span class="status-pill status-active">Activo</span>
+          <span class="trabajador-fecha">15 feb 2025</span>
+        </li>
+
+        <li class="trabajador-fila" data-status="activa" data-name="diego silva diego.silva@gmail.com">
+          <span class="ava ava-wo">DS</span>
+          <div class="trabajador-info">
+            <p class="trabajador-nombre">Diego Silva</p>
+            <p class="trabajador-correo">diego.silva@gmail.com</p>
+          </div>
+          <p class="trabajador-rubro">Fotógrafo profesional</p>
+          <p class="trabajador-habilidades">Fotografía, Video, Edición, Lightroom</p>
+          <span class="status-pill status-active">Activo</span>
+          <span class="trabajador-fecha">03 mar 2025</span>
+        </li>
+
+      </ul>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-grid">
+      <address>
+        <a class="ft-logo" href="../index.html"><span class="ft-logo-box">EC</span>ExpertConnect</a>
+        <p class="ft-desc">Panel de administración interna.</p>
+      </address>
+      <section class="fc">
+        <p class="fc-ttl">Admin</p>
+        <ul>
+          <li><a href="editor-empresas.html">Empresas</a></li>
+          <li><a href="editor-trabajadores.html">Trabajadores</a></li>
+          <li><a href="editor-usuarios.html">Usuarios</a></li>
+          <li><a href="#">Reportes</a></li>
+        </ul>
+      </section>
+      <section class="fc">
+        <p class="fc-ttl">Soporte</p>
+        <ul>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">Contacto</a></li>
+        </ul>
+      </section>
+      <section class="fc">
+        <p class="fc-ttl">Legal</p>
+        <ul>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+        </ul>
+      </section>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 ExpertConnect. Todos los derechos reservados.</p>
+      <p>Español (Latinoamérica)</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById('search-comp');
+      const countEl = document.getElementById('r-count');
+      const rows = document.querySelectorAll('.trabajador-fila');
+      const filters = document.querySelectorAll('.filtro');
+      let activeFilter = 'todas';
+
+      function applyFilters() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visible = 0;
+        rows.forEach(row => {
+          const matchStatus = activeFilter === 'todas' || row.dataset.status === activeFilter;
+          const matchQuery = !query || row.dataset.name.includes(query);
+          const show = matchStatus && matchQuery;
+          row.style.display = show ? 'grid' : 'none';
+          if (show) visible++;
+        });
+        countEl.textContent = visible;
+      }
+
+      filters.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filters.forEach(b => b.classList.remove('act'));
+          btn.classList.add('act');
+          activeFilter = btn.dataset.filter;
+          applyFilters();
+        });
+      });
+
+      searchInput.addEventListener('input', applyFilters);
+    })();
+
+    document.querySelector('.hamburger')?.addEventListener('click', function(){
+      document.querySelector('.nav-links')?.classList.toggle('open');
+    });
+  </script>
+</body>
+
+</html>

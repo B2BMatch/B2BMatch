@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Empresas registradas — Admin · ExpertConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700;800&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+
+  <header class="cabecera">
+    <svg class="hero-svg" viewBox="0 0 1400 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="cg" cx="50%" cy="20%" r="70%">
+          <stop offset="0%" stop-color="#5A7A50" stop-opacity="0.45" />
+          <stop offset="100%" stop-color="#2B3F29" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="1400" height="400" fill="url(#cg)" />
+      <circle cx="1220" cy="60" r="42" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2" />
+      <circle cx="240" cy="330" r="3.5" fill="rgba(255,255,255,0.22)" />
+      <circle cx="420" cy="370" r="3" fill="rgba(255,255,255,0.18)" />
+    </svg>
+
+    <nav class="nav">
+      <a class="nav-logo" href="../index.html">
+        <span class="nav-logo-box">M</span>B2BMatch <span class="nav-admin-label">/ Admin</span>
+      </a>
+      <div class="nav-links">
+        <a class="on" href="editor-empresas.html">Empresas</a>
+        <a href="editor-trabajadores.html">Trabajadores</a>
+        <a href="editor-usuarios.html">Usuarios</a>
+        <a href="#">Reportes</a>
+      </div>
+      <button class="hamburger">☰</button>
+      <div class="nav-r">
+        <button class="btn-n-ghost">Notificaciones</button>
+        <button class="btn-n-solid">Cerrar sesión</button>
+      </div>
+    </nav>
+
+    <div class="cabecera-contenido">
+      <p class="ruta">Admin / Empresas</p>
+      <div class="cabecera-fila">
+        <div class="cabecera-titulo">
+          <span class="icono"><span class="sym sym-lg">business</span></span>
+          <div class="titulo-texto">
+            <p class="titulo">Empresas registradas</p>
+            <p class="subtitulo">Gestiona, verifica y edita todas las empresas de la plataforma</p>
+          </div>
+        </div>
+        <div class="acciones">
+          <label class="buscador">
+            <span class="sym">search</span>
+            <input type="text" id="search-comp" placeholder="Buscar por nombre o correo...">
+          </label>
+          <button class="btn-n-solid"><span class="sym sym-btn">add</span> Nueva empresa</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenido">
+
+    <div class="estadisticas">
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">business</span></span>
+        <p class="estadistica-numero">150</p>
+        <p class="estadistica-label">Empresas totales</p>
+      </div>
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">check_circle</span></span>
+        <p class="estadistica-numero">133</p>
+        <p class="estadistica-label">Activas</p>
+      </div>
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">hourglass_empty</span></span>
+        <p class="estadistica-numero">100</p>
+        <p class="estadistica-label">Pendientes de revisión</p>
+      </div>
+      <div class="estadistica">
+        <span class="estadistica-icono"><span class="sym">block</span></span>
+        <p class="estadistica-numero">18</p>
+        <p class="estadistica-label">Suspendidas</p>
+      </div>
+    </div>
+
+    <div class="tabla">
+      <div class="tabla-barra">
+        <div class="tabla-filtros">
+          <button class="filtro act" data-filter="todas">Todas</button>
+          <button class="filtro" data-filter="activa">Activas</button>
+          <button class="filtro" data-filter="pendiente">Pendientes</button>
+          <button class="filtro" data-filter="suspendida">Suspendidas</button>
+        </div>
+        <p class="tabla-conteo"><strong id="r-count">6</strong> empresas encontradas</p>
+      </div>
+
+      <ul id="company-list">
+
+        <li class="empresa-fila" data-status="activa" data-name="techweb chile contacto@techwebchile.cl">
+          <span class="ava ava-co">TW</span>
+          <div class="empresa-info">
+            <p class="empresa-nombre">TechWeb Chile</p>
+            <p class="empresa-correo">contacto@techwebchile.cl</p>
+          </div>
+          <p class="empresa-rubro">Desarrollo web y apps móviles</p>
+          <span class="status-pill status-active">Activa</span>
+          <span class="empresa-fecha">14 mar 2023</span>
+          <a class="empresa-editar" href="editor.html?id=techweb"><span class="sym sym-sm">edit</span> Editar</a>
+        </li>
+
+        <li class="empresa-fila" data-status="activa" data-name="diseño360 studio hola@diseno360.cl">
+          <span class="ava ava-co">D3</span>
+          <div class="empresa-info">
+            <p class="empresa-nombre">Diseño360 Studio</p>
+            <p class="empresa-correo">hola@diseno360.cl</p>
+          </div>
+          <p class="empresa-rubro">Branding, UX/UI y marketing</p>
+          <span class="status-pill status-active">Activa</span>
+          <span class="empresa-fecha">02 jun 2023</span>
+          <a class="empresa-editar" href="editor.html?id=diseno360"><span class="sym sym-sm">edit</span> Editar</a>
+        </li>
+
+        <li class="empresa-fila" data-status="activa" data-name="contaasesores spa contacto@contaasesores.cl">
+          <span class="ava ava-co">CA</span>
+          <div class="empresa-info">
+            <p class="empresa-nombre">ContaAsesores SpA</p>
+            <p class="empresa-correo">contacto@contaasesores.cl</p>
+          </div>
+          <p class="empresa-rubro">Contabilidad, tributaria y finanzas</p>
+          <span class="status-pill status-active">Activa</span>
+          <span class="empresa-fecha">21 ago 2023</span>
+          <a class="empresa-editar" href="editor.html?id=contaasesores"><span class="sym sym-sm">edit</span> Editar</a>
+        </li>
+
+        <li class="empresa-fila" data-status="pendiente" data-name="marketing masters info@marketingmasters.cl">
+          <span class="ava ava-co">MM</span>
+          <div class="empresa-info">
+            <p class="empresa-nombre">Marketing Masters</p>
+            <p class="empresa-correo">info@marketingmasters.cl</p>
+          </div>
+          <p class="empresa-rubro">Marketing digital, SEO y redes sociales</p>
+          <span class="status-pill status-pending">Pendiente</span>
+          <span class="empresa-fecha">09 ene 2025</span>
+          <a class="empresa-editar" href="editor.html?id=marketingmasters"><span class="sym sym-sm">edit</span> Editar</a>
+        </li>
+
+        <li class="empresa-fila" data-status="suspendida" data-name="constructora vial contacto@constructoravial.cl">
+          <span class="ava ava-co">CV</span>
+          <div class="empresa-info">
+            <p class="empresa-nombre">Constructora Vial</p>
+            <p class="empresa-correo">contacto@constructoravial.cl</p>
+          </div>
+          <p class="empresa-rubro">Construcción y obras civiles</p>
+          <span class="status-pill status-suspended">Suspendida</span>
+          <span class="empresa-fecha">11 nov 2022</span>
+          <a class="empresa-editar" href="editor.html?id=constructoravial"><span class="sym sym-sm">edit</span> Editar</a>
+        </li>
+
+        <li class="empresa-fila" data-status="pendiente" data-name="agenciaweb+ hola@agenciawebplus.cl">
+          <span class="ava ava-co">AW</span>
+          <div class="empresa-info">
+            <p class="empresa-nombre">AgenciaWeb+</p>
+            <p class="empresa-correo">hola@agenciawebplus.cl</p>
+          </div>
+          <p class="empresa-rubro">Diseño web y posicionamiento</p>
+          <span class="status-pill status-pending">Pendiente</span>
+          <span class="empresa-fecha">28 may 2025</span>
+          <a class="empresa-editar" href="editor.html?id=agenciawebplus"><span class="sym sym-sm">edit</span> Editar</a>
+        </li>
+
+      </ul>
+    </div>
+
+  </main>
+
+
+  <footer>
+    <div class="footer-grid">
+      <address>
+        <a class="ft-logo" href="../index.html"><span class="ft-logo-box">M</span>B2BMatch</a>
+        <p class="ft-desc">Panel de administración interna.</p>
+      </address>
+      <section class="fc">
+        <p class="fc-ttl">Admin</p>
+        <ul>
+          <li><a href="#">Empresas</a></li>
+          <li><a href="editor-trabajadores.html">Trabajadores</a></li>
+          <li><a href="editor-usuarios.html">Usuarios</a></li>
+          <li><a href="#">Reportes</a></li>
+        </ul>
+      </section>
+      <section class="fc">
+        <p class="fc-ttl">Soporte</p>
+        <ul>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">Contacto</a></li>
+        </ul>
+      </section>
+      <section class="fc">
+        <p class="fc-ttl">Legal</p>
+        <ul>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+        </ul>
+      </section>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 B2BMatch. Todos los derechos reservados.</p>
+      <p>Español (Latinoamérica)</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById('search-comp');
+      const countEl = document.getElementById('r-count');
+      const rows = document.querySelectorAll('.empresa-fila');
+      const filters = document.querySelectorAll('.filtro');
+      let activeFilter = 'todas';
+
+      function applyFilters() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visible = 0;
+        rows.forEach(row => {
+          const matchStatus = activeFilter === 'todas' || row.dataset.status === activeFilter;
+          const matchQuery = !query || row.dataset.name.includes(query);
+          const show = matchStatus && matchQuery;
+          row.style.display = show ? 'grid' : 'none';
+          if (show) visible++;
+        });
+        countEl.textContent = visible;
+      }
+
+      filters.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filters.forEach(b => b.classList.remove('act'));
+          btn.classList.add('act');
+          activeFilter = btn.dataset.filter;
+          applyFilters();
+        });
+      });
+
+      searchInput.addEventListener('input', applyFilters);
+    })();
+
+    document.querySelector('.hamburger')?.addEventListener('click', function(){
+      document.querySelector('.nav-links')?.classList.toggle('open');
+    });
+  </script>
+</body>
+
+</html>
