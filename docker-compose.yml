@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+
+  postgres:
+
+    image: postgres:17
+
+    container_name: b2bmatch-db
+
+    restart: always
+
+    environment:
+
+      POSTGRES_DB: b2bmatch
+
+      POSTGRES_USER: postgres
+
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+
+      - "5433:5432"
+
+    volumes:
+
+      - postgres_data:/var/lib/postgresql/data
+
+      - ./database:/docker-entrypoint-initdb.d
+
+volumes:
+
+  postgres_data:
