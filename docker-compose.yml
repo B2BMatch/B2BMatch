@@ -4,7 +4,7 @@ services:
 
   postgres:
 
-    image: postgres:17
+    image: postgres:16
 
     container_name: b2bmatch-db
 
