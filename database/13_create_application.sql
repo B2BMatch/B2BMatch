@@ -1,0 +1,5 @@
+-- ================================================
+-- Tabla: application
+-- Descripción: Postulaciones realizadas por profesionales a las ofertas de trabajo, incluyendo propuesta, precio esperado y estado.
+-- Utilizada por: notification
+-- ================================================

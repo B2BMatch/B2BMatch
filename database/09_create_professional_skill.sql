@@ -1,0 +1,5 @@
+-- ================================================
+-- Tabla: professional_skill
+-- Descripción: Relación entre profesionales y sus habilidades. Permite asociar múltiples habilidades a un profesional y compartir una habilidad entre varios profesionales.
+-- Utilizada por: professional_profile / skill
+-- ================================================

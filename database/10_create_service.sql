@@ -1,0 +1,5 @@
+-- ================================================
+-- Tabla: service
+-- Descripción: Servicios ofrecidos por profesionales dentro del marketplace, clasificados por categoría y con información de precio, descripción y estado.
+-- Utilizada por: quotation
+-- ================================================

@@ -1,0 +1,5 @@
+-- ================================================
+-- Tabla: company_service
+-- Descripción: Servicios ofrecidos por empresas registradas en la plataforma, clasificados por categoría e información comercial.
+-- Utilizada por: review
+-- ================================================

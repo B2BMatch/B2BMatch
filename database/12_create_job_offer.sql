@@ -1,0 +1,5 @@
+-- ================================================
+-- Tabla: job_offer
+-- Descripción: Ofertas de trabajo o proyectos publicadas por empresas para contratar profesionales a través de la plataforma.
+-- Utilizada por: application
+-- ================================================
