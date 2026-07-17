@@ -87,9 +87,15 @@ INSERT INTO skill (name) VALUES
 ('Posicionamiento SEO'),
 ('Publicidad SEM'),
 ('Gestión de Redes Sociales'),
-('Email Marketing'),
 ('Analítica de Marketing'),
 ('Campañas Publicitarias'),
+('SEO'),
+('SEM'),
+('Google Ads'),
+('Meta Ads'),
+('Email Marketing'),
+('Google Analytics'),
+('Content Marketing'),
 
 -- Finanzas y Contabilidad
 ('Contabilidad General'),
@@ -187,15 +193,6 @@ INSERT INTO skill (name) VALUES
 ('Photoshop'),
 ('Illustrator'),
 ('Canva'),
-
--- Marketing
-('SEO'),
-('SEM'),
-('Google Ads'),
-('Meta Ads'),
-('Email Marketing'),
-('Google Analytics'),
-('Content Marketing'),
 
 -- Gestión
 ('Scrum'),
