@@ -1,3 +1,17 @@
+server:
+  port: 8084
+
 spring:
   application:
     name: ofertas
+  datasource:
+    url: jdbc:postgresql://localhost:5433/b2bmatch
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    properties:
+      hibernate:
+        default_schema: b2bmatch
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
