@@ -15,7 +15,7 @@
 CREATE TABLE notification (
 
     id BIGSERIAL,
-    user_id INT NOT NULL,
+    user_id BIGINT NOT NULL,
     title VARCHAR(150) NOT NULL,
     message TEXT,
     is_read BOOLEAN DEFAULT FALSE,

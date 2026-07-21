@@ -15,8 +15,8 @@
 CREATE TABLE review (
 
     id BIGSERIAL,
-    customer_id INT NOT NULL,
-    professional_id INT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    professional_id BIGINT NOT NULL,
     
     -- MODIFICACIÓN: CHECK constraint para asegurar que la calificación sea entre 1 y 5
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
