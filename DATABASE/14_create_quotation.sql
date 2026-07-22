@@ -15,8 +15,8 @@
 CREATE TABLE quotation (
 
     id BIGSERIAL,
-    service_id INT NOT NULL,
-    customer_id INT NOT NULL,
+    service_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
     message TEXT,
     
     -- MODIFICACIÓN: CHECK constraint para asegurar que solo ingresen estados válidos
