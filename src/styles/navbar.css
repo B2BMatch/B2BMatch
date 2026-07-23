@@ -1,0 +1,153 @@
+/* ==========================================================================
+   NAVBAR B2B
+   ========================================================================== */
+.navbar-b2b {
+  background: var(--bg-navbar, rgba(11, 15, 25, 0.95));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1.5px solid rgba(229, 62, 62, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 14px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.navbar-logo img {
+  height: 75px;
+  width: auto;
+  display: block;
+}
+
+/* Contenedor central (Links + Botones alineados en una sola fila para PC) */
+.navbar-content {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links a {
+  color: var(--text-muted, #9CA3AF);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.navbar-links a:hover {
+  color: var(--text-main, #FFFFFF);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Botón Tema */
+.theme-toggle-btn {
+  background: var(--bg-input, #161F33);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  color: var(--text-main, #FFFFFF);
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--red-glow, #E53E3E);
+}
+
+/* Botón Hamburguesa */
+.hamburger-btn {
+  display: none; /* Oculto en PC */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 2.5px;
+  background-color: var(--text-main, #FFFFFF);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.open .hamburger-line:nth-child(1) {
+  transform: translateY(7.5px) rotate(45deg);
+}
+.hamburger-btn.open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+.hamburger-btn.open .hamburger-line:nth-child(3) {
+  transform: translateY(-7.5px) rotate(-45deg);
+}
+
+/* ==========================================================================
+   RESPONSIVO: MÓVILES Y TABLETS (Menos de 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .navbar-b2b {
+    padding: 12px 20px;
+  }
+
+  .hamburger-btn {
+    display: flex; /* Aparece en móviles */
+  }
+
+  .navbar-content {
+    position: fixed;
+    top: 68px;
+    left: 0;
+    right: 0;
+    background: var(--bg-navbar, #0B0F19);
+    border-bottom: 1.5px solid rgba(229, 62, 62, 0.35);
+    padding: 24px;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    
+    /* Efecto oculto/visible al pulsar el botón */
+    display: none;
+  }
+
+  .navbar-content.open {
+    display: flex;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .navbar-actions button {
+    width: 100%;
+  }
+}

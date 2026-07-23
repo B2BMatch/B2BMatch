@@ -1,0 +1,48 @@
+/* ==========================================================================
+   TARJETAS (CARDS)
+   ========================================================================== */
+.card-b2b {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-b2b::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red-glow), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card-b2b:hover {
+  transform: translateY(-5px);
+  border-color: var(--red-glow);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15), 0 0 15px rgba(229, 62, 62, 0.2);
+}
+
+.card-b2b:hover::before {
+  opacity: 1;
+}
+
+.badge-tag {
+  background: rgba(229, 62, 62, 0.12);
+  color: var(--red-glow);
+  border: 1px solid rgba(229, 62, 62, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}

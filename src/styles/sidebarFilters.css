@@ -1,0 +1,106 @@
+/* ==========================================================================
+   SIDEBAR FILTERS
+   ========================================================================== */
+.sidebar-b2b {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  height: fit-content;
+  position: sticky;
+  top: 90px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-title);
+}
+
+.sidebar-reset-btn {
+  background: transparent;
+  border: none;
+  color: var(--red-glow);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-reset-btn:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.filter-group {
+  margin-bottom: 20px;
+}
+
+.filter-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-title);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.filter-option:hover {
+  color: var(--text-main);
+}
+
+.filter-option input[type="checkbox"],
+.filter-option input[type="radio"] {
+  accent-color: var(--red-glow);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.filter-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 16px 0;
+  opacity: 0.5;
+}
+
+.salary-slider {
+  width: 100%;
+  accent-color: var(--red-glow);
+  cursor: pointer;
+}
+
+.salary-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* RESPONSIVO PANTALLAS PEQUEÑAS */
+@media (max-width: 992px) {
+  .sidebar-b2b {
+    position: static;
+    margin-bottom: 20px;
+  }
+}
