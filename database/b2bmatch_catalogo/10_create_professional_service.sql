@@ -4,7 +4,7 @@
 -- Utilizada por: quotation
 -- ================================================
 
-CREATE TABLE service (
+CREATE TABLE professional_service (
 
     id BIGSERIAL,
 
@@ -27,9 +27,6 @@ CREATE TABLE service (
 CONSTRAINT pk_service
 PRIMARY KEY (id),
 
-CONSTRAINT fk_service_professional
-foreign KEY (professional_id)
-references professional_profile(id),
 
 CONSTRAINT fk_service_category
 foreign key (category_id)

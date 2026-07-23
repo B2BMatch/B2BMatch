@@ -1,19 +1,19 @@
 /*
 ====================================================
  Project : b2bmatch
+ Microservice : Usuarios
  File    : 18_seed_data.sql
- Author  : Team b2bmatch
 ====================================================
 */
 
 -- =============================================
 -- INITIAL DATA SEEDING
 -- Description:
--- Populates initial required roles.
+-- Initial user roles.
 -- =============================================
 
-INSERT INTO role (name, description) VALUES 
-('ADMIN', 'System administrator'),
-('CUSTOMER', 'Service requester'),
-('PROFESSIONAL', 'Service provider'),
-('COMPANY', 'Corporate service provider');
+INSERT INTO role (name, description) VALUES
+('ADMIN', 'Administrador del sistema'),
+('CUSTOMER', 'Solicitante de servicios'),
+('PROFESSIONAL', 'Proveedor de servicios'),
+('COMPANY', 'Empresa proveedora de servicios');

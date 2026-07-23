@@ -13,10 +13,6 @@ CREATE TABLE professional_skill (
     CONSTRAINT pk_professional_skill
         PRIMARY KEY (professional_id, skill_id),
 
-    CONSTRAINT fk_professional_skill_professional
-        FOREIGN KEY (professional_id)
-        REFERENCES professional_profile(id)
-        ON DELETE CASCADE,
 
     CONSTRAINT fk_professional_skill_skill
         FOREIGN KEY (skill_id)

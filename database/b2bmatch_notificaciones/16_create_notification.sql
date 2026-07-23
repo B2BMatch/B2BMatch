@@ -24,8 +24,6 @@ CREATE TABLE notification (
     CONSTRAINT pk_notification
         PRIMARY KEY (id),
 
-    CONSTRAINT fk_notification_user
-        FOREIGN KEY (user_id) REFERENCES app_user(id)
 
 );
 

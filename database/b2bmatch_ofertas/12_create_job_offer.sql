@@ -29,13 +29,6 @@ CREATE TABLE job_offer (
     CONSTRAINT pk_job_offer
         PRIMARY KEY (id),
 
-    CONSTRAINT fk_job_offer_company
-        FOREIGN KEY (company_id)
-        REFERENCES company_profile(id),
-
-    CONSTRAINT fk_job_offer_category
-        FOREIGN KEY (category_id)
-        REFERENCES category(id),
 
     CONSTRAINT ck_job_offer_status
         CHECK (

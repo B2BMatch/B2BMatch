@@ -1,19 +1,68 @@
--- ================================================
--- Tabla: skill
--- Descripción: Catálogo de habilidades y competencias profesionales que pueden poseer los usuarios.
--- Utilizada por: professional_skill
--- ================================================
+/*
+====================================================
+ Project : b2bmatch
+ Microservice : catalogo
+ File    : 18_seed_data.sql
+====================================================
+*/
 
 
-CREATE TABLE skill (
+-- =====================================================
+-- Inserción de categorías iniciales
+-- =====================================================
 
-    id BIGSERIAL PRIMARY KEY,
-    
-    name VARCHAR(100) NOT NULL UNIQUE,
+INSERT INTO category (name, description) VALUES
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+('Software Development', 
+ 'Desarrollo de software y soluciones tecnológicas'),
 
-);
+('Web Development', 
+ 'Diseño y desarrollo de aplicaciones web'),
+
+('Mobile Development', 
+ 'Desarrollo de aplicaciones móviles Android e iOS'),
+
+('UI/UX Design', 
+ 'Diseño de interfaces y experiencia de usuario'),
+
+('Graphic Design', 
+ 'Diseño gráfico y creación de contenido visual'),
+
+('Digital Marketing', 
+ 'Marketing digital, publicidad y estrategias online'),
+
+('Accounting', 
+ 'Servicios contables y financieros'),
+
+('Legal Services', 
+ 'Servicios legales y asesoría jurídica'),
+
+('Architecture', 
+ 'Servicios de arquitectura y diseño de espacios'),
+
+('Construction', 
+ 'Servicios relacionados a construcción y obras'),
+
+('Photography', 
+ 'Servicios profesionales de fotografía'),
+
+('Translation', 
+ 'Servicios de traducción e interpretación'),
+
+('Cybersecurity', 
+ 'Seguridad informática y protección de datos'),
+
+('Cloud Computing', 
+ 'Servicios basados en infraestructura cloud'),
+
+('Data Science', 
+ 'Análisis de datos y ciencia de datos'),
+
+('Artificial Intelligence', 
+ 'Soluciones basadas en inteligencia artificial'),
+
+('Business Consulting', 
+ 'Consultoría empresarial y estratégica');
 
 
 INSERT INTO skill (name) VALUES

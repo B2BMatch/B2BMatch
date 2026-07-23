@@ -4,7 +4,7 @@
 -- Utilizada por: notification
 -- ================================================
 
-CREATE TABLE application (
+CREATE TABLE application_table (
 
     id BIGSERIAL,
 
@@ -28,11 +28,6 @@ CREATE TABLE application (
     CONSTRAINT fk_application_job_offer
         FOREIGN KEY (job_offer_id)
         REFERENCES job_offer(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_application_professional
-        FOREIGN KEY (professional_id)
-        REFERENCES professional_profile(id)
         ON DELETE CASCADE,
 
     CONSTRAINT uk_application
