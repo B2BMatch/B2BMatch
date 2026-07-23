@@ -1,5 +1,6 @@
 package com.b2bmatch.usuarios.service;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.b2bmatch.usuarios.model.AppUser;
 import com.b2bmatch.usuarios.repository.AppUserRepository;
+import com.b2bmatch.usuarios.model.Role;
+import com.b2bmatch.usuarios.repository.RoleRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,13 +23,14 @@ public class AppUserService {
     private static final Pattern PASSWORD_PATTERN = 
         Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
 
+    private final RoleRepository roleRepository;
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
 
     public AppUser register(AppUser appUser) {
         String normalizedEmail = appUser.getEmail().toLowerCase().trim();
         appUser.setEmail(normalizedEmail);
-
+        
         if (appUserRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new IllegalArgumentException("El email ya está registrado");
         }

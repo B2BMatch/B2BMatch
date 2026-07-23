@@ -2,12 +2,9 @@ package com.b2bmatch.usuarios.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import com.b2bmatch.usuarios.model.Role;
 import com.b2bmatch.usuarios.repository.RoleRepository;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -16,8 +13,11 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
-    public Role create(Role role){
-        if(roleRepository.findByName(role.getName()).isPresent()){
+    public Role create(Role role) {
+        String normalizedName = role.getName().trim().toUpperCase();
+        role.setName(normalizedName);
+
+        if (roleRepository.findByName(normalizedName).isPresent()) {
             throw new IllegalArgumentException("El rol ya existe");
         }
         role.setCreatedAt(LocalDateTime.now());
