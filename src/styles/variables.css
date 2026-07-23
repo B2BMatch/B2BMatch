@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   PALETA DE COLORES Y VARIABLES CSS (MODO OSCURO POR DEFECTO)
+   ========================================================================== */
+:root {
+  /* Modo Oscuro (Oficial B2B) */
+  --bg-main: #0A2540;
+  --bg-card: #0F3052;
+  --bg-navbar: rgba(10, 37, 64, 0.85);
+  --bg-modal: #071D33;
+  --bg-input: rgba(255, 255, 255, 0.08);
+  
+  --text-main: #FFFFFF;
+  --text-muted: #94A3B8;
+  --text-accent: #63B3ED;
+  
+  --border-color: rgba(255, 255, 255, 0.12);
+  --red-glow: #E53E3E;
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================================================
+   PALETA PARA MODO CLARO (LIGHT MODE)
+   ========================================================================== */
+[data-theme="light"] {
+  --bg-main: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-navbar: rgba(255, 255, 255, 0.88);
+  --bg-modal: #FFFFFF;
+  --bg-input: #F1F5F9;
+  
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --text-accent: #0284C7;
+  
+  --border-color: #E2E8F0;
+  --red-glow: #E53E3E;
+  --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+}
