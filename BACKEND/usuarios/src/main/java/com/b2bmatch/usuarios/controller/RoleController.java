@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.b2bmatch.usuarios.model.Role;
 import com.b2bmatch.usuarios.service.RoleService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,7 +29,7 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<Role> create(@RequestBody Role role){
+    public ResponseEntity<Role> create(@Valid @RequestBody Role role){
         Role saved = roleService.create(role);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
