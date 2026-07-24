@@ -10,4 +10,5 @@ import com.b2bmatch.usuarios.model.AppUser;
 public interface AppUserRepository extends JpaRepository<AppUser, Long>{
     Optional<AppUser> findByEmail(String email);
     List<AppUser> findByStatusNot(String status);
+    List<AppUser> findByRole_NameAndStatusNot(String roleName, String status);
 }

@@ -4,15 +4,10 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.b2bmatch.usuarios.model.AppUser;
+import com.b2bmatch.usuarios.dto.AppUserRegisterRequestDto;
+import com.b2bmatch.usuarios.dto.AppUserResponseDto;
 import com.b2bmatch.usuarios.service.AppUserService;
 
 import jakarta.validation.Valid;
@@ -26,21 +21,23 @@ public class AppUserController {
     private final AppUserService appUserService;
 
     @GetMapping
-    public List<AppUser> getAll(){
+    public List<AppUserResponseDto> getAll() {
         return appUserService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AppUser> getById(@PathVariable Long id){
-        return appUserService.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AppUserResponseDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(appUserService.findById(id));
     }
 
+    @GetMapping("/role/{roleName}")
+    public List<AppUserResponseDto> getByRole(@PathVariable String roleName) {
+        return appUserService.findByRole(roleName);
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<AppUser> register(@Valid @RequestBody AppUser appUser){
-        AppUser saved = appUserService.register(appUser);
+    public ResponseEntity<AppUserResponseDto> register(@Valid @RequestBody AppUserRegisterRequestDto request) {
+        AppUserResponseDto saved = appUserService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -50,6 +47,8 @@ public class AppUserController {
         return ResponseEntity.noContent().build();
     }
 
-
-
+    @PatchMapping("/{id}/reactivate")
+    public ResponseEntity<AppUserResponseDto> reactivate(@PathVariable Long id) {
+        return ResponseEntity.ok(appUserService.reactivate(id));
+    }
 }
