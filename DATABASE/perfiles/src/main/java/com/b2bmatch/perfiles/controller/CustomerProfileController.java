@@ -13,42 +13,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.b2bmatch.perfiles.dto.ProfessionalProfileRequest;
-import com.b2bmatch.perfiles.dto.ProfessionalProfileResponse;
-import com.b2bmatch.perfiles.service.ProfessionalProfileService;
+import com.b2bmatch.perfiles.dto.CustomerProfileRequest;
+import com.b2bmatch.perfiles.dto.CustomerProfileResponse;
+import com.b2bmatch.perfiles.service.CustomerProfileService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/professional-profiles")
+@RequestMapping("/api/v1/customer-profiles")
 @RequiredArgsConstructor
-public class ProfessionalProfileController {
+public class CustomerProfileController {
 
-    private final ProfessionalProfileService service;
+    private final CustomerProfileService service;
 
     @GetMapping
-    public ResponseEntity<List<ProfessionalProfileResponse>> findAll() {
+    public ResponseEntity<List<CustomerProfileResponse>> findAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProfessionalProfileResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<CustomerProfileResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<ProfessionalProfileResponse> findByUserId(@PathVariable Long userId) {
+    public ResponseEntity<CustomerProfileResponse> findByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(service.findByUserId(userId));
     }
 
     @PostMapping
-    public ResponseEntity<ProfessionalProfileResponse> create(@Valid @RequestBody ProfessionalProfileRequest request) {
+    public ResponseEntity<CustomerProfileResponse> create(@Valid @RequestBody CustomerProfileRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProfessionalProfileResponse> update(@PathVariable Long id, @Valid @RequestBody ProfessionalProfileRequest request) {
+    public ResponseEntity<CustomerProfileResponse> update(@PathVariable Long id, @Valid @RequestBody CustomerProfileRequest request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 

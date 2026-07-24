@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/professional-profiles")
+@RequestMapping("/api/v1/professional-profiles")
 @RequiredArgsConstructor
 public class ProfessionalProfileController {
 

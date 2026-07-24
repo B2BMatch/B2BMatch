@@ -2,15 +2,17 @@ package com.b2bmatch.usuarios.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.b2bmatch.usuarios.dto.AppUserRegisterRequestDto;
+import com.b2bmatch.usuarios.dto.AppUserResponseDto;
+import com.b2bmatch.usuarios.dto.AppUserUpdateRequestDto;
 import com.b2bmatch.usuarios.model.AppUser;
-import com.b2bmatch.usuarios.repository.AppUserRepository;
 import com.b2bmatch.usuarios.model.Role;
+import com.b2bmatch.usuarios.repository.AppUserRepository;
 import com.b2bmatch.usuarios.repository.RoleRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,37 +27,47 @@ public class AppUserService {
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AppUser register(AppUser appUser) {
-        String normalizedEmail = appUser.getEmail().toLowerCase().trim();
-        appUser.setEmail(normalizedEmail);
+    public AppUserResponseDto register(AppUserRegisterRequestDto request) {
+        String normalizedEmail = request.getEmail().toLowerCase().trim();
 
         if (appUserRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new IllegalArgumentException("El email ya está registrado");
         }
 
-        String rawPassword = appUser.getPasswordHash();
-        if (!PASSWORD_PATTERN.matcher(rawPassword).matches()) {
+        if (!PASSWORD_PATTERN.matcher(request.getPassword()).matches()) {
             throw new IllegalArgumentException(
                     "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número");
         }
 
-        Role role = roleRepository.findById(appUser.getRole().getId())
+        Role role = roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new IllegalArgumentException("El rol especificado no existe"));
-        appUser.setRole(role);
 
-        appUser.setPasswordHash(passwordEncoder.encode(rawPassword));
+        AppUser appUser = new AppUser();
+        appUser.setEmail(normalizedEmail);
+        appUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        appUser.setRole(role);
         appUser.setStatus("ACTIVE");
         appUser.setCreatedAt(LocalDateTime.now());
 
-        return appUserRepository.save(appUser);
+        return toDto(appUserRepository.save(appUser));
     }
 
-    public List<AppUser> findAll() {
-        return appUserRepository.findByStatusNot("DELETED");
+    public List<AppUserResponseDto> findAll() {
+        return appUserRepository.findByStatusNot("DELETED").stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public Optional<AppUser> findById(Long id) {
-        return appUserRepository.findById(id);
+    public AppUserResponseDto findById(Long id) {
+        AppUser appUser = appUserRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
+        return toDto(appUser);
+    }
+
+    public List<AppUserResponseDto> findByRole(String roleName) {
+        return appUserRepository.findByRole_NameAndStatusNot(roleName.toUpperCase(), "DELETED").stream()
+                .map(this::toDto)
+                .toList();
     }
 
     public void delete(Long id) {
@@ -71,4 +83,48 @@ public class AppUserService {
         appUserRepository.save(appUser);
     }
 
+    public AppUserResponseDto reactivate(Long id) {
+        AppUser appUser = appUserRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
+
+        if (!"DELETED".equals(appUser.getStatus())) {
+            throw new IllegalArgumentException("El usuario no está eliminado, no se puede reactivar");
+        }
+
+        appUser.setStatus("ACTIVE");
+        appUser.setUpdatedAt(LocalDateTime.now());
+        return toDto(appUserRepository.save(appUser));
+    }
+
+    private AppUserResponseDto toDto(AppUser appUser) {
+        return new AppUserResponseDto(
+                appUser.getId(),
+                appUser.getEmail(),
+                appUser.getStatus(),
+                appUser.getRole().getName(),
+                appUser.getCreatedAt(),
+                appUser.getUpdatedAt());
+    }
+
+    public AppUserResponseDto update(Long id, AppUserUpdateRequestDto request) {
+        AppUser appUser = appUserRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
+
+        String normalizedEmail = request.getEmail().toLowerCase().trim();
+
+        appUserRepository.findByEmail(normalizedEmail)
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new IllegalArgumentException("El email ya está en uso por otro usuario");
+                });
+
+        Role role = roleRepository.findById(request.getRoleId())
+                .orElseThrow(() -> new IllegalArgumentException("El rol especificado no existe"));
+
+        appUser.setEmail(normalizedEmail);
+        appUser.setRole(role);
+        appUser.setUpdatedAt(LocalDateTime.now());
+
+        return toDto(appUserRepository.save(appUser));
+    }
 }
