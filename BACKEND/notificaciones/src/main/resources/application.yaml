@@ -5,7 +5,7 @@ spring:
   application:
     name: notificaciones
   datasource:
-    url: jdbc:postgresql://localhost:5433/b2bmatch
+    url: jdbc:postgresql://postgre-db:5432/b2bmatch
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:

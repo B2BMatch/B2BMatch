@@ -18,6 +18,9 @@ services:
   usuarios:
     build: ./usuarios
     container_name: usuarios
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgre123
     ports:
       - "8081:8081"
     restart: unless-stopped
@@ -27,6 +30,9 @@ services:
   perfiles:
     build: ./perfiles
     container_name: perfiles
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgre123
     ports:
       - "8082:8082"
     restart: unless-stopped
@@ -36,6 +42,9 @@ services:
   catalogo:
     build: ./catalogo
     container_name: catalogo
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgre123
     ports:
       - "8083:8083"
     restart: unless-stopped
@@ -45,6 +54,9 @@ services:
   ofertas:
     build: ./ofertas
     container_name: ofertas
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgre123
     ports:
       - "8084:8084"
     restart: unless-stopped
@@ -54,6 +66,9 @@ services:
   resenias:
     build: ./resenias
     container_name: resenias
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgre123
     ports:
       - "8085:8085"
     restart: unless-stopped
@@ -63,6 +78,9 @@ services:
   notificaciones:
     build: ./notificaciones
     container_name: notificaciones
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgre123
     ports:
       - "8086:8086"
     restart: unless-stopped
