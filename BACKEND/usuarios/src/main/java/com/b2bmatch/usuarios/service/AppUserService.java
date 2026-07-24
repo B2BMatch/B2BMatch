@@ -1,6 +1,5 @@
 package com.b2bmatch.usuarios.service;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -20,8 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AppUserService {
 
-    private static final Pattern PASSWORD_PATTERN = 
-        Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
 
     private final RoleRepository roleRepository;
     private final AppUserRepository appUserRepository;
@@ -30,7 +28,7 @@ public class AppUserService {
     public AppUser register(AppUser appUser) {
         String normalizedEmail = appUser.getEmail().toLowerCase().trim();
         appUser.setEmail(normalizedEmail);
-        
+
         if (appUserRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new IllegalArgumentException("El email ya está registrado");
         }
@@ -38,8 +36,12 @@ public class AppUserService {
         String rawPassword = appUser.getPasswordHash();
         if (!PASSWORD_PATTERN.matcher(rawPassword).matches()) {
             throw new IllegalArgumentException(
-                "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número");
+                    "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número");
         }
+
+        Role role = roleRepository.findById(appUser.getRole().getId())
+                .orElseThrow(() -> new IllegalArgumentException("El rol especificado no existe"));
+        appUser.setRole(role);
 
         appUser.setPasswordHash(passwordEncoder.encode(rawPassword));
         appUser.setStatus("ACTIVE");
@@ -48,11 +50,11 @@ public class AppUserService {
         return appUserRepository.save(appUser);
     }
 
-    public List<AppUser> findAll(){
+    public List<AppUser> findAll() {
         return appUserRepository.findAll();
     }
 
-    public Optional<AppUser> findById(Long id){
+    public Optional<AppUser> findById(Long id) {
         return appUserRepository.findById(id);
     }
 }
