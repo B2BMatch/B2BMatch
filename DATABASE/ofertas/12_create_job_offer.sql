@@ -1,3 +1,5 @@
+SET search_path TO ofertas, public;
+
 -- ================================================
 -- Tabla: job_offer
 -- Descripción: Ofertas de trabajo o proyectos publicadas por empresas para contratar profesionales a través de la plataforma.
@@ -29,13 +31,6 @@ CREATE TABLE job_offer (
     CONSTRAINT pk_job_offer
         PRIMARY KEY (id),
 
-    CONSTRAINT fk_job_offer_company
-        FOREIGN KEY (company_id)
-        REFERENCES company_profile(id),
-
-    CONSTRAINT fk_job_offer_category
-        FOREIGN KEY (category_id)
-        REFERENCES category(id),
 
     CONSTRAINT ck_job_offer_status
         CHECK (

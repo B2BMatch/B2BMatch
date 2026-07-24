@@ -1,3 +1,5 @@
+SET search_path TO resenias, public;
+
 /*
 ====================================================
  Project : b2bmatch
@@ -26,13 +28,7 @@ CREATE TABLE review (
     updated_at TIMESTAMP,
 
     CONSTRAINT pk_review
-        PRIMARY KEY (id),
-
-    CONSTRAINT fk_review_customer
-        FOREIGN KEY (customer_id) REFERENCES customer_profile(id),
-
-    CONSTRAINT fk_review_professional
-        FOREIGN KEY (professional_id) REFERENCES professional_profile(id)
+        PRIMARY KEY (id)
 
 );
 

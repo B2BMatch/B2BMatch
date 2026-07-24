@@ -1,3 +1,5 @@
+SET search_path TO ofertas, public;
+
 /*
 ====================================================
  Project : b2bmatch
@@ -26,13 +28,7 @@ CREATE TABLE quotation (
     updated_at TIMESTAMP,
 
     CONSTRAINT pk_quotation
-        PRIMARY KEY (id),
-
-    CONSTRAINT fk_quotation_service
-        FOREIGN KEY (service_id) REFERENCES service(id),
-
-    CONSTRAINT fk_quotation_customer
-        FOREIGN KEY (customer_id) REFERENCES customer_profile(id)
+        PRIMARY KEY (id)
 
 );
 

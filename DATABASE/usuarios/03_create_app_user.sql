@@ -1,3 +1,5 @@
+SET search_path TO usuarios, public;
+
 /*
 ====================================================
  Project : b2bmatch
