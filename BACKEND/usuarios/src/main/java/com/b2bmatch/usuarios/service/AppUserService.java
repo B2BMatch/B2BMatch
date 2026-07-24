@@ -51,10 +51,24 @@ public class AppUserService {
     }
 
     public List<AppUser> findAll() {
-        return appUserRepository.findAll();
+        return appUserRepository.findByStatusNot("DELETED");
     }
 
     public Optional<AppUser> findById(Long id) {
         return appUserRepository.findById(id);
     }
+
+    public void delete(Long id) {
+        AppUser appUser = appUserRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
+
+        if ("DELETED".equals(appUser.getStatus())) {
+            throw new IllegalArgumentException("El usuario ya está eliminado");
+        }
+
+        appUser.setStatus("DELETED");
+        appUser.setUpdatedAt(LocalDateTime.now());
+        appUserRepository.save(appUser);
+    }
+
 }

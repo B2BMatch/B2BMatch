@@ -38,7 +38,7 @@ public class AppUser {
     private String email;
 
     @NotBlank(message = "El password es obligatorio")
-    @Column(name = "password_hash", nullable = false, length = 100)
+    @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
     @Column(nullable = false, length = 20)

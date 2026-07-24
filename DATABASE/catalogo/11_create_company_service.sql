@@ -1,3 +1,5 @@
+SET search_path TO catalogo, public;
+
 -- ================================================
 -- Tabla: company_service
 -- Descripción: Servicios ofrecidos por empresas registradas en la plataforma, clasificados por categoría e información comercial.
@@ -27,9 +29,6 @@ CREATE TABLE company_service (
     CONSTRAINT pk_company_service
         PRIMARY KEY (id),
 
-    CONSTRAINT fk_company_service_company
-        FOREIGN KEY (company_id)
-        REFERENCES company_profile(id),
 
     CONSTRAINT fk_company_service_category
         FOREIGN KEY (category_id)

@@ -1,10 +1,12 @@
+SET search_path TO catalogo, public;
+
 -- ================================================
 -- Tabla: service
 -- Descripción: Servicios ofrecidos por profesionales dentro del marketplace, clasificados por categoría y con información de precio, descripción y estado.
 -- Utilizada por: quotation
 -- ================================================
 
-CREATE TABLE service (
+CREATE TABLE professional_service (
 
     id BIGSERIAL,
 
@@ -27,9 +29,6 @@ CREATE TABLE service (
 CONSTRAINT pk_service
 PRIMARY KEY (id),
 
-CONSTRAINT fk_service_professional
-foreign KEY (professional_id)
-references professional_profile(id),
 
 CONSTRAINT fk_service_category
 foreign key (category_id)
@@ -48,10 +47,10 @@ CONSTRAINT ck_service_status
 
 );
 
-COMMENT ON TABLE service IS 'Professional services offered on the platform';
+COMMENT ON TABLE professional_service IS 'Professional services offered on the platform';
 
 CREATE INDEX idx_service_professional
-ON service(professional_id);
+ON professional_service(professional_id);
 
 CREATE INDEX idx_service_category
-ON service(category_id);
+ON professional_service(category_id);

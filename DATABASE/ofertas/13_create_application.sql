@@ -1,10 +1,12 @@
+SET search_path TO ofertas, public;
+
 -- ================================================
 -- Tabla: application
 -- Descripción: Postulaciones realizadas por profesionales a las ofertas de trabajo, incluyendo propuesta, precio esperado y estado.
 -- Utilizada por: notification
 -- ================================================
 
-CREATE TABLE application (
+CREATE TABLE application_table (
 
     id BIGSERIAL,
 
@@ -30,11 +32,6 @@ CREATE TABLE application (
         REFERENCES job_offer(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_application_professional
-        FOREIGN KEY (professional_id)
-        REFERENCES professional_profile(id)
-        ON DELETE CASCADE,
-
     CONSTRAINT uk_application
         UNIQUE(job_offer_id, professional_id),
 
@@ -50,10 +47,10 @@ CREATE TABLE application (
 
 );
 
-COMMENT ON TABLE application IS 'Applications submitted by professionals';
+COMMENT ON TABLE application_table IS 'Applications submitted by professionals';
 
 CREATE INDEX idx_application_job_offer
-ON application(job_offer_id);
+ON application_table(job_offer_id);
 
 CREATE INDEX idx_application_professional
-ON application(professional_id);
+ON application_table(professional_id);

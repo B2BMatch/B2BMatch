@@ -1,0 +1,73 @@
+services:
+
+  postgre-db:
+    image: postgres:16
+    container_name: postgre
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgre123
+      POSTGRES_DB: b2bmatch
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgre_data:/var/lib/postgresql/data
+      - ../DATABASE:/sql
+      - ./init:/docker-entrypoint-initdb.d
+
+  usuarios:
+    build: ./usuarios
+    container_name: usuarios
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
+
+  perfiles:
+    build: ./perfiles
+    container_name: perfiles
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
+
+  catalogo:
+    build: ./catalogo
+    container_name: catalogo
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
+
+  ofertas:
+    build: ./ofertas
+    container_name: ofertas
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
+
+  resenias:
+    build: ./resenias
+    container_name: resenias
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
+
+  notificaciones:
+    build: ./notificaciones
+    container_name: notificaciones
+    ports:
+      - "8086:8086"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
+
+volumes:
+  postgre_data:

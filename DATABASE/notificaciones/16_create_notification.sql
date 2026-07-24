@@ -1,3 +1,5 @@
+SET search_path TO notificaciones, public;
+
 /*
 ====================================================
  Project : b2bmatch
@@ -22,10 +24,7 @@ CREATE TABLE notification (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT pk_notification
-        PRIMARY KEY (id),
-
-    CONSTRAINT fk_notification_user
-        FOREIGN KEY (user_id) REFERENCES app_user(id)
+        PRIMARY KEY (id)
 
 );
 

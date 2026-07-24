@@ -11,7 +11,7 @@ spring:
   jpa:
     properties:
       hibernate:
-        default_schema: b2bmatch
+        default_schema: perfiles
     hibernate:
       ddl-auto: validate
     show-sql: true

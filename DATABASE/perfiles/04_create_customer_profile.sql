@@ -1,3 +1,5 @@
+SET search_path TO perfiles, public;
+
 /*
 ====================================================
  Project : b2bmatch
@@ -37,11 +39,6 @@ CREATE TABLE customer_profile (
 
     CONSTRAINT pk_customer_profile
         PRIMARY KEY (id),
-
-    CONSTRAINT fk_customer_profile_user
-        FOREIGN KEY (user_id)
-        REFERENCES app_user(id)
-        ON DELETE CASCADE,
 
     CONSTRAINT uk_customer_profile_user
         UNIQUE (user_id)
