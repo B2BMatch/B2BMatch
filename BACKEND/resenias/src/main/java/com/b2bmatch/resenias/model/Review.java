@@ -32,13 +32,13 @@ public class Review {
     @Column (nullable = false)
     private Long professional_id;
 
-    @Column
-    private int rating;
+    @Column (nullable = false)
+    private Integer rating;
 
-    @Column
+    @Column (columnDefinition = "TEXT")
     private String comment;
 
-    @Column
+    @Column (nullable = false)
     private LocalDateTime created_at;
 
     @Column

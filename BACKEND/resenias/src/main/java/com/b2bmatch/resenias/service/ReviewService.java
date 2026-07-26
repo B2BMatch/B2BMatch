@@ -1,5 +1,6 @@
 package com.b2bmatch.resenias.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class ReviewService {
 
     //ver todas las reseñas de un profesioal
     public List<Review> getReviewsByProfessional(Long professional_id){
-            List<Review> reviews = reviewRepository.findByProfessionalId(professional_id);
+            List<Review> reviews = reviewRepository.findByProfessional_id(professional_id);
 
             if (reviews.isEmpty()){
                 throw new ResourceNotFoundException("Profesional con id " + professional_id + " no encontrado dentro de entidad Review");
@@ -39,7 +40,7 @@ public class ReviewService {
         }
     //reseñas de un cliente por id
     public List<Review> getReviewsByCustomer(Long customer_id){
-        List<Review> reviews = reviewRepository.findByCustomerId(customer_id);
+        List<Review> reviews = reviewRepository.findByCustomer_id(customer_id);
         
         if (reviews.isEmpty()) {
         throw new ResourceNotFoundException("Cliente con id " + customer_id + " no encontrado dentro de entidad Review");
@@ -49,6 +50,7 @@ public class ReviewService {
 
     //crear una review
     public Review createReview (Review review){
+        review.setCreated_at(LocalDateTime.now()); //para evitar posibles errores con el created_at not null del sql
         return reviewRepository.save(review);
     }
 
