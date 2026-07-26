@@ -16,6 +16,10 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     //ingles
+    public List<Review> getAllReviews(){
+        return reviewRepository.findAll();
+    }
+
     //ver una reseña por id
     public Review getReview(Long id) {
 
@@ -34,19 +38,23 @@ public class ReviewService {
 
     //crear una review
     public Review createReview (Review review){
-        reviewRepository.save(review);
-        return review;
+        return reviewRepository.save(review);
     }
 
+    //actualizar review
     public Review updateReview (Long id, Review review){
         
-        return reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Review no encontrada para modificar"));
-        review.setRating(0);
-        review.setComment(null);
-        reviewRepository.save(review)
+        Review existingReview = reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Review no encontrada para modificar"));
+
+        existingReview.setRating(review.getRating());
+        existingReview.setComment(review.getComment());
+
+        return reviewRepository.save(existingReview);
     }
 
-    public void deletReview (Long id){
+    //borrar review
+    public void deleteReview (Long id){
+        Review review = getReview(id); //primero verifica que exista la review
         reviewRepository.deleteById(id);
         //o tambien por la entidad en si reviewRepository.delete(review);
     }
