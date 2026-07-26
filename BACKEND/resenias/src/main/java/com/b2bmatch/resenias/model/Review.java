@@ -26,10 +26,10 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private Long customer_id;
+    @Column (nullable = false)
+    private Long customer_id; //puede cambiarse a customerId para seguir convencion, se tendria que agregar name = "customer_id" a parametro de la columna.
 
-    @Column
+    @Column (nullable = false)
     private Long professional_id;
 
     @Column
