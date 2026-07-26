@@ -2,6 +2,7 @@ package com.b2bmatch.resenias.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.b2bmatch.resenias.model.Review;
@@ -50,8 +52,21 @@ public class ReviewController {
         return reviewService.getReview(id);
     }
 
+    //por profesional
+    @GetMapping("/professional/{professional_id}")
+    public List<Review> getReviewsByProfessional(@PathVariable Long professional_id) {
+        return reviewService.getReviewsByProfessional(professional_id);
+    }
+
+    //por cliente
+    @GetMapping("/customer/{customer_id}")
+    public List<Review> getReviewsByCustomer(@PathVariable Long customer_id) {
+        return reviewService.getReviewsByCustomer(customer_id);
+    }
+
     //publicar review
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED) //para dar un codigo 201 "creado" en vez de 200 "ok"
     public Review createReview(@RequestBody Review review) {
         return reviewService.createReview(review);
     }
