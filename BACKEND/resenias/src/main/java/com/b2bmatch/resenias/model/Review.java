@@ -27,10 +27,10 @@ public class Review {
     private Long id;
 
     @Column (nullable = false)
-    private Long customer_id; //puede cambiarse a customerId para seguir convencion, se tendria que agregar name = "customer_id" a parametro de la columna.
+    private Long customerId; //puede cambiarse a customerId para seguir convencion, se tendria que agregar name = "customer_id" a parametro de la columna.
 
     @Column (nullable = false)
-    private Long professional_id;
+    private Long professionalId;
 
     @Column (nullable = false)
     private Integer rating;
@@ -39,9 +39,9 @@ public class Review {
     private String comment;
 
     @Column (nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
 }

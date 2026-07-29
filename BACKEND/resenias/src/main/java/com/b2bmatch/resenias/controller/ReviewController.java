@@ -19,7 +19,7 @@ import com.b2bmatch.resenias.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 
 /* Controller
-Lo dejaría para el final. Cuando llegues aquí ya tendrás todo listo:
+
 entidad
 repositorio
 DTOs
@@ -54,14 +54,14 @@ public class ReviewController {
 
     //por profesional
     @GetMapping("/professional/{professional_id}")
-    public List<Review> getReviewsByProfessional(@PathVariable Long professional_id) {
-        return reviewService.getReviewsByProfessional(professional_id);
+    public List<Review> getReviewsByProfessional(@PathVariable Long professionalId) {
+        return reviewService.getReviewsByProfessional(professionalId);
     }
 
     //por cliente
     @GetMapping("/customer/{customer_id}")
-    public List<Review> getReviewsByCustomer(@PathVariable Long customer_id) {
-        return reviewService.getReviewsByCustomer(customer_id);
+    public List<Review> getReviewsByCustomer(@PathVariable Long customerId) {
+        return reviewService.getReviewsByCustomer(customerId);
     }
 
     //publicar review
