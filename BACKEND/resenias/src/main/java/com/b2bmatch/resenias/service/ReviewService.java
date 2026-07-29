@@ -33,18 +33,18 @@ public class ReviewService {
     public List<Review> getReviewsByProfessional(Long professionalId){
             List<Review> reviews = reviewRepository.findByProfessionalId(professionalId);
 
-            if (reviews.isEmpty()){
+            /* if (reviews.isEmpty()){
                 throw new ResourceNotFoundException("Profesional con id " + professionalId + " no encontrado dentro de entidad Review");
-            }
+            } */
             return reviews;
         }
     //reseñas de un cliente por id
     public List<Review> getReviewsByCustomer(Long customerId){
         List<Review> reviews = reviewRepository.findByCustomerId(customerId);
         
-        if (reviews.isEmpty()) {
+        /* if (reviews.isEmpty()) {
         throw new ResourceNotFoundException("Cliente con id " + customerId + " no encontrado dentro de entidad Review");
-        }
+        } */
         return reviews;
     }
 
