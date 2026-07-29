@@ -53,13 +53,13 @@ public class ReviewController {
     }
 
     //por profesional
-    @GetMapping("/professional/{professional_id}")
+    @GetMapping("/professional/{professionalId}")
     public List<Review> getReviewsByProfessional(@PathVariable Long professionalId) {
         return reviewService.getReviewsByProfessional(professionalId);
     }
 
     //por cliente
-    @GetMapping("/customer/{customer_id}")
+    @GetMapping("/customer/{customerId}")
     public List<Review> getReviewsByCustomer(@PathVariable Long customerId) {
         return reviewService.getReviewsByCustomer(customerId);
     }
