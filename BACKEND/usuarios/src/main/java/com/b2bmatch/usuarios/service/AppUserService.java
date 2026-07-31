@@ -20,13 +20,14 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AppUserService {
-
+    //Capa de seguridad a password(al menos una mayusculta, una minuscula un numero y desde 8 caracteres)
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
 
     private final RoleRepository roleRepository;
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
-
+    
+    //Normalizar email(Todo en minusculas y sin espacios al comienzo y al final)
     public AppUserResponseDto register(AppUserRegisterRequestDto request) {
         String normalizedEmail = request.getEmail().toLowerCase().trim();
 

@@ -61,6 +61,7 @@ public class ReviewService {
 
         existingReview.setRating(review.getRating());
         existingReview.setComment(review.getComment());
+        existingReview.setUpdatedAt(LocalDateTime.now());
 
         return reviewRepository.save(existingReview);
     }
