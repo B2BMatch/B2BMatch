@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.b2bmatch.perfiles.dto.ProfessionalProfileRequest;
 import com.b2bmatch.perfiles.dto.ProfessionalProfileResponse;
+import com.b2bmatch.perfiles.exception.ProfileNotFoundException;
 import com.b2bmatch.perfiles.model.ProfessionalProfile;
 import com.b2bmatch.perfiles.repository.ProfessionalProfileRepository;
 
@@ -19,20 +20,20 @@ public class ProfessionalProfileService {
     private final ProfessionalProfileRepository repository;
 
     public List<ProfessionalProfileResponse> findAll() {
-        return repository.findAll().stream()
+        return repository.findByStatusNot("DELETED").stream()
                 .map(ProfessionalProfileResponse::fromEntity)
                 .toList();
     }
 
     public ProfessionalProfileResponse findById(Long id) {
         ProfessionalProfile entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Professional profile not found with id: " + id));
+                .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));
         return ProfessionalProfileResponse.fromEntity(entity);
     }
 
     public ProfessionalProfileResponse findByUserId(Long userId) {
         ProfessionalProfile entity = repository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Professional profile not found for user id: " + userId));
+                .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found for user id: " + userId));
         return ProfessionalProfileResponse.fromEntity(entity);
     }
 
@@ -50,13 +51,14 @@ public class ProfessionalProfileService {
         entity.setGithubUrl(request.getGithubUrl());
         entity.setCity(request.getCity());
         entity.setCountry(request.getCountry());
+        entity.setStatus("ACTIVE");
         entity.setCreatedAt(LocalDateTime.now());
         return ProfessionalProfileResponse.fromEntity(repository.save(entity));
     }
 
     public ProfessionalProfileResponse update(Long id, ProfessionalProfileRequest request) {
         ProfessionalProfile existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Professional profile not found with id: " + id));
+                .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));
         existing.setFirstName(request.getFirstName());
         existing.setLastName(request.getLastName());
         existing.setPhone(request.getPhone());
@@ -73,7 +75,29 @@ public class ProfessionalProfileService {
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+        ProfessionalProfile entity = repository.findById(id)
+                .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));
+
+        if ("DELETED".equals(entity.getStatus())) {
+            throw new IllegalArgumentException("El perfil ya está eliminado");
+        }
+
+        entity.setStatus("DELETED");
+        entity.setUpdatedAt(LocalDateTime.now());
+        repository.save(entity);
     }
+
+    public ProfessionalProfileResponse reactivate(Long id) {
+    ProfessionalProfile entity = repository.findById(id)
+            .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));
+
+    if (!"DELETED".equals(entity.getStatus())) {
+        throw new IllegalArgumentException("El perfil no está eliminado, no se puede reactivar");
+    }
+
+    entity.setStatus("ACTIVE");
+    entity.setUpdatedAt(LocalDateTime.now());
+    return ProfessionalProfileResponse.fromEntity(repository.save(entity));
+}
 
 }

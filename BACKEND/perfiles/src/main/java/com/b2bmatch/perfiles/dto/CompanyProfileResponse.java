@@ -26,6 +26,7 @@ public class CompanyProfileResponse {
     private String country;
     private String companyDescription;
     private String logoUrl;
+    private String status;
 
     public static CompanyProfileResponse fromEntity(CompanyProfile entity) {
         CompanyProfileResponse dto = new CompanyProfileResponse();
@@ -42,6 +43,7 @@ public class CompanyProfileResponse {
         dto.setCountry(entity.getCountry());
         dto.setCompanyDescription(entity.getCompanyDescription());
         dto.setLogoUrl(entity.getLogoUrl());
+        dto.setStatus(entity.getStatus());
         return dto;
     }
 
