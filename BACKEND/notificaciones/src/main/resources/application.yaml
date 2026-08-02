@@ -5,13 +5,18 @@ spring:
   application:
     name: notificaciones
   datasource:
-    url: jdbc:postgresql://localhost:5433/b2bmatch
+    url: jdbc:postgresql://postgre-db:5432/b2bmatch
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:
     properties:
       hibernate:
-        default_schema: b2bmatch
+        default_schema: notificaciones
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:b2bmatch-dev-secret-key-2026-super-secret-256-bits-xx}
+    expiration-ms: 86400000

@@ -1,11 +1,8 @@
-/* ==========================================================================
-   NAVBAR B2B
-   ========================================================================== */
 .navbar-b2b {
-  background: var(--bg-navbar, rgba(11, 15, 25, 0.95));
+  background: var(--bg-navbar);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1.5px solid rgba(229, 62, 62, 0.35);
+  border-bottom: 1.5px solid var(--red-glow);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   padding: 14px 32px;
   display: flex;
@@ -17,13 +14,26 @@
   width: 100%;
 }
 
+/* LOGO BLANCO EN MODO OSCURO CON FILTRO */
 .navbar-logo img {
   height: 75px;
   width: auto;
   display: block;
+  transition: filter 0.3s ease, transform 0.2s ease;
 }
 
-/* Contenedor central (Links + Botones alineados en una sola fila para PC) */
+:root:not([data-theme="light"]) .navbar-logo img {
+  filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+}
+
+[data-theme="light"] .navbar-logo img {
+  filter: none;
+}
+
+.navbar-logo img:hover {
+  transform: scale(1.03);
+}
+
 .navbar-content {
   display: flex;
   align-items: center;
@@ -40,7 +50,7 @@
 }
 
 .navbar-links a {
-  color: var(--text-muted, #9CA3AF);
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;
@@ -48,7 +58,7 @@
 }
 
 .navbar-links a:hover {
-  color: var(--text-main, #FFFFFF);
+  color: var(--text-main);
 }
 
 .navbar-actions {
@@ -57,26 +67,181 @@
   gap: 12px;
 }
 
-/* Botón Tema */
 .theme-toggle-btn {
-  background: var(--bg-input, #161F33);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  color: var(--text-main, #FFFFFF);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
   padding: 8px 16px;
   border-radius: 10px;
   cursor: pointer;
   font-size: 0.88rem;
   font-weight: 600;
-  transition: all 0.2s ease;
 }
 
-.theme-toggle-btn:hover {
-  border-color: var(--red-glow, #E53E3E);
+/* =============================================
+   Campana de notificaciones
+   ============================================= */
+.notif-bell-wrap {
+  position: relative;
 }
 
-/* Botón Hamburguesa */
+.notif-bell {
+  position: relative;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.notif-bell:hover {
+  border-color: var(--red-glow);
+  transform: translateY(-1px);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--red-glow);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 8px rgba(255, 61, 61, 0.4);
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 340px;
+  max-height: 420px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  z-index: 1100;
+  animation: notif-slide-in 0.18s ease-out;
+}
+
+@keyframes notif-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.notif-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.notif-mark-all {
+  background: none;
+  border: none;
+  color: var(--text-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notif-mark-all:hover {
+  text-decoration: underline;
+}
+
+.notif-list {
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.notif-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  padding: 24px 12px;
+}
+
+.notif-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: var(--bg-input);
+}
+
+.notif-item.unread {
+  background: var(--bg-input);
+  border-color: var(--border-color);
+}
+
+.notif-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.notif-item-message {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.notif-item-date {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red-glow);
+  flex-shrink: 0;
+}
+
 .hamburger-btn {
-  display: none; /* Oculto en PC */
+  display: none;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -88,66 +253,35 @@
 .hamburger-line {
   width: 24px;
   height: 2.5px;
-  background-color: var(--text-main, #FFFFFF);
+  background-color: var(--text-main);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
 
-.hamburger-btn.open .hamburger-line:nth-child(1) {
-  transform: translateY(7.5px) rotate(45deg);
-}
-.hamburger-btn.open .hamburger-line:nth-child(2) {
-  opacity: 0;
-}
-.hamburger-btn.open .hamburger-line:nth-child(3) {
-  transform: translateY(-7.5px) rotate(-45deg);
-}
+.hamburger-btn.open .hamburger-line:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.hamburger-btn.open .hamburger-line:nth-child(2) { opacity: 0; }
+.hamburger-btn.open .hamburger-line:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
 
-/* ==========================================================================
-   RESPONSIVO: MÓVILES Y TABLETS (Menos de 768px)
-   ========================================================================== */
 @media (max-width: 768px) {
-  .navbar-b2b {
-    padding: 12px 20px;
-  }
-
-  .hamburger-btn {
-    display: flex; /* Aparece en móviles */
-  }
+  .navbar-b2b { padding: 12px 20px; }
+  .navbar-logo img { height: 55px; }
+  .hamburger-btn { display: flex; }
 
   .navbar-content {
     position: fixed;
     top: 68px;
     left: 0;
     right: 0;
-    background: var(--bg-navbar, #0B0F19);
-    border-bottom: 1.5px solid rgba(229, 62, 62, 0.35);
+    background: var(--bg-card);
+    border-bottom: 1.5px solid var(--red-glow);
     padding: 24px;
     flex-direction: column;
     gap: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    
-    /* Efecto oculto/visible al pulsar el botón */
     display: none;
   }
 
-  .navbar-content.open {
-    display: flex;
-  }
-
-  .navbar-links {
-    flex-direction: column;
-    gap: 16px;
-    width: 100%;
-    text-align: center;
-  }
-
-  .navbar-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .navbar-actions button {
-    width: 100%;
-  }
+  .navbar-content.open { display: flex; }
+  .navbar-links { flex-direction: column; width: 100%; text-align: center; }
+  .navbar-actions { flex-direction: column; width: 100%; }
+  .navbar-actions button { width: 100%; }
 }

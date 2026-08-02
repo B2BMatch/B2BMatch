@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   PALETA DE COLORES Y VARIABLES CSS (MODO OSCURO POR DEFECTO)
+   ========================================================================== */
+:root {
+  /* Fondo principal y contenedores (Modo Oscuro) */
+  --bg-main: #063561;          /* TEAL BLUE */
+  --bg-card: #0A1C3A;          /* OXFORD BLUE */
+  --bg-navbar: rgba(10, 28, 58, 0.9); /* OXFORD BLUE con opacidad */
+  --bg-modal: #0E2A13;         /* BUSH */
+  --bg-input: rgba(192, 218, 237, 0.1); /* SPINDLE translúcido */
+
+  /* Textos */
+  --text-main: #FFF8E7;        /* COSMIC LATTE */
+  --text-muted: #C0DAED;       /* SPINDLE */
+  --text-accent: #9DC7E4;      /* REGENT ST BLUE */
+
+  /* Detalles y Bordes */
+  --border-color: rgba(157, 199, 228, 0.25);
+  --red-glow: #930500;         /* SANGRIA */
+  --regent-st-blue: #9DC7E4;   /* REGENT ST BLUE */
+  --hippie-blue: #5894BA;     /* HIPPIE BLUE */
+  --texto-claro: #fff;     /* TETO CLARO*/
+  --cornflower: #95BBEA;      /* CORN FLOWER */
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================================================================
+   PALETA PARA MODO CLARO (LIGHT MODE)
+   ========================================================================== */
+[data-theme="light"] {
+  --bg-main: #FFF8E7;          /* COSMIC LATTE */
+  --bg-card: #F9FBE7;          /* IVORY */
+  --bg-navbar: rgba(255, 248, 231, 0.92); 
+  --bg-modal: #FFF8E7;         /* COSMIC LATTE */
+  --bg-input: #C0DAED;         /* SPINDLE */
+
+  --text-main: #0A1C3A;        /* OXFORD BLUE */
+  --text-muted: #063561;       /* TEAL BLUE */
+  --text-accent: #5894BA;      /* HIPPIE BLUE */
+
+  --border-color: rgba(6, 53, 97, 0.2);
+  --red-glow: #930500;         /* SANGRIA */
+  --regent-st-blue: #063561;   /* TEAL BLUE para acentos oscuros */
+  --hippie-blue: #5894BA;     /* HIPPIE BLUE */
+  --texto-claro: #0A1C3A;     /* TEXTO OSCURO*/
+  --cornflower: #95BBEA;      /* CORN FLOWER */
+  --shadow-card: 0 10px 25px rgba(6, 53, 97, 0.08);
+}

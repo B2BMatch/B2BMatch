@@ -1,37 +1,30 @@
-/* ==========================================================================
-   BOTONES REUTILIZABLES
-   ========================================================================== */
 .btn-b2b-primary {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  border: 1.5px solid var(--red-glow);
-  padding: 12px 20px;
+  background-color: var(--red-glow);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 20px;
   border-radius: 10px;
   font-weight: 700;
-  font-size: 0.95rem;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(229, 62, 62, 0.3);
+  transition: all 0.2s ease;
 }
 
 .btn-b2b-primary:hover {
-  background: var(--red-glow);
-  color: #FFFFFF;
-  box-shadow: 0 0 20px rgba(229, 62, 62, 0.6);
-  transform: translateY(-2px);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .btn-b2b-outline {
-  background: var(--bg-input);
+  background: transparent;
   color: var(--text-main);
-  border: 1px solid var(--border-color);
-  padding: 12px 20px;
+  border: 1.5px solid var(--border-color);
+  padding: 10px 20px;
   border-radius: 10px;
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-b2b-outline:hover {
-  border-color: var(--red-glow);
-  color: var(--red-glow);
+  border-color: var(--text-accent);
 }

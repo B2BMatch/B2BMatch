@@ -1,106 +1,120 @@
-/* ==========================================================================
-   SIDEBAR FILTERS
-   ========================================================================== */
-.sidebar-b2b {
-  background: var(--bg-card);
+.sidebar-filters {
+  background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: var(--shadow-card);
-  height: fit-content;
-  position: sticky;
-  top: 90px;
-  transition: all 0.3s ease;
-}
-
-.sidebar-header {
+  padding: 20px;
+  border-radius: 14px;
+  width: 260px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.sidebar-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text-title);
-}
-
-.sidebar-reset-btn {
-  background: transparent;
-  border: none;
-  color: var(--red-glow);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.sidebar-reset-btn:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
-
-.filter-group {
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .filter-label {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--text-title);
-  margin-bottom: 12px;
   display: block;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.filter-option:hover {
+  margin-bottom: 8px;
+  font-weight: 600;
   color: var(--text-main);
 }
 
-.filter-option input[type="checkbox"],
-.filter-option input[type="radio"] {
-  accent-color: var(--red-glow);
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
+.custom-select {
+  position: relative;
 }
 
-.filter-divider {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin: 16px 0;
-  opacity: 0.5;
-}
-
-.salary-slider {
-  width: 100%;
-  accent-color: var(--red-glow);
-  cursor: pointer;
-}
-
-.salary-values {
+.select-trigger {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: 6px;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* RESPONSIVO PANTALLAS PEQUEÑAS */
-@media (max-width: 992px) {
-  .sidebar-b2b {
-    position: static;
-    margin-bottom: 20px;
-  }
+.select-trigger:hover,
+.select-trigger.is-open {
+  border-color: var(--text-accent);
+}
+
+.select-trigger.is-open {
+  box-shadow: 0 0 0 3px rgba(157, 199, 228, 0.25);
+}
+
+.select-trigger__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-trigger__chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.18s ease;
+}
+
+.select-trigger.is-open .select-trigger__chevron {
+  transform: rotate(180deg);
+}
+
+.select-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  z-index: 20;
+  animation: select-fade-in 0.15s ease-out;
+}
+
+@keyframes select-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.select-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.select-option:hover {
+  background: var(--bg-input);
+  color: var(--text-accent);
+}
+
+.select-option.is-selected {
+  background: var(--bg-input);
+  color: var(--text-accent);
+  font-weight: 700;
+}
+
+.select-option.is-selected::before {
+  content: '✓';
+  margin-right: 8px;
+  font-weight: 700;
 }

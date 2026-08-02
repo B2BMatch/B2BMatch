@@ -1,50 +1,18 @@
-/* ==========================================================================
-   SEARCHBAR
-   ========================================================================== */
 .searchbar-container {
-  background: var(--bg-card);
-  padding: 8px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border-color);
   display: flex;
   gap: 12px;
-  box-shadow: var(--shadow-card);
-  margin-top: 24px;
-  transition: all 0.3s ease;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 12px;
   width: 100%;
-}
-
-.searchbar-container:focus-within {
-  border-color: var(--red-glow);
-  box-shadow: 0 0 15px rgba(229, 62, 62, 0.25);
 }
 
 .searchbar-input {
-  width: 100%;
-  background: transparent !important;
-  border: none !important;
-  padding: 10px 14px;
-  color: var(--text-main) !important;
-  font-size: 1rem;
+  background: transparent;
+  border: none;
   outline: none;
-}
-
-.searchbar-input::placeholder {
-  color: var(--text-muted) !important;
-}
-
-.searchbar-btn {
-  white-space: nowrap;
-}
-
-/* RESPONSIVO MÓVIL */
-@media (max-width: 576px) {
-  .searchbar-container {
-    flex-direction: column;
-    padding: 12px;
-  }
-
-  .searchbar-btn {
-    width: 100%;
-  }
+  color: var(--text-main);
+  width: 100%;
+  font-size: 1rem;
 }
