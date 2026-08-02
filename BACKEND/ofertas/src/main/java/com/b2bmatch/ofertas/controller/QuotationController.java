@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -53,7 +54,8 @@ public class QuotationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<QuotationResponse> update(@PathVariable Long id, @Valid @RequestBody QuotationRequest request) {
+    public ResponseEntity<QuotationResponse> update(@PathVariable Long id,
+            @Valid @RequestBody QuotationRequest request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 
@@ -62,5 +64,14 @@ public class QuotationController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
-}
 
+    @PatchMapping("/{id}/accept")
+    public ResponseEntity<QuotationResponse> accept(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(service.accept(id));
+    }
+
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<QuotationResponse> reject(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(service.reject(id));
+    }
+}
