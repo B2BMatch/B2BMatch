@@ -43,6 +43,8 @@ CREATE TABLE company_profile (
 
     logo_url VARCHAR(255),
 
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     updated_at TIMESTAMP,
@@ -54,7 +56,10 @@ CREATE TABLE company_profile (
         UNIQUE (user_id),
 
     CONSTRAINT uk_company_tax_id
-        UNIQUE (tax_id)
+        UNIQUE (tax_id),
+
+    CONSTRAINT ck_company_profile_status
+        CHECK (status IN ('ACTIVE', 'DELETED'))
 
 );
 

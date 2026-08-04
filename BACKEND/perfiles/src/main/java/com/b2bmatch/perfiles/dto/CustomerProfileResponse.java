@@ -21,6 +21,7 @@ public class CustomerProfileResponse {
     private String address;
     private String city;
     private String country;
+    private String status;
 
     public static CustomerProfileResponse fromEntity(CustomerProfile entity) {
         CustomerProfileResponse dto = new CustomerProfileResponse();
@@ -32,6 +33,7 @@ public class CustomerProfileResponse {
         dto.setAddress(entity.getAddress());
         dto.setCity(entity.getCity());
         dto.setCountry(entity.getCountry());
+        dto.setStatus(entity.getStatus());
         return dto;
     }
 

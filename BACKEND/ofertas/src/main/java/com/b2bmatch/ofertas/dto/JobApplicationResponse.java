@@ -16,7 +16,6 @@ public class JobApplicationResponse {
     private Long id;
     private Long jobOfferId;
     private Long professionalId;
-    private Long userId;
     private String proposal;
     private BigDecimal expectedPrice;
     private String status;
@@ -29,7 +28,6 @@ public class JobApplicationResponse {
             entity.getId(),
             entity.getJobOffer() != null ? entity.getJobOffer().getId() : null,
             entity.getProfessionalId(),
-            entity.getUserId(),
             entity.getProposal(),
             entity.getExpectedPrice(),
             entity.getStatus(),

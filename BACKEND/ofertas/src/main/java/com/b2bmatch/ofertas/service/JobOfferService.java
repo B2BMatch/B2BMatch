@@ -3,12 +3,12 @@ package com.b2bmatch.ofertas.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.b2bmatch.ofertas.dto.JobOfferRequest;
 import com.b2bmatch.ofertas.dto.JobOfferResponse;
+import com.b2bmatch.ofertas.exception.ForbiddenException;
+import com.b2bmatch.ofertas.exception.OfferNotFoundException;
 import com.b2bmatch.ofertas.model.JobOffer;
 import com.b2bmatch.ofertas.repository.JobOfferRepository;
 
@@ -28,7 +28,7 @@ public class JobOfferService {
 
     public JobOfferResponse findById(Long id) {
         JobOffer entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job offer not found with id: " + id));
+                .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
         return JobOfferResponse.fromEntity(entity);
     }
 
@@ -39,64 +39,50 @@ public class JobOfferService {
                 .toList();
     }
 
-    public JobOfferResponse create(JobOfferRequest request, Long currentUserId, boolean isAdmin) {
+    public JobOfferResponse create(JobOfferRequest request) {
         JobOffer entity = new JobOffer();
         entity.setCompanyId(request.getCompanyId());
-        entity.setUserId(isAdmin && request.getUserId() != null ? request.getUserId() : currentUserId);
         entity.setCategoryId(request.getCategoryId());
         entity.setTitle(request.getTitle());
         entity.setDescription(request.getDescription());
         entity.setBudget(request.getBudget());
         entity.setDeadline(request.getDeadline());
-        if (request.getStatus() != null) {
-            entity.setStatus(request.getStatus());
-        } else {
-            entity.setStatus("ACTIVE");
-        }
+        entity.setStatus("ACTIVE");
         entity.setCreatedAt(LocalDateTime.now());
         return JobOfferResponse.fromEntity(repository.save(entity));
     }
 
-    public JobOfferResponse update(Long id, JobOfferRequest request, Long currentUserId, boolean isAdmin) {
+    public JobOfferResponse update(Long id, JobOfferRequest request, Long requesterId, String requesterRole) {
         JobOffer existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job offer not found with id: " + id));
-        requireOwner(existing.getUserId(), currentUserId, isAdmin);
+                .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
+
+        checkOwnership(existing.getCompanyId(), requesterId, requesterRole);
+
         existing.setCategoryId(request.getCategoryId());
         existing.setTitle(request.getTitle());
         existing.setDescription(request.getDescription());
         existing.setBudget(request.getBudget());
         existing.setDeadline(request.getDeadline());
-        if (request.getStatus() != null) {
-            existing.setStatus(request.getStatus());
-        }
         existing.setUpdatedAt(LocalDateTime.now());
         return JobOfferResponse.fromEntity(repository.save(existing));
     }
 
-    public void delete(Long id, Long currentUserId, boolean isAdmin) {
+    public void delete(Long id, Long requesterId, String requesterRole) {
         JobOffer existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job offer not found with id: " + id));
-        requireOwner(existing.getUserId(), currentUserId, isAdmin);
+                .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
+
+        checkOwnership(existing.getCompanyId(), requesterId, requesterRole);
+
         existing.setStatus("DELETED");
         existing.setUpdatedAt(LocalDateTime.now());
         repository.save(existing);
     }
 
-    public JobOfferResponse updateStatus(Long id, String status, Long currentUserId, boolean isAdmin) {
-        if (status == null || status.isBlank()) {
-            throw new IllegalArgumentException("status is required");
-        }
-        JobOffer existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job offer not found with id: " + id));
-        requireOwner(existing.getUserId(), currentUserId, isAdmin);
-        existing.setStatus(status.toUpperCase());
-        existing.setUpdatedAt(LocalDateTime.now());
-        return JobOfferResponse.fromEntity(repository.save(existing));
-    }
-
-    private void requireOwner(Long ownerUserId, Long currentUserId, boolean isAdmin) {
-        if (!isAdmin && !ownerUserId.equals(currentUserId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo el dueño de la oferta puede modificarla");
+    private void checkOwnership(Long ownerId, Long requesterId, String requesterRole) {
+        boolean isOwner = ownerId.equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo el dueño de la oferta puede realizar esta acción, o ser ADMIN");
         }
     }
 }

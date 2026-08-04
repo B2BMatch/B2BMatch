@@ -16,7 +16,6 @@ import lombok.Setter;
 public class JobOfferResponse {
     private Long id;
     private Long companyId;
-    private Long userId;
     private Long categoryId;
     private String title;
     private String description;
@@ -31,7 +30,6 @@ public class JobOfferResponse {
         return new JobOfferResponse(
             entity.getId(),
             entity.getCompanyId(),
-            entity.getUserId(),
             entity.getCategoryId(),
             entity.getTitle(),
             entity.getDescription(),

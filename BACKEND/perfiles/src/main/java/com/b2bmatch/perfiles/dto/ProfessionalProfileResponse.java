@@ -28,6 +28,7 @@ public class ProfessionalProfileResponse {
     private String githubUrl;
     private String city;
     private String country;
+    private String status;
 
     public static ProfessionalProfileResponse fromEntity(ProfessionalProfile entity) {
         ProfessionalProfileResponse dto = new ProfessionalProfileResponse();
@@ -44,6 +45,7 @@ public class ProfessionalProfileResponse {
         dto.setGithubUrl(entity.getGithubUrl());
         dto.setCity(entity.getCity());
         dto.setCountry(entity.getCountry());
+        dto.setStatus(entity.getStatus());
         return dto;
     }
 

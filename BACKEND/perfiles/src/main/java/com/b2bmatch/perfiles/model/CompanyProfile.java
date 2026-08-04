@@ -62,6 +62,9 @@ public class CompanyProfile {
     @Column(name = "logo_url", length = 255)
     private String logoUrl;
 
+    @Column(nullable=false, length=20)
+    private String status;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

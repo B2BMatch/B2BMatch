@@ -2,12 +2,7 @@ package com.b2bmatch.notificaciones.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,8 +29,8 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "is_read", nullable = false)
-    private Boolean read = false;
+    @Column(name = "is_read")
+    private Boolean isRead;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

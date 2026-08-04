@@ -4,21 +4,15 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.*;
 
+import com.b2bmatch.notificaciones.config.JwtService;
 import com.b2bmatch.notificaciones.dto.NotificationRequest;
 import com.b2bmatch.notificaciones.dto.NotificationResponse;
 import com.b2bmatch.notificaciones.service.NotificationService;
 
+import io.jsonwebtoken.Claims;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,79 +21,61 @@ import lombok.RequiredArgsConstructor;
 public class NotificationController {
 
     private final NotificationService service;
+    private final JwtService jwtService;
 
-    private Long currentUserId(Authentication authentication) {
-        return Long.valueOf(authentication.getName());
-    }
+    @PostMapping
+    public ResponseEntity<NotificationResponse> create(
+            @Valid @RequestBody NotificationRequest request,
+            @RequestHeader("Authorization") String authHeader) {
 
-    private boolean isAdmin(Authentication authentication) {
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch("ROLE_ADMIN"::equals);
-    }
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        String requesterRole = claims.get("role", String.class);
 
-    private void requireOwner(Authentication authentication, Long resourceUserId) {
-        if (!isAdmin(authentication) && !resourceUserId.equals(currentUserId(authentication))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso sobre esta notificación");
-        }
-    }
-
-    private void requireSelf(Authentication authentication, Long requestedUserId) {
-        if (!isAdmin(authentication) && !requestedUserId.equals(currentUserId(authentication))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo puedes acceder a tus propias notificaciones");
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<List<NotificationResponse>> findAll(Authentication authentication) {
-        if (!isAdmin(authentication)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo un administrador puede ver todas las notificaciones");
-        }
-        return ResponseEntity.ok(service.findAll());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<NotificationResponse> findById(@PathVariable Long id, Authentication authentication) {
-        NotificationResponse notification = service.findById(id);
-        requireOwner(authentication, notification.getUserId());
-        return ResponseEntity.ok(notification);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, requesterRole));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<NotificationResponse>> findByUserId(@PathVariable Long userId, Authentication authentication) {
-        requireSelf(authentication, userId);
-        return ResponseEntity.ok(service.findByUserId(userId));
+    public ResponseEntity<List<NotificationResponse>> findByUserId(
+            @PathVariable("userId") Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findByUserId(userId,
+                claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
     @GetMapping("/user/{userId}/unread")
-    public ResponseEntity<List<NotificationResponse>> findUnreadByUserId(@PathVariable Long userId, Authentication authentication) {
-        requireSelf(authentication, userId);
-        return ResponseEntity.ok(service.findUnreadByUserId(userId));
+    public ResponseEntity<List<NotificationResponse>> findUnreadByUserId(
+            @PathVariable("userId") Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findUnreadByUserId(userId,
+                claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
-    @GetMapping("/user/{userId}/unread-count")
-    public ResponseEntity<Long> countUnreadByUserId(@PathVariable Long userId, Authentication authentication) {
-        requireSelf(authentication, userId);
-        return ResponseEntity.ok(service.countUnreadByUserId(userId));
+    @GetMapping("/{id}")
+    public ResponseEntity<NotificationResponse> findById(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findById(id,
+                claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
-    @PostMapping
-    public ResponseEntity<NotificationResponse> create(@RequestBody NotificationRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
-    }
-
-    @PostMapping("/{id}/read")
-    public ResponseEntity<NotificationResponse> markAsRead(@PathVariable Long id, Authentication authentication) {
-        NotificationResponse notification = service.findById(id);
-        requireOwner(authentication, notification.getUserId());
-        return ResponseEntity.ok(service.markAsRead(id));
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<NotificationResponse> markAsRead(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.markAsRead(id,
+                claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, Authentication authentication) {
-        NotificationResponse notification = service.findById(id);
-        requireOwner(authentication, notification.getUserId());
-        service.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        service.delete(id, claims.get("userId", Long.class), claims.get("role", String.class));
         return ResponseEntity.noContent().build();
     }
 }

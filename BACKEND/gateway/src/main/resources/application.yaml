@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: usuarios
+              uri: http://usuarios:8081
+              predicates:
+                - Path=/api/users/**,/api/auth/**,/api/roles/**
+
+            - id: perfiles
+              uri: http://perfiles:8082
+              predicates:
+                - Path=/api/customer-profiles/**,/api/professional-profiles/**,/api/company-profiles/**
+
+            - id: catalogo
+              uri: http://catalogo:8083
+              predicates:
+                - Path=/api/categories/**,/api/skills/**,/api/services/**
+
+            - id: ofertas
+              uri: http://ofertas:8084
+              predicates:
+                - Path=/api/job-offers/**,/api/job-applications/**,/api/quotations/**
+
+            - id: resenias
+              uri: http://resenias:8085
+              predicates:
+                - Path=/api/reviews/**
+
+            - id: notificaciones
+              uri: http://notificaciones:8086
+              predicates:
+                - Path=/api/notifications/**
+
+jwt:
+  secret: ${JWT_SECRET}

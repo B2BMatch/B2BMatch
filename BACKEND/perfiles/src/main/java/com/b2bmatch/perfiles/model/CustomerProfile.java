@@ -47,6 +47,9 @@ public class CustomerProfile {
     @Column(length = 100)
     private String country;
 
+    @Column(nullable=false, length=20)
+    private String status;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
