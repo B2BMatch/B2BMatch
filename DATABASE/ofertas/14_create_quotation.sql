@@ -22,7 +22,7 @@ CREATE TABLE quotation (
     message TEXT,
     
     -- MODIFICACIÓN: CHECK constraint para asegurar que solo ingresen estados válidos
-    status VARCHAR(20) NOT NULL CHECK (status IN ('ACTIVE', 'PENDING', 'SUSPENDED', 'INACTIVE', 'DELETED')),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'EXPIRED')),
     
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
