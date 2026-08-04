@@ -10,7 +10,7 @@ const inputStyle = {
   padding: '10px 14px',
   borderRadius: '8px',
   border: '1px solid var(--border-color)',
-  background: 'var(--bg-input)',
+  background: 'var(--bg-main)',
   color: 'var(--text-main)',
   outline: 'none',
 };

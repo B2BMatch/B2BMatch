@@ -8,7 +8,7 @@ const inputStyle = {
   padding: '10px 14px',
   borderRadius: '8px',
   border: '1px solid var(--border-color)',
-  background: 'var(--bg-input)',
+  background: 'var(--bg-main)',
   color: 'var(--text-main)',
   outline: 'none',
 };
@@ -145,7 +145,7 @@ export const EditOffer = () => {
                 style={inputStyle}
               >
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
+                  <option className='fondo-oscuro' key={category.id} value={category.id}>
                     {category.name || category.title || 'Categoría'}
                   </option>
                 ))}
