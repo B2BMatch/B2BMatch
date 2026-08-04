@@ -14,8 +14,6 @@ CREATE TABLE application_table (
 
     professional_id BIGINT NOT NULL,
 
-    user_id BIGINT NOT NULL,
-
     proposal TEXT NOT NULL,
 
     expected_price NUMERIC(12,2),

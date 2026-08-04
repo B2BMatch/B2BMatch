@@ -43,6 +43,8 @@ CREATE TABLE professional_profile (
 
     country VARCHAR(100),
 
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     updated_at TIMESTAMP,
@@ -57,7 +59,10 @@ CREATE TABLE professional_profile (
         CHECK (experience_years >= 0),
 
     CONSTRAINT ck_professional_hourly_rate
-        CHECK (hourly_rate IS NULL OR hourly_rate >= 0)
+        CHECK (hourly_rate IS NULL OR hourly_rate >= 0),
+
+    CONSTRAINT ck_professional_profile_status
+        CHECK (status IN ('ACTIVE', 'DELETED'))
 
 );
 

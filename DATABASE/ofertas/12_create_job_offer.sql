@@ -12,8 +12,6 @@ CREATE TABLE job_offer (
 
     company_id BIGINT NOT NULL,
 
-    user_id BIGINT NOT NULL,
-
     category_id BIGINT NOT NULL,
 
     title VARCHAR(150) NOT NULL,

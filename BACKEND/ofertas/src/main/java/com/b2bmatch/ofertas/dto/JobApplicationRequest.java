@@ -20,8 +20,6 @@ public class JobApplicationRequest {
     @NotNull(message = "professionalId is required")
     private Long professionalId;
 
-    private Long userId;
-
     @NotBlank(message = "proposal is required")
     private String proposal;
 

@@ -2,11 +2,11 @@ package com.b2bmatch.resenias.exception;
 
 import java.time.LocalDateTime;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -30,19 +30,6 @@ para transformar las excepciones en respuestas HTTP apropiadas. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Maneja respuestas con código HTTP específico (p. ej. 403 por falta de permisos)
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiError> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
-        ApiError error = new ApiError(
-                LocalDateTime.now(),
-                ex.getStatusCode().value(),
-                ex.getStatusCode().value() == 403 ? HttpStatus.FORBIDDEN.getReasonPhrase() : "Error",
-                ex.getReason(),
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(ex.getStatusCode()).body(error);
-    }
-
     // Maneja recursos que no existen
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
@@ -52,8 +39,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(), // Código HTTP (404)
                 HttpStatus.NOT_FOUND.getReasonPhrase(), // Nombre del estado HTTP
                 ex.getMessage(),
-                request.getRequestURI()
-        );
+                request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
@@ -67,9 +53,31 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                 ex.getMessage(),
-                request.getRequestURI()
-        );
+                request.getRequestURI());
         // Devuelve una respuesta HTTP 500
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                "El dato viola una restricción de la base de datos",
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiError> handleForbidden(ForbiddenException ex, HttpServletRequest request) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 }

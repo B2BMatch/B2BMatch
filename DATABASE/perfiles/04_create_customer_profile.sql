@@ -33,6 +33,8 @@ CREATE TABLE customer_profile (
 
     country VARCHAR(100),
 
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     updated_at TIMESTAMP,
@@ -41,7 +43,10 @@ CREATE TABLE customer_profile (
         PRIMARY KEY (id),
 
     CONSTRAINT uk_customer_profile_user
-        UNIQUE (user_id)
+        UNIQUE (user_id),
+    
+    CONSTRAINT ck_customer_profile_status
+        CHECK (status IN ('ACTIVE', 'DELETED'))
 
 );
 

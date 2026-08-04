@@ -19,18 +19,17 @@ public class NotificationResponse {
     private Long userId;
     private String title;
     private String message;
-    private Boolean read;
+    private Boolean isRead;
     private LocalDateTime createdAt;
 
     public static NotificationResponse fromEntity(Notification entity) {
-        if (entity == null) return null;
-        return new NotificationResponse(
-            entity.getId(),
-            entity.getUserId(),
-            entity.getTitle(),
-            entity.getMessage(),
-            entity.getRead(),
-            entity.getCreatedAt()
-        );
+        NotificationResponse dto = new NotificationResponse();
+        dto.setId(entity.getId());
+        dto.setUserId(entity.getUserId());
+        dto.setTitle(entity.getTitle());
+        dto.setMessage(entity.getMessage());
+        dto.setIsRead(entity.getIsRead());
+        dto.setCreatedAt(entity.getCreatedAt());
+        return dto;
     }
 }

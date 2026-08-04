@@ -16,7 +16,6 @@ spring:
       ddl-auto: validate
     show-sql: true
 
-app:
-  jwt:
-    secret: ${JWT_SECRET:b2bmatch-dev-secret-key-2026-super-secret-256-bits-xx}
-    expiration-ms: 86400000
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: 86400000

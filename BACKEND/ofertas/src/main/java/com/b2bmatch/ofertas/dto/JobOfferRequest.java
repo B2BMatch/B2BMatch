@@ -19,8 +19,6 @@ public class JobOfferRequest {
     @NotNull(message = "companyId is required")
     private Long companyId;
 
-    private Long userId;
-
     @NotNull(message = "categoryId is required")
     private Long categoryId;
 
