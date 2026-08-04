@@ -21,6 +21,7 @@ services:
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
+      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
     ports:
       - "8081:8081"
     restart: unless-stopped
@@ -33,11 +34,7 @@ services:
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
-    ports:
-      - "8082:8082"
-    restart: unless-stopped
-    depends_on:
-      - postgre-db
+      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
 
   catalogo:
     build: ./catalogo
@@ -57,11 +54,7 @@ services:
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
-    ports:
-      - "8084:8084"
-    restart: unless-stopped
-    depends_on:
-      - postgre-db
+      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
 
   resenias:
     build: ./resenias
@@ -69,11 +62,7 @@ services:
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
-    ports:
-      - "8085:8085"
-    restart: unless-stopped
-    depends_on:
-      - postgre-db
+      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
 
   notificaciones:
     build: ./notificaciones
@@ -81,11 +70,23 @@ services:
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
+      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    environment:
+      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
     ports:
-      - "8086:8086"
+      - "8080:8080"
     restart: unless-stopped
     depends_on:
-      - postgre-db
+      - usuarios
+      - perfiles
+      - catalogo
+      - ofertas
+      - resenias
+      - notificaciones
 
 volumes:
   postgre_data:

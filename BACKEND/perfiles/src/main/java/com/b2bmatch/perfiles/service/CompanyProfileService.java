@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.b2bmatch.perfiles.dto.CompanyProfileRequest;
 import com.b2bmatch.perfiles.dto.CompanyProfileResponse;
+import com.b2bmatch.perfiles.exception.ForbiddenException;
+import com.b2bmatch.perfiles.exception.ProfileNotFoundException;
 import com.b2bmatch.perfiles.model.CompanyProfile;
 import com.b2bmatch.perfiles.repository.CompanyProfileRepository;
-import com.b2bmatch.perfiles.exception.ProfileNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -74,9 +75,16 @@ public class CompanyProfileService {
         return CompanyProfileResponse.fromEntity(repository.save(existing));
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Long requesterId, String requesterRole) {
         CompanyProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Company profile not found with id: " + id));
+
+        boolean isOwner = entity.getUserId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo puedes eliminar tu propio perfil, o ser ADMIN");
+        }
 
         if ("DELETED".equals(entity.getStatus())) {
             throw new IllegalArgumentException("El perfil ya está eliminado");
@@ -87,9 +95,16 @@ public class CompanyProfileService {
         repository.save(entity);
     }
 
-    public CompanyProfileResponse reactivate(Long id) {
+    public CompanyProfileResponse reactivate(Long id, Long requesterId, String requesterRole) {
         CompanyProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Company profile not found with id: " + id));
+
+        boolean isOwner = entity.getUserId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo puedes reactivar tu propio perfil, o ser ADMIN");
+        }
 
         if (!"DELETED".equals(entity.getStatus())) {
             throw new IllegalArgumentException("El perfil no está eliminado, no se puede reactivar");

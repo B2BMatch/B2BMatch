@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.b2bmatch.ofertas.config.JwtService;
 import com.b2bmatch.ofertas.dto.QuotationRequest;
 import com.b2bmatch.ofertas.dto.QuotationResponse;
 import com.b2bmatch.ofertas.service.QuotationService;
 
+import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class QuotationController {
 
     private final QuotationService service;
+    private final JwtService jwtService;
 
     @GetMapping
     public ResponseEntity<List<QuotationResponse>> findAll() {
@@ -60,18 +64,27 @@ public class QuotationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        service.delete(id, claims.get("userId", Long.class), claims.get("role", String.class));
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/accept")
-    public ResponseEntity<QuotationResponse> accept(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(service.accept(id));
+    public ResponseEntity<QuotationResponse> accept(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.accept(id, claims.get("role", String.class)));
     }
 
     @PatchMapping("/{id}/reject")
-    public ResponseEntity<QuotationResponse> reject(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(service.reject(id));
+    public ResponseEntity<QuotationResponse> reject(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.reject(id, claims.get("role", String.class)));
     }
 }

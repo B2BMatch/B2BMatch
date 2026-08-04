@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.b2bmatch.perfiles.dto.CustomerProfileRequest;
 import com.b2bmatch.perfiles.dto.CustomerProfileResponse;
+import com.b2bmatch.perfiles.exception.ForbiddenException;
 import com.b2bmatch.perfiles.exception.ProfileNotFoundException;
 import com.b2bmatch.perfiles.model.CustomerProfile;
 import com.b2bmatch.perfiles.repository.CustomerProfileRepository;
@@ -64,9 +65,16 @@ public class CustomerProfileService {
         return CustomerProfileResponse.fromEntity(repository.save(existing));
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Long requesterId, String requesterRole) {
         CustomerProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Customer profile not found with id: " + id));
+
+        boolean isOwner = entity.getUserId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo puedes eliminar tu propio perfil, o ser ADMIN");
+        }
 
         if ("DELETED".equals(entity.getStatus())) {
             throw new IllegalArgumentException("El perfil ya está eliminado");
@@ -77,9 +85,16 @@ public class CustomerProfileService {
         repository.save(entity);
     }
 
-    public CustomerProfileResponse reactivate(Long id) {
+    public CustomerProfileResponse reactivate(Long id, Long requesterId, String requesterRole) {
         CustomerProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Customer profile not found with id: " + id));
+
+        boolean isOwner = entity.getUserId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo puedes reactivar tu propio perfil, o ser ADMIN");
+        }
 
         if (!"DELETED".equals(entity.getStatus())) {
             throw new IllegalArgumentException("El perfil no está eliminado, no se puede reactivar");

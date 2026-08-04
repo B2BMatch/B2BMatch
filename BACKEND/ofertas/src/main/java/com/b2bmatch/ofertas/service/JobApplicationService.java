@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.b2bmatch.ofertas.dto.JobApplicationRequest;
 import com.b2bmatch.ofertas.dto.JobApplicationResponse;
+import com.b2bmatch.ofertas.exception.ForbiddenException;
 import com.b2bmatch.ofertas.exception.OfferNotFoundException;
 import com.b2bmatch.ofertas.model.JobApplication;
 import com.b2bmatch.ofertas.model.JobOffer;
@@ -48,7 +49,8 @@ public class JobApplicationService {
 
     public JobApplicationResponse create(JobApplicationRequest request) {
         JobOffer jobOffer = jobOfferRepository.findById(request.getJobOfferId())
-                .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + request.getJobOfferId()));
+                .orElseThrow(
+                        () -> new OfferNotFoundException("Job offer not found with id: " + request.getJobOfferId()));
 
         JobApplication entity = new JobApplication();
         entity.setJobOffer(jobOffer);
@@ -65,7 +67,8 @@ public class JobApplicationService {
                 .orElseThrow(() -> new OfferNotFoundException("Job application not found with id: " + id));
 
         JobOffer jobOffer = jobOfferRepository.findById(request.getJobOfferId())
-                .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + request.getJobOfferId()));
+                .orElseThrow(
+                        () -> new OfferNotFoundException("Job offer not found with id: " + request.getJobOfferId()));
 
         existing.setJobOffer(jobOffer);
         existing.setProfessionalId(request.getProfessionalId());
@@ -75,9 +78,25 @@ public class JobApplicationService {
         return JobApplicationResponse.fromEntity(repository.save(existing));
     }
 
-    public JobApplicationResponse accept(Long id) {
+    public void delete(Long id, Long requesterId, String requesterRole) {
         JobApplication entity = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job application not found with id: " + id));
+
+        boolean isOwner = entity.getProfessionalId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException(
+                    "Solo el profesional que postuló puede eliminar esta postulación, o ser ADMIN");
+        }
+
+        repository.deleteById(id);
+    }
+
+    public JobApplicationResponse accept(Long id, Long requesterId, String requesterRole) {
+        JobApplication entity = repository.findById(id)
+                .orElseThrow(() -> new OfferNotFoundException("Job application not found with id: " + id));
+
+        checkCompanyOwnership(entity, requesterId, requesterRole);
 
         if (!"PENDING".equals(entity.getStatus())) {
             throw new IllegalArgumentException("Solo se pueden aceptar postulaciones en estado PENDING");
@@ -99,9 +118,11 @@ public class JobApplicationService {
         return response;
     }
 
-    public JobApplicationResponse reject(Long id) {
+    public JobApplicationResponse reject(Long id, Long requesterId, String requesterRole) {
         JobApplication entity = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job application not found with id: " + id));
+
+        checkCompanyOwnership(entity, requesterId, requesterRole);
 
         if (!"PENDING".equals(entity.getStatus())) {
             throw new IllegalArgumentException("Solo se pueden rechazar postulaciones en estado PENDING");
@@ -112,7 +133,12 @@ public class JobApplicationService {
         return JobApplicationResponse.fromEntity(repository.save(entity));
     }
 
-    public void delete(Long id) {
-        repository.deleteById(id);
+    private void checkCompanyOwnership(JobApplication entity, Long requesterId, String requesterRole) {
+        boolean isOwnerCompany = entity.getJobOffer().getCompanyId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+        if (!isOwnerCompany && !isAdmin) {
+            throw new ForbiddenException(
+                    "Solo la empresa dueña de la oferta puede aceptar/rechazar postulaciones, o ser ADMIN");
+        }
     }
 }

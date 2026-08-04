@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.b2bmatch.ofertas.dto.JobOfferRequest;
 import com.b2bmatch.ofertas.dto.JobOfferResponse;
+import com.b2bmatch.ofertas.exception.ForbiddenException;
 import com.b2bmatch.ofertas.exception.OfferNotFoundException;
 import com.b2bmatch.ofertas.model.JobOffer;
 import com.b2bmatch.ofertas.repository.JobOfferRepository;
@@ -51,9 +52,12 @@ public class JobOfferService {
         return JobOfferResponse.fromEntity(repository.save(entity));
     }
 
-    public JobOfferResponse update(Long id, JobOfferRequest request) {
+    public JobOfferResponse update(Long id, JobOfferRequest request, Long requesterId, String requesterRole) {
         JobOffer existing = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
+
+        checkOwnership(existing.getCompanyId(), requesterId, requesterRole);
+
         existing.setCategoryId(request.getCategoryId());
         existing.setTitle(request.getTitle());
         existing.setDescription(request.getDescription());
@@ -63,11 +67,22 @@ public class JobOfferService {
         return JobOfferResponse.fromEntity(repository.save(existing));
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Long requesterId, String requesterRole) {
         JobOffer existing = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
+
+        checkOwnership(existing.getCompanyId(), requesterId, requesterRole);
+
         existing.setStatus("DELETED");
         existing.setUpdatedAt(LocalDateTime.now());
         repository.save(existing);
+    }
+
+    private void checkOwnership(Long ownerId, Long requesterId, String requesterRole) {
+        boolean isOwner = ownerId.equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo el dueño de la oferta puede realizar esta acción, o ser ADMIN");
+        }
     }
 }

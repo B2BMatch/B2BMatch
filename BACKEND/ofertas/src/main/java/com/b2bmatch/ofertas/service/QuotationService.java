@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.b2bmatch.ofertas.dto.QuotationRequest;
 import com.b2bmatch.ofertas.dto.QuotationResponse;
+import com.b2bmatch.ofertas.exception.ForbiddenException;
 import com.b2bmatch.ofertas.exception.OfferNotFoundException;
 import com.b2bmatch.ofertas.model.Quotation;
 import com.b2bmatch.ofertas.repository.QuotationRepository;
@@ -63,7 +64,24 @@ public class QuotationService {
         return QuotationResponse.fromEntity(repository.save(existing));
     }
 
-    public QuotationResponse accept(Long id) {
+    public void delete(Long id, Long requesterId, String requesterRole) {
+        Quotation entity = repository.findById(id)
+                .orElseThrow(() -> new OfferNotFoundException("Quotation not found with id: " + id));
+
+        boolean isOwner = entity.getCustomerId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo el cliente que solicitó la cotización puede eliminarla, o ser ADMIN");
+        }
+
+        repository.deleteById(id);
+    }
+
+    public QuotationResponse accept(Long id, String requesterRole) {
+        if (!"ADMIN".equals(requesterRole)) {
+            throw new ForbiddenException(
+                    "Por ahora, solo ADMIN puede aceptar cotizaciones (pendiente validar dueño real del servicio)");
+        }
         Quotation entity = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Quotation not found with id: " + id));
 
@@ -76,7 +94,11 @@ public class QuotationService {
         return QuotationResponse.fromEntity(repository.save(entity));
     }
 
-    public QuotationResponse reject(Long id) {
+    public QuotationResponse reject(Long id, String requesterRole) {
+        if (!"ADMIN".equals(requesterRole)) {
+            throw new ForbiddenException(
+                    "Por ahora, solo ADMIN puede rechazar cotizaciones (pendiente validar dueño real del servicio)");
+        }
         Quotation entity = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Quotation not found with id: " + id));
 
@@ -87,9 +109,5 @@ public class QuotationService {
         entity.setStatus("REJECTED");
         entity.setUpdatedAt(LocalDateTime.now());
         return QuotationResponse.fromEntity(repository.save(entity));
-    }
-
-    public void delete(Long id) {
-        repository.deleteById(id);
     }
 }

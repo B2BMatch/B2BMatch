@@ -10,13 +10,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.b2bmatch.ofertas.config.JwtService;
 import com.b2bmatch.ofertas.dto.JobOfferRequest;
 import com.b2bmatch.ofertas.dto.JobOfferResponse;
 import com.b2bmatch.ofertas.service.JobOfferService;
 
+import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class JobOfferController {
 
     private final JobOfferService service;
+    private final JwtService jwtService;
 
     @GetMapping
     public ResponseEntity<List<JobOfferResponse>> findAll() {
@@ -48,14 +52,28 @@ public class JobOfferController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JobOfferResponse> update(@PathVariable Long id, @Valid @RequestBody JobOfferRequest request) {
-        return ResponseEntity.ok(service.update(id, request));
+    public ResponseEntity<JobOfferResponse> update(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody JobOfferRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        Long requesterId = claims.get("userId", Long.class);
+        String requesterRole = claims.get("role", String.class);
+
+        return ResponseEntity.ok(service.update(id, request, requesterId, requesterRole));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        Long requesterId = claims.get("userId", Long.class);
+        String requesterRole = claims.get("role", String.class);
+
+        service.delete(id, requesterId, requesterRole);
         return ResponseEntity.noContent().build();
     }
 }
-

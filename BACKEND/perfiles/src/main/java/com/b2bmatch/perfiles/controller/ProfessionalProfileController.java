@@ -4,20 +4,14 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.b2bmatch.perfiles.config.JwtService;
 import com.b2bmatch.perfiles.dto.ProfessionalProfileRequest;
 import com.b2bmatch.perfiles.dto.ProfessionalProfileResponse;
 import com.b2bmatch.perfiles.service.ProfessionalProfileService;
 
+import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class ProfessionalProfileController {
 
     private final ProfessionalProfileService service;
+    private final JwtService jwtService;
 
     @GetMapping
     public ResponseEntity<List<ProfessionalProfileResponse>> findAll() {
@@ -55,14 +50,31 @@ public class ProfessionalProfileController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
-        service.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        Claims claims = jwtService.parseToken(token);
+
+        Long requesterId = claims.get("userId", Long.class);
+        String requesterRole = claims.get("role", String.class);
+
+        service.delete(id, requesterId, requesterRole);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/reactivate")
-    public ResponseEntity<ProfessionalProfileResponse> reactivate(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(service.reactivate(id));
-    }
+    public ResponseEntity<ProfessionalProfileResponse> reactivate(
+            @PathVariable("id") Long id,
+            @RequestHeader("Authorization") String authHeader) {
 
+        String token = authHeader.substring(7);
+        Claims claims = jwtService.parseToken(token);
+
+        Long requesterId = claims.get("userId", Long.class);
+        String requesterRole = claims.get("role", String.class);
+
+        return ResponseEntity.ok(service.reactivate(id, requesterId, requesterRole));
+    }
 }
