@@ -72,7 +72,7 @@ public class AppUserService {
         }
 
         String token = jwtService.generateToken(appUser.getEmail(), appUser.getRole().getName(), appUser.getId());
-        return new LoginResponseDto(token, appUser.getEmail(), appUser.getRole().getName());
+        return new LoginResponseDto(appUser.getId(), token, appUser.getEmail(), appUser.getRole().getName());
     }
 
     public AppUserResponseDto update(Long id, AppUserUpdateRequestDto request) {

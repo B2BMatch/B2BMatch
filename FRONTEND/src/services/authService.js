@@ -5,9 +5,9 @@ import api from './api';
  * @param {Object} credentials - { email, password }
  */
 export const login = async (credentials) => {
-    const response = await api.post('/users/login', credentials);
-    return response.data; // Esperamos que devuelva los datos del usuario
-};
+    const response = await api.post('/auth/login', credentials);
+    return response.data;
+}; // Esperamos que devuelva los datos del usuario
 
 /**
  * Registra un nuevo usuario en el sistema.
