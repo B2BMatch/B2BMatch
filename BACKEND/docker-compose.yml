@@ -35,6 +35,11 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
       JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
 
   catalogo:
     build: ./catalogo
@@ -55,6 +60,11 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
       JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
 
   resenias:
     build: ./resenias
@@ -63,6 +73,11 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
       JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
 
   notificaciones:
     build: ./notificaciones
@@ -71,6 +86,11 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgre123
       JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+    ports:
+      - "8086:8086"
+    restart: unless-stopped
+    depends_on:
+      - postgre-db
 
   gateway:
     build: ./gateway

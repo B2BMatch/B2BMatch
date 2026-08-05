@@ -39,5 +39,6 @@ spring:
               predicates:
                 - Path=/api/notifications/**
 
-jwt:
-  secret: ${JWT_SECRET}
+app:
+  jwt:
+    secret: ${JWT_SECRET}
