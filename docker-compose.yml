@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-b2bmatch}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria, ver .env.example}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
     ports:
       - "5434:5432"
     volumes:
@@ -23,7 +23,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-b2bmatch}
       DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria, ver .env.example}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatoria, ver .env.example}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       ADMIN_BOOTSTRAP_KEY: ${ADMIN_BOOTSTRAP_KEY:?ADMIN_BOOTSTRAP_KEY es obligatoria, ver .env.example}
@@ -56,7 +56,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-b2bmatch}
       DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria, ver .env.example}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
       # Mismo secreto que "usuarios" — valida los JWT en los endpoints de
       # publicar servicios (POST /api/company-services, /api/professional-services).
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatoria, ver .env.example}
@@ -80,7 +80,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-b2bmatch}
       DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria, ver .env.example}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatoria, ver .env.example}
     ports:
       - "8082:8082"
@@ -104,7 +104,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-b2bmatch}
       DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria, ver .env.example}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
       # Mismo secreto que "usuarios" — valida los JWT que usuarios emite.
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatoria, ver .env.example}
       NOTIFICACIONES_API_URL: http://notificaciones:8086
@@ -131,7 +131,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-b2bmatch}
       DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria, ver .env.example}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatoria, ver .env.example}
       NOTIFICACIONES_API_URL: http://notificaciones:8086
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY es obligatoria, ver .env.example}
@@ -155,7 +155,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-b2bmatch}
       DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria, ver .env.example}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatoria, ver .env.example}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY es obligatoria, ver .env.example}
     ports:
