@@ -103,7 +103,7 @@ export default function CreateOffer() {
                 required
                 value={form.categoryId}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-(--color-border) bg-(--color-bg-input) px-4 py-3 text-sm text-(--color-text-main) outline-none"
+                className="w-full rounded-xl border border-(--color-border) bg-(--color-bg-main) px-4 py-3 text-sm text-(--color-text-main) outline-none"
               >
                 <option value="" disabled>
                   Selecciona una categoría
