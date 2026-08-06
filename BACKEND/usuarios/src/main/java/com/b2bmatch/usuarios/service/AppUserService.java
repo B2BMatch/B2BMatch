@@ -1,6 +1,7 @@
 package com.b2bmatch.usuarios.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.b2bmatch.usuarios.dto.AdminRegisterRequest;
+import com.b2bmatch.usuarios.dto.AppUserRegisterRequestDto;
+import com.b2bmatch.usuarios.dto.AppUserResponseDto;
 import com.b2bmatch.usuarios.dto.AuthResponse;
 import com.b2bmatch.usuarios.dto.LoginRequest;
 import com.b2bmatch.usuarios.dto.RegisterRequest;
@@ -147,6 +150,72 @@ public class AppUserService {
         String displayName = resolveDisplayName(user);
         String token = jwtService.generateToken(user.getId(), user.getEmail(), user.getRole().getName());
         return new AuthResponse(token, user.getId(), user.getEmail(), user.getRole().getName(), displayName);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppUserResponseDto> findAll() {
+        return appUserRepository.findAll().stream()
+                .map(this::toResponseDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AppUserResponseDto findById(Long id) {
+        return toResponseDto(findUserOrThrow(id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppUserResponseDto> findByRole(String roleName) {
+        return appUserRepository.findByRole_Name(roleName).stream()
+                .map(this::toResponseDto)
+                .toList();
+    }
+
+    @Transactional
+    public AppUserResponseDto register(AppUserRegisterRequestDto request) {
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setEmail(request.getEmail());
+        registerRequest.setPassword(request.getPassword());
+        registerRequest.setRole(request.getRole());
+        registerRequest.setFirstName(request.getFirstName());
+        registerRequest.setLastName(request.getLastName());
+        registerRequest.setPhone(request.getPhone());
+        registerRequest.setCompanyName(request.getCompanyName());
+        registerRequest.setTaxId(request.getTaxId());
+        registerRequest.setIndustry(request.getIndustry());
+
+        AuthResponse response = register(registerRequest);
+        return toResponseDto(findUserOrThrow(response.getUserId()));
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        AppUser user = findUserOrThrow(id);
+        user.setStatus("DELETED");
+        user.setUpdatedAt(LocalDateTime.now());
+        appUserRepository.save(user);
+    }
+
+    @Transactional
+    public AppUserResponseDto reactivate(Long id) {
+        AppUser user = findUserOrThrow(id);
+        user.setStatus("ACTIVE");
+        user.setUpdatedAt(LocalDateTime.now());
+        return toResponseDto(appUserRepository.save(user));
+    }
+
+    private AppUser findUserOrThrow(Long id) {
+        return appUserRepository.findById(id)
+                .orElseThrow(() -> new AuthException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    }
+
+    private AppUserResponseDto toResponseDto(AppUser user) {
+        return new AppUserResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().getName(),
+                user.getStatus(),
+                user.getCreatedAt());
     }
 
     private String resolveDisplayName(AppUser user) {
