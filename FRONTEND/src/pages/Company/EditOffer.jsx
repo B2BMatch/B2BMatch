@@ -120,7 +120,7 @@ export default function EditOffer() {
                   required
                   value={form.categoryId}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-(--color-border) bg-(--color-bg-input) px-4 py-3 text-sm text-(--color-text-main) outline-none"
+                  className="w-full rounded-xl border border-(--color-border) bg-(--color-bg-main) px-4 py-3 text-sm text-(--color-text-main) outline-none"
                 >
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
