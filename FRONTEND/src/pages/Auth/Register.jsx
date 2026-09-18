@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register as registerService } from '../../services/authService';
+import '../../styles/auth.css';
+
+const AuthPanel = () => (
+  <div className="auth-panel">
+    <div className="auth-panel-brand">
+      <span className="brand-mark">B2B</span>
+      <span className="brand-name">B2BMatch</span>
+    </div>
+    <span className="badge-gold">Unite a la red</span>
+    <h2>Creá tu cuenta y empezá hoy mismo.</h2>
+    <p>Tanto si buscás talento como si ofrecés servicios, hay un lugar para vos.</p>
+    <ul className="auth-features">
+      <li><span className="auth-feature-icon">✓</span> Perfiles verificados para empresas y profesionales</li>
+      <li><span className="auth-feature-icon">✓</span> Catálogo de servicios con cotización directa</li>
+      <li><span className="auth-feature-icon">✓</span> Publicación de ofertas con seguimiento de postulantes</li>
+    </ul>
+  </div>
+);
 
 export const Register = ({ onSwitchToLogin, onSuccess }) => {
   const [userType, setUserType] = useState('user');
@@ -9,6 +27,8 @@ export const Register = ({ onSwitchToLogin, onSuccess }) => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const isEmbedded = typeof onSwitchToLogin === 'function';
 
   const roleMap = {
     user: 3, // PROFESSIONAL
@@ -50,127 +70,100 @@ export const Register = ({ onSwitchToLogin, onSuccess }) => {
     }
   };
 
-  return (
-    <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', padding: '10px' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '8px' }}>Crear Cuenta</h2>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.9rem' }}>
-        Únete a la plataforma B2BMatch
-      </p>
+  const card = (
+    <div className="auth-card">
+      <div className="auth-card-head">
+        <span className="badge-gold">Registro</span>
+        <h2>Crear Cuenta</h2>
+        <p>Únete a la plataforma B2BMatch</p>
+      </div>
 
-      {/* Selector de Tipo de Usuario */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+      <div className="type-toggle">
         <button
           type="button"
-          className={userType === 'user' ? 'btn-b2b-primary' : 'btn-b2b-outline'}
-          style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
+          className={userType === 'user' ? 'active' : ''}
           onClick={() => setUserType('user')}
         >
           👨‍💻 Postulante
         </button>
         <button
           type="button"
-          className={userType === 'company' ? 'btn-b2b-primary' : 'btn-b2b-outline'}
-          style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
+          className={userType === 'company' ? 'active' : ''}
           onClick={() => setUserType('company')}
         >
           🏢 Empresa
         </button>
       </div>
 
-      {error && <p style={{ color: 'red', padding: '0 10px' }}>{error}</p>}
-      {success && <p style={{ color: 'green', padding: '0 10px' }}>{success}</p>}
+      {error && <div className="alert-banner alert-banner--error">{error}</div>}
+      {success && <div className="alert-banner alert-banner--success">{success}</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-            {userType === 'user' ? 'Nombre Completo' : 'Nombre de la Empresa'}
-          </label>
-          <input 
-            type="text" 
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label className="form-label">{userType === 'user' ? 'Nombre Completo' : 'Nombre de la Empresa'}</label>
+          <input
+            type="text"
             name="name"
+            className="form-input"
             value={formData.name}
             onChange={handleChange}
             placeholder={userType === 'user' ? 'Juan Pérez' : 'Acme B2B Corp'}
             required
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-input)',
-              color: 'var(--text-main)',
-              outline: 'none'
-            }}
           />
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-            Correo Electrónico
-          </label>
-          <input 
-            type="email" 
+        <div className="form-group">
+          <label className="form-label">Correo Electrónico</label>
+          <input
+            type="email"
             name="email"
+            className="form-input"
             value={formData.email}
             onChange={handleChange}
             placeholder="correo@ejemplo.com"
             required
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-input)',
-              color: 'var(--text-main)',
-              outline: 'none'
-            }}
           />
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-            Contraseña
-          </label>
-          <input 
-            type="password" 
+        <div className="form-group">
+          <label className="form-label">Contraseña</label>
+          <input
+            type="password"
             name="password"
+            className="form-input"
             value={formData.password}
             onChange={handleChange}
             placeholder="••••••••"
             required
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-input)',
-              color: 'var(--text-main)',
-              outline: 'none'
-            }}
           />
         </div>
 
-        <button type="submit" className="btn-b2b-primary" style={{ marginTop: '8px', width: '100%' }} disabled={loading}>
+        <button type="submit" className="btn-b2b-primary auth-submit" disabled={loading}>
           {loading ? 'Registrando...' : 'Registrarme'}
         </button>
       </form>
 
-      <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+      <p className="auth-switch">
         ¿Ya tienes cuenta?{' '}
         {onSwitchToLogin ? (
-          <button 
-            type="button" 
-            onClick={onSwitchToLogin} 
-            style={{ background: 'none', border: 'none', color: 'var(--text-accent)', fontWeight: '600', cursor: 'pointer' }}
-          >
+          <button type="button" onClick={onSwitchToLogin}>
             Inicia Sesión
           </button>
         ) : (
-          <Link to="/login" style={{ color: 'var(--text-accent)', textDecoration: 'none', fontWeight: '600' }}>
-            Inicia Sesión
-          </Link>
+          <Link to="/login">Inicia Sesión</Link>
         )}
       </p>
+    </div>
+  );
+
+  if (isEmbedded) {
+    return card;
+  }
+
+  return (
+    <div className="auth-page">
+      <AuthPanel />
+      {card}
     </div>
   );
 };

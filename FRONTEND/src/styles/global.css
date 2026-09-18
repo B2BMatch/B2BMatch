@@ -144,3 +144,34 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
 }
+
+/* Barra de acciones de formulario */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* =====================================================
+   Banners de alerta (error / éxito)
+   ===================================================== */
+.alert-banner {
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.alert-banner--error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #B91C1C;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.alert-banner--success {
+  background: rgba(38, 166, 91, 0.1);
+  color: #1B7F4B;
+  border: 1px solid rgba(38, 166, 91, 0.25);
+}

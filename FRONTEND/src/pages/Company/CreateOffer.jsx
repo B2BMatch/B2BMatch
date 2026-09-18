@@ -4,23 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import catalogoService from '../../services/catalogoService';
 import perfilesService from '../../services/perfilesService';
 import { createOferta } from '../../services/ofertasService';
-
-const inputStyle = {
-  width: '100%',
-  padding: '10px 14px',
-  borderRadius: '8px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-main)',
-  color: 'var(--text-main)',
-  outline: 'none',
-};
-
-const labelStyle = {
-  display: 'block',
-  marginBottom: '6px',
-  color: 'var(--text-muted)',
-  fontSize: '0.9rem',
-};
+import '../../styles/catalog.css';
 
 export const CreateOffer = () => {
   const navigate = useNavigate();
@@ -108,83 +92,84 @@ export const CreateOffer = () => {
   }, [user]);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Crear Nueva Oferta</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Completa la información del puesto de trabajo</p>
+    <div className="list-page" style={{ maxWidth: '820px' }}>
+      <header className="page-title">
+        <span className="badge-gold">Publicación</span>
+        <h1>Crear Nueva Oferta</h1>
+        <p>Completa la información del puesto de trabajo</p>
+      </header>
 
-      <div className="card-b2b" style={{ padding: '32px' }}>
+      <div className="section-card">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {loadingProfile ? (
             <p style={{ color: 'var(--text-muted)' }}>Cargando perfil de empresa...</p>
           ) : profileError ? (
-            <div style={{ padding: '16px', background: '#f9ecec', color: '#B91C1C', borderRadius: '12px' }}>
-              {profileError}
-            </div>
+            <div className="alert-banner alert-banner--error">{profileError}</div>
           ) : null}
 
-          <div>
-            <label style={labelStyle}>Título de la Vacante</label>
+          <div className="form-group">
+            <label className="form-label">Título de la Vacante</label>
             <input
               type="text"
               name="title"
+              className="form-input"
               placeholder="Ej: Senior React Developer"
               value={formData.title}
               onChange={handleChange}
               required
-              style={inputStyle}
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Presupuesto (USD)</label>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Presupuesto (USD)</label>
               <input
                 type="number"
                 step="0.01"
                 name="budget"
+                className="form-input"
                 placeholder="Ej: 3800"
                 value={formData.budget}
                 onChange={handleChange}
                 required
-                style={inputStyle}
               />
             </div>
-            <div>
-              <label style={labelStyle}>Fecha Límite</label>
+            <div className="form-group">
+              <label className="form-label">Fecha Límite</label>
               <input
                 type="date"
                 name="deadline"
+                className="form-input"
                 value={formData.deadline}
                 onChange={handleChange}
                 required
-                style={inputStyle}
               />
             </div>
           </div>
 
-          <div>
-            <label style={labelStyle}>Categoría</label>
-            <select value={categoryId || ''} onChange={(e) => setCategoryId(Number(e.target.value))} style={{ ...inputStyle, color: 'var(--text-main)' }}>
+          <div className="form-group">
+            <label className="form-label">Categoría</label>
+            <select className="form-select" value={categoryId || ''} onChange={(e) => setCategoryId(Number(e.target.value))}>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
           </div>
 
-          <div>
-            <label style={labelStyle}>Descripción del Puesto</label>
+          <div className="form-group">
+            <label className="form-label">Descripción del Puesto</label>
             <textarea
               name="description"
+              className="form-textarea"
               rows="4"
               placeholder="Detalla las responsabilidades clave..."
               value={formData.description}
               onChange={handleChange}
               required
-              style={{ ...inputStyle, resize: 'vertical' }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+          <div className="form-actions">
             <button type="submit" className="btn-b2b-primary" disabled={!companyProfileId || loadingProfile || submitting}>
               {submitting ? 'Publicando...' : 'Publicar Vacante'}
             </button>

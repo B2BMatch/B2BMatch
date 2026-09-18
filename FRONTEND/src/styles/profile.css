@@ -125,14 +125,6 @@
   font-size: 0.95rem;
 }
 
-/* Barra de acciones de formulario */
-.form-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-
 /* Tarjetas de items dentro del perfil (servicios propios) */
 .gig-row {
   border: 1px solid var(--border-color);

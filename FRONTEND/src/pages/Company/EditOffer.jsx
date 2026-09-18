@@ -2,23 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import catalogoService from '../../services/catalogoService';
 import { getOfertaById, updateOferta } from '../../services/ofertasService';
-
-const inputStyle = {
-  width: '100%',
-  padding: '10px 14px',
-  borderRadius: '8px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-main)',
-  color: 'var(--text-main)',
-  outline: 'none',
-};
-
-const labelStyle = {
-  display: 'block',
-  marginBottom: '6px',
-  color: 'var(--text-muted)',
-  fontSize: '0.9rem',
-};
+import '../../styles/catalog.css';
 
 export const EditOffer = () => {
   const navigate = useNavigate();
@@ -110,86 +94,85 @@ export const EditOffer = () => {
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Editar Oferta</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Modifica la información de la vacante</p>
+    <div className="list-page" style={{ maxWidth: '820px' }}>
+      <header className="page-title">
+        <span className="badge-gold">Edición</span>
+        <h1>Editar Oferta</h1>
+        <p>Modifica la información de la vacante</p>
+      </header>
 
-      {error && (
-        <div style={{ marginBottom: '20px', padding: '16px', background: '#fdecea', color: '#b91c1c', borderRadius: '12px' }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="alert-banner alert-banner--error">{error}</div>}
 
-      <div className="card-b2b" style={{ padding: '32px' }}>
+      <div className="section-card">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div>
-            <label style={labelStyle}>Título de la Vacante</label>
+          <div className="form-group">
+            <label className="form-label">Título de la Vacante</label>
             <input
               type="text"
               name="title"
+              className="form-input"
               value={formData.title}
               onChange={handleChange}
               required
-              style={inputStyle}
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Categoría</label>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Categoría</label>
               <select
                 name="categoryId"
+                className="form-select"
                 value={formData.categoryId || ''}
                 onChange={handleChange}
                 required
-                style={inputStyle}
               >
                 {categories.map((category) => (
-                  <option className='fondo-oscuro' key={category.id} value={category.id}>
+                  <option key={category.id} value={category.id}>
                     {category.name || category.title || 'Categoría'}
                   </option>
                 ))}
               </select>
             </div>
-            <div>
-              <label style={labelStyle}>Presupuesto (USD)</label>
+            <div className="form-group">
+              <label className="form-label">Presupuesto (USD)</label>
               <input
                 type="number"
                 step="0.01"
                 name="budget"
+                className="form-input"
                 value={formData.budget}
                 onChange={handleChange}
                 required
-                style={inputStyle}
               />
             </div>
           </div>
 
-          <div>
-            <label style={labelStyle}>Fecha Límite</label>
+          <div className="form-group">
+            <label className="form-label">Fecha Límite</label>
             <input
               type="date"
               name="deadline"
+              className="form-input"
               value={formData.deadline}
               onChange={handleChange}
               required
-              style={inputStyle}
             />
           </div>
 
-          <div>
-            <label style={labelStyle}>Descripción del Puesto</label>
+          <div className="form-group">
+            <label className="form-label">Descripción del Puesto</label>
             <textarea
               name="description"
+              className="form-textarea"
               rows="4"
               value={formData.description}
               onChange={handleChange}
               required
-              style={{ ...inputStyle, resize: 'vertical' }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+          <div className="form-actions">
             <button type="submit" className="btn-b2b-primary" disabled={submitting}>
               {submitting ? 'Guardando...' : 'Actualizar Oferta'}
             </button>

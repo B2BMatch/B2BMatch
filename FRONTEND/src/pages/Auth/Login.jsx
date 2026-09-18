@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import '../../styles/auth.css';
+
+const AuthPanel = () => (
+  <div className="auth-panel">
+    <div className="auth-panel-brand">
+      <span className="brand-mark">B2B</span>
+      <span className="brand-name">B2BMatch</span>
+    </div>
+    <span className="badge-gold">Red de negocios</span>
+    <h2>Conectá tu talento con oportunidades reales.</h2>
+    <p>Un ecosistema donde profesionales y empresas se encuentran, colaboran y crecen.</p>
+    <ul className="auth-features">
+      <li><span className="auth-feature-icon">✓</span> Empresas verificadas que publican ofertas confiables</li>
+      <li><span className="auth-feature-icon">✓</span> Postulación directa a las vacantes que te interesan</li>
+      <li><span className="auth-feature-icon">✓</span> Reseñas de clientes que construyen tu reputación</li>
+    </ul>
+  </div>
+);
 
 export const Login = ({ onSwitchToRegister, onSuccess }) => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -9,6 +27,8 @@ export const Login = ({ onSwitchToRegister, onSuccess }) => {
 
   const { loginUser } = useAuth();
   const navigate = useNavigate();
+
+  const isEmbedded = typeof onSwitchToRegister === 'function';
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -38,83 +58,71 @@ export const Login = ({ onSwitchToRegister, onSuccess }) => {
     }
   };
 
-  return (
-    <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', padding: '10px' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '8px' }}>Iniciar Sesión</h2>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.9rem' }}>
-        Ingresa a tu cuenta de B2BMatch
-      </p>
+  const card = (
+    <div className="auth-card">
+      <div className="auth-card-head">
+        <span className="badge-gold">Cuenta</span>
+        <h2>Iniciar Sesión</h2>
+        <p>Ingresa a tu cuenta de B2BMatch</p>
+      </div>
 
-      {error && <p style={{ color: 'red', padding: '0 10px' }}>{error}</p>}
+      {error && <div className="alert-banner alert-banner--error">{error}</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-            Correo Electrónico
-          </label>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label className="form-label">Correo Electrónico</label>
           <input
             type="email"
             name="email"
+            className="form-input"
             value={credentials.email}
             onChange={handleChange}
             placeholder="correo@ejemplo.com"
             required
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-input)',
-              color: 'var(--text-main)',
-              outline: 'none'
-            }}
           />
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-            Contraseña
-          </label>
+        <div className="form-group">
+          <label className="form-label">Contraseña</label>
           <input
             type="password"
             name="password"
+            className="form-input"
             value={credentials.password}
             onChange={handleChange}
             placeholder="••••••••"
             required
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-input)',
-              color: 'var(--text-main)',
-              outline: 'none'
-            }}
           />
         </div>
 
-        <button type="submit" className="btn-b2b-primary" style={{ marginTop: '8px', width: '100%' }} disabled={loading}>
+        <button type="submit" className="btn-b2b-primary auth-submit" disabled={loading}>
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
       </form>
 
-      <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+      <p className="auth-switch">
         ¿No tienes cuenta?{' '}
         {onSwitchToRegister ? (
-          <button
-            type="button"
-            onClick={onSwitchToRegister}
-            style={{ background: 'none', border: 'none', color: 'var(--text-accent)', fontWeight: '600', cursor: 'pointer' }}
-          >
+          <button type="button" onClick={onSwitchToRegister}>
             Regístrate
           </button>
         ) : (
-          <Link to="/register" style={{ color: 'var(--text-accent)', textDecoration: 'none', fontWeight: '600' }}>
-            Regístrate
-          </Link>
+          <Link to="/register">Regístrate</Link>
         )}
       </p>
     </div>
   );
+
+  if (isEmbedded) {
+    return card;
+  }
+
+  return (
+    <div className="auth-page">
+      <AuthPanel />
+      {card}
+    </div>
+  );
 };
+
+export default Login;

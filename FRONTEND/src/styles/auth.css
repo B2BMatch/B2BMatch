@@ -1,0 +1,220 @@
+/* =====================================================
+   Autenticación (Login / Registro)
+   ===================================================== */
+
+/* Layout standalone: panel de valor + tarjeta */
+.auth-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 44px 20px 72px;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    display: none;
+  }
+}
+
+/* Panel de valor (navy degradé) */
+.auth-panel {
+  border-radius: 20px;
+  padding: 40px 36px;
+  color: #FFFFFF;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 111, 77, 0.28), transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(217, 164, 65, 0.32), transparent 50%),
+    linear-gradient(135deg, #16233F 0%, #27375C 100%);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.auth-panel .badge-gold {
+  margin-bottom: 14px;
+}
+
+.auth-panel h2 {
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 10px;
+}
+
+.auth-panel > p {
+  color: rgba(247, 243, 236, 0.78);
+  font-size: 0.95rem;
+  margin: 0 0 24px;
+}
+
+.auth-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.auth-feature-icon {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(255, 111, 77, 0.22);
+  color: #FF8A6E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.auth-panel-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.auth-panel-brand .brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--coral);
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-panel-brand .brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Tarjeta del formulario */
+.auth-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  padding: 34px 30px 26px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--coral), var(--gold));
+  border-radius: 0 0 6px 6px;
+}
+
+.auth-card-head {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.auth-card-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 10px 0 4px;
+  color: var(--text-main);
+}
+
+.auth-card-head p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Toggle segmentado de tipo de cuenta (Registro) */
+.type-toggle {
+  display: flex;
+  gap: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 5px;
+  margin-bottom: 20px;
+}
+
+.type-toggle button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 10px;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.type-toggle button.active {
+  background: var(--coral);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(255, 111, 77, 0.28);
+}
+
+/* Footer de cambio de pantalla */
+.auth-switch {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.auth-switch button {
+  background: none;
+  border: none;
+  color: var(--coral);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-switch a {
+  color: var(--coral);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Botón primario a ancho completo */
+.auth-submit {
+  width: 100%;
+  margin-top: 8px;
+}

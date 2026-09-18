@@ -68,6 +68,23 @@
   transform: translateY(-1px);
 }
 
+/* Variantes compactas para listas y tablas */
+.btn-b2b-primary.btn-xs,
+.btn-b2b-outline.btn-xs {
+  padding: 6px 16px;
+  font-size: 0.85rem;
+}
+
+.btn-b2b-outline.btn-danger {
+  color: #DC2626;
+  border-color: #DC2626;
+}
+
+.btn-b2b-outline.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #DC2626;
+}
+
 /* Modo oscuro: outline con texto claro */
 [data-theme="dark"] .btn-b2b-outline {
   color: var(--text-main);

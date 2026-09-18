@@ -41,6 +41,124 @@
   padding: 24px 20px 72px;
 }
 
+/* Encabezado de página alineado a la izquierda */
+.page-title {
+  margin-bottom: 24px;
+}
+
+.page-title .badge-gold {
+  margin-bottom: 8px;
+}
+
+.page-title h1 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 8px 0 6px;
+}
+
+.page-title p {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.page-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.page-title-row .page-title {
+  margin-bottom: 0;
+}
+
+/* Tarjeta de oferta (compañía) */
+.offer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.offer-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 22px 24px;
+}
+
+.offer-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.offer-card-title h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.offer-card-meta {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  margin: 6px 0 0;
+}
+
+.offer-card-meta strong {
+  color: var(--gold);
+}
+
+.offer-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.offer-card-body {
+  border-top: 1px solid var(--border-color);
+  padding: 22px 24px;
+}
+
+/* Tarjeta de postulación (candidato) */
+.app-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 20px 24px;
+}
+
+.app-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.app-card .app-meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.app-card .app-extra {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin: 6px 0 0;
+}
+
 .catalog-sidebar {
   display: flex;
   flex-direction: column;

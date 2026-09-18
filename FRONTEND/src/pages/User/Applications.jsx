@@ -3,6 +3,20 @@ import { useAuth } from '../../context/AuthContext';
 import applicationsService from '../../services/applicationsService';
 import perfilesService from '../../services/perfilesService';
 import { getOfertas } from '../../services/ofertasService';
+import '../../styles/catalog.css';
+import '../../styles/admin.css';
+
+const statusInfo = (status) => {
+  const raw = status || 'Pendiente';
+  const s = String(status || '').toUpperCase();
+  if (s.includes('REJECT') || s.includes('CANCEL') || s.includes('SUSPEND') || s.includes('BLOCK')) {
+    return { text: raw, cls: 'badge-status--suspended' };
+  }
+  if (s.includes('ACCEPT') || s.includes('HIRE') || s.includes('APPROV') || s.includes('ACTIVE')) {
+    return { text: raw, cls: 'badge-status--active' };
+  }
+  return { text: raw, cls: 'badge-status--neutral' };
+};
 
 export const Applications = () => {
   const { user } = useAuth();
@@ -58,44 +72,42 @@ export const Applications = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Mis Postulaciones</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Estado de tus postulaciones actuales</p>
+    <div className="list-page">
+      <header className="page-title">
+        <span className="badge-gold">Historial laboral</span>
+        <h1>Mis Postulaciones</h1>
+        <p>Estado de tus postulaciones actuales</p>
+      </header>
 
       {applications.length === 0 ? (
-        <div className="card-b2b" style={{ padding: '24px' }}>
-          <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-            No hay postulaciones registradas todavía.
-          </p>
+        <div className="empty-state">
+          <strong>Sin postulaciones registradas</strong>
+          <span>Explorá el listado de ofertas y postulate a la vacante que encaje con vos.</span>
+          <a href="/empleos" style={{ color: 'var(--text-accent)', fontWeight: '600' }}>Ver ofertas disponibles →</a>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {applications.map((app) => (
-            <div key={app.id} className="card-b2b" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>{getOfferTitle(app.jobOfferId || app.job_offer_id)}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  {app.proposal || 'Sin propuesta adjunta.'}
-                </p>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  Postulado el {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : app.created_at ? new Date(app.created_at).toLocaleDateString() : 'sin fecha'}
-                </p>
+          {applications.map((app) => {
+            const status = statusInfo(app.status || app.state);
+            return (
+              <div key={app.id} className="app-card">
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <h3>{getOfferTitle(app.jobOfferId || app.job_offer_id)}</h3>
+                  {app.proposal && <p className="app-meta">{app.proposal}</p>}
+                  <p className="app-extra">
+                    {app.expectedPrice != null && <span><strong style={{ color: 'var(--gold)' }}>${app.expectedPrice}</strong> · </span>}
+                    Postulado el{' '}
+                    {app.createdAt
+                      ? new Date(app.createdAt).toLocaleDateString()
+                      : app.created_at
+                        ? new Date(app.created_at).toLocaleDateString()
+                        : 'sin fecha'}
+                  </p>
+                </div>
+                <span className={`badge-status ${status.cls}`}>{status.text}</span>
               </div>
-              <div>
-                <span style={{
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  background: 'rgba(59, 130, 246, 0.15)',
-                  color: '#3B82F6',
-                  border: '1px solid #3B82F6'
-                }}>
-                  {app.status || app.state || 'Pendiente'}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
