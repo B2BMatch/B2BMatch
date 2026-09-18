@@ -1,22 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import perfilesService from '../../services/perfilesService';
+import '../../styles/profile.css';
+import '../../styles/catalog.css';
 
-const inputStyle = {
-  width: '100%',
-  padding: '10px 14px',
-  borderRadius: '8px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-input)',
-  color: 'var(--text-main)',
-  outline: 'none',
-};
-
-const labelStyle = {
-  display: 'block',
-  marginBottom: '6px',
-  color: 'var(--text-muted)',
-  fontSize: '0.9rem',
+const getInitials = (name = '') => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase() || 'E';
 };
 
 export const CompanyProfile = () => {
@@ -110,9 +102,12 @@ export const CompanyProfile = () => {
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Perfil de la Empresa</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Configura los datos públicos de tu organización</p>
+    <div className="profile-page">
+      <header className="page-head" style={{ padding: '0 0 24px' }}>
+        <span className="badge-gold">Perfil de empresa</span>
+        <h1>Perfil de la Empresa</h1>
+        <p>Configurá los datos públicos de tu organización para publicar ofertas confiables.</p>
+      </header>
 
       {error && (
         <div style={{ marginBottom: '20px', padding: '16px', background: '#fdecea', color: '#b91c1c', borderRadius: '12px' }}>
@@ -120,126 +115,94 @@ export const CompanyProfile = () => {
         </div>
       )}
 
-      <div className="card-b2b" style={{ padding: '32px' }}>
+      <section className="profile-hero">
+        <div className="profile-avatar-lg profile-avatar-lg--gold">
+          {getInitials(profile.companyName || user?.name || 'E')}
+        </div>
+        <div className="profile-hero-info">
+          <div className="profile-hero-name">
+            {profile.companyName || user?.name || 'Tu empresa'}
+            <span className="badge-verified">✓ Empresa verificada</span>
+          </div>
+          <p className="profile-hero-sub">
+            {profile.companyDescription
+              ? profile.companyDescription.slice(0, 150)
+              : 'La descripción de tu empresa aparecerá aquí — completá el formulario abajo.'}
+          </p>
+          <div className="profile-hero-chips">
+            {profile.industry && <span className="profile-hero-chip">🏭 {profile.industry}</span>}
+            {(profile.city || profile.country) && (
+              <span className="profile-hero-chip">📍 {profile.city}{profile.country ? `, ${profile.country}` : ''}</span>
+            )}
+            <span className="profile-hero-chip">🏢 Perfil público</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-card">
+        <h2>Datos de la organización</h2>
+        <p className="section-sub">Esta información es pública y valida tu presencia en B2BMatch</p>
         <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div>
-            <label style={labelStyle}>Nombre de la Empresa</label>
-            <input
-              type="text"
-              name="companyName"
-              value={profile.companyName}
-              onChange={handleChange}
-              style={inputStyle}
-            />
+          <div className="form-group">
+            <label className="form-label">Nombre de la Empresa</label>
+            <input type="text" className="form-input" name="companyName" value={profile.companyName} onChange={handleChange} />
           </div>
 
-          <div>
-            <label style={labelStyle}>CUIT / Tax ID</label>
-            <input
-              type="text"
-              name="taxId"
-              value={profile.taxId}
-              onChange={handleChange}
-              style={inputStyle}
-            />
+          <div className="form-group">
+            <label className="form-label">CUIT / Tax ID</label>
+            <input type="text" className="form-input" name="taxId" value={profile.taxId} onChange={handleChange} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Industria / Sector</label>
-              <input
-                type="text"
-                name="industry"
-                value={profile.industry}
-                onChange={handleChange}
-                style={inputStyle}
-              />
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Industria / Sector</label>
+              <input type="text" className="form-input" name="industry" value={profile.industry} onChange={handleChange} />
             </div>
-            <div>
-              <label style={labelStyle}>Sitio Web</label>
-              <input
-                type="url"
-                name="website"
-                value={profile.website}
-                onChange={handleChange}
-                style={inputStyle}
-              />
+            <div className="form-group">
+              <label className="form-label">Sitio Web</label>
+              <input type="url" className="form-input" name="website" value={profile.website} onChange={handleChange} />
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Correo de Contacto</label>
-              <input
-                type="email"
-                name="email"
-                value={profile.email}
-                onChange={handleChange}
-                style={inputStyle}
-              />
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Correo de Contacto</label>
+              <input type="email" className="form-input" name="email" value={profile.email} onChange={handleChange} />
             </div>
-            <div>
-              <label style={labelStyle}>Teléfono</label>
-              <input
-                type="text"
-                name="phone"
-                value={profile.phone}
-                onChange={handleChange}
-                style={inputStyle}
-              />
+            <div className="form-group">
+              <label className="form-label">Teléfono</label>
+              <input type="text" className="form-input" name="phone" value={profile.phone} onChange={handleChange} />
             </div>
           </div>
 
-          <div>
-            <label style={labelStyle}>Dirección</label>
-            <input
-              type="text"
-              name="address"
-              value={profile.address}
-              onChange={handleChange}
-              style={inputStyle}
-            />
+          <div className="form-group">
+            <label className="form-label">Dirección</label>
+            <input type="text" className="form-input" name="address" value={profile.address} onChange={handleChange} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Ciudad</label>
-              <input
-                type="text"
-                name="city"
-                value={profile.city}
-                onChange={handleChange}
-                style={inputStyle}
-              />
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Ciudad</label>
+              <input type="text" className="form-input" name="city" value={profile.city} onChange={handleChange} />
             </div>
-            <div>
-              <label style={labelStyle}>País</label>
-              <input
-                type="text"
-                name="country"
-                value={profile.country}
-                onChange={handleChange}
-                style={inputStyle}
-              />
+            <div className="form-group">
+              <label className="form-label">País</label>
+              <input type="text" className="form-input" name="country" value={profile.country} onChange={handleChange} />
             </div>
           </div>
 
-          <div>
-            <label style={labelStyle}>Descripción de la Empresa</label>
-            <textarea
-              name="companyDescription"
-              rows="4"
-              value={profile.companyDescription}
-              onChange={handleChange}
-              style={{ ...inputStyle, resize: 'vertical' }}
-            />
+          <div className="form-group">
+            <label className="form-label">Descripción de la Empresa</label>
+            <textarea className="form-textarea" name="companyDescription" rows="4" value={profile.companyDescription} onChange={handleChange} />
           </div>
 
-          <button type="button" className="btn-b2b-primary" style={{ marginTop: '10px', alignSelf: 'flex-start' }} onClick={handleSave} disabled={saving}>
-            {saving ? 'Guardando...' : 'Guardar Cambios'}
-          </button>
+          <div className="form-actions">
+            <button type="button" className="btn-b2b-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
+          </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 };

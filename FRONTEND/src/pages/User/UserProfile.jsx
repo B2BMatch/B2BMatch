@@ -4,22 +4,13 @@ import perfilesService from '../../services/perfilesService';
 import reviewsService from '../../services/reviewsService';
 import catalogoService from '../../services/catalogoService';
 import quotationsService from '../../services/quotationsService';
+import '../../styles/catalog.css';
+import '../../styles/profile.css';
 
-const inputStyle = {
-  width: '100%',
-  padding: '10px 14px',
-  borderRadius: '8px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-input)',
-  color: 'var(--text-main)',
-  outline: 'none',
-};
-
-const labelStyle = {
-  display: 'block',
-  marginBottom: '6px',
-  color: 'var(--text-muted)',
-  fontSize: '0.9rem',
+const getInitials = (firstName = '', lastName = '') => {
+    const first = firstName.trim()[0] || '';
+    const last = lastName.trim()[0] || '';
+    return (first + last).toUpperCase() || 'P';
 };
 
 export const UserProfile = () => {
@@ -193,10 +184,19 @@ export const UserProfile = () => {
     return <p style={{ padding: '20px' }}>Cargando perfil...</p>;
   }
 
+  const displayName = `${profile.firstName} ${profile.lastName}`.trim() || user?.name || user?.email || 'Profesional';
+  const avgRating =
+    reviews.length > 0
+      ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviews.length).toFixed(1)
+      : null;
+
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Mi Perfil</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Administra tu información personal y profesional</p>
+    <div className="profile-page">
+      <header className="page-head" style={{ padding: '0 0 24px' }}>
+        <span className="badge-gold">Perfil profesional</span>
+        <h1>Mi Perfil</h1>
+        <p>Administrá tu información personal, tus reseñas y los servicios que publicás.</p>
+      </header>
 
       {error && (
         <div style={{ marginBottom: '20px', padding: '16px', background: '#fdecea', color: '#b91c1c', borderRadius: '12px' }}>
@@ -204,124 +204,143 @@ export const UserProfile = () => {
         </div>
       )}
 
-      <div className="card-b2b" style={{ padding: '32px' }}>
+      <section className="profile-hero">
+        <div className={`profile-avatar-lg ${avgRating ? 'profile-avatar-lg--gold' : 'profile-avatar-lg--coral'}`}>
+          {getInitials(profile.firstName, profile.lastName) || 'P'}
+        </div>
+        <div className="profile-hero-info">
+          <div className="profile-hero-name">
+            {displayName}
+            <span className="badge-verified">✓ Profesional verificado</span>
+          </div>
+          <p className="profile-hero-sub">
+            {profile.biography ? profile.biography.slice(0, 140) : 'Tu bio aparecerá aquí — completá tu perfil abajo.'}
+          </p>
+          <div className="profile-hero-chips">
+            {profile.experienceYears != null && profile.experienceYears !== '' && (
+              <span className="profile-hero-chip">🎓 {profile.experienceYears} años de experiencia</span>
+            )}
+            {profile.hourlyRate != null && profile.hourlyRate !== '' && (
+              <span className="profile-hero-chip">💰 ${profile.hourlyRate}/h</span>
+            )}
+            {profile.city && (
+              <span className="profile-hero-chip">📍 {profile.city}{profile.country ? `, ${profile.country}` : ''}</span>
+            )}
+            <span className="profile-hero-chip">★ {avgRating || '—'} ({reviews.length} reseñas)</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-card">
+        <h2>Información personal</h2>
+        <p className="section-sub">Estos datos se muestran en tu perfil público</p>
         <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Nombre</label>
-              <input type="text" name="firstName" value={profile.firstName} onChange={handleChange} style={inputStyle} />
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Nombre</label>
+              <input type="text" className="form-input" name="firstName" value={profile.firstName} onChange={handleChange} />
             </div>
-            <div>
-              <label style={labelStyle}>Apellido</label>
-              <input type="text" name="lastName" value={profile.lastName} onChange={handleChange} style={inputStyle} />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Teléfono</label>
-              <input type="text" name="phone" value={profile.phone} onChange={handleChange} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Años de Experiencia</label>
-              <input type="number" name="experienceYears" value={profile.experienceYears} onChange={handleChange} style={inputStyle} />
+            <div className="form-group">
+              <label className="form-label">Apellido</label>
+              <input type="text" className="form-input" name="lastName" value={profile.lastName} onChange={handleChange} />
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Tarifa por Hora (USD)</label>
-              <input type="number" step="0.01" name="hourlyRate" value={profile.hourlyRate} onChange={handleChange} style={inputStyle} />
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Teléfono</label>
+              <input type="text" className="form-input" name="phone" value={profile.phone} onChange={handleChange} />
             </div>
-            <div>
-              <label style={labelStyle}>Ciudad</label>
-              <input type="text" name="city" value={profile.city} onChange={handleChange} style={inputStyle} />
-            </div>
-          </div>
-
-          <div>
-            <label style={labelStyle}>País</label>
-            <input type="text" name="country" value={profile.country} onChange={handleChange} style={inputStyle} />
-          </div>
-
-          <div>
-            <label style={labelStyle}>Biografía / Sobre mí</label>
-            <textarea
-              name="biography"
-              rows="4"
-              value={profile.biography}
-              onChange={handleChange}
-              style={{ ...inputStyle, resize: 'vertical' }}
-            />
-          </div>
-
-          <div>
-            <label style={labelStyle}>URL de Portafolio</label>
-            <input type="url" name="portfolioUrl" value={profile.portfolioUrl} onChange={handleChange} style={inputStyle} />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>LinkedIn</label>
-              <input type="url" name="linkedinUrl" value={profile.linkedinUrl} onChange={handleChange} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>GitHub</label>
-              <input type="url" name="githubUrl" value={profile.githubUrl} onChange={handleChange} style={inputStyle} />
+            <div className="form-group">
+              <label className="form-label">Años de Experiencia</label>
+              <input type="number" className="form-input" name="experienceYears" value={profile.experienceYears} onChange={handleChange} />
             </div>
           </div>
 
-          <button type="button" className="btn-b2b-primary" style={{ marginTop: '10px', alignSelf: 'flex-start' }} onClick={handleSave} disabled={saving}>
-            {saving ? 'Guardando...' : 'Guardar Cambios'}
-          </button>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Tarifa por Hora (USD)</label>
+              <input type="number" step="0.01" className="form-input" name="hourlyRate" value={profile.hourlyRate} onChange={handleChange} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Ciudad</label>
+              <input type="text" className="form-input" name="city" value={profile.city} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">País</label>
+            <input type="text" className="form-input" name="country" value={profile.country} onChange={handleChange} />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Biografía / Sobre mí</label>
+            <textarea className="form-textarea" name="biography" rows="4" value={profile.biography} onChange={handleChange} />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">URL de Portafolio</label>
+            <input type="url" className="form-input" name="portfolioUrl" value={profile.portfolioUrl} onChange={handleChange} />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">LinkedIn</label>
+              <input type="url" className="form-input" name="linkedinUrl" value={profile.linkedinUrl} onChange={handleChange} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">GitHub</label>
+              <input type="url" className="form-input" name="githubUrl" value={profile.githubUrl} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="button" className="btn-b2b-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
+          </div>
         </form>
-      </div>
+      </section>
 
-      <div className="card-b2b" style={{ padding: '32px', marginTop: '24px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '6px' }}>Reseñas de clientes</h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: '0.9rem' }}>
-          Valoraciones que las empresas dejan sobre tu trabajo
-        </p>
+      <section className="section-card">
+        <h2>Reseñas de clientes</h2>
+        <p className="section-sub">Valoraciones que las empresas dejan sobre tu trabajo</p>
         {reviews.length === 0 ? (
           <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-            Todavía no tienes reseñas. Cuando una empresa evalúe tu trabajo aparecerán aquí.
+            Todavía no tenés reseñas. Cuando una empresa evalúe tu trabajo aparecerán aquí.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="item-list">
             {reviews.map((review) => (
-              <div key={review.id} style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ color: '#F59E0B', fontSize: '1.05rem', letterSpacing: '2px' }}>
+              <div key={review.id} className="review-item">
+                <div className="review-item-header">
+                  <span className="review-stars">
                     {'★'.repeat(review.rating || 0)}{'☆'.repeat(Math.max(0, 5 - (review.rating || 0)))}
                   </span>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                    {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'sin fecha'}
-                  </span>
+                  <small>{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'sin fecha'}</small>
                 </div>
-                {review.comment && <p style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.95rem' }}>{review.comment}</p>}
+                {review.comment && <p>{review.comment}</p>}
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
-      <div className="card-b2b" style={{ padding: '32px', marginTop: '24px' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '6px' }}>Mis Servicios</h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: '0.9rem' }}>
-          Publica servicios que ofreces; los clientes podrán solicitarte cotizaciones
-        </p>
+      <section className="section-card">
+        <h2>Mis Servicios</h2>
+        <p className="section-sub">Publicá servicios que ofrecés; los clientes podrán solicitarte cotizaciones</p>
 
         {serviceError && <p style={{ color: 'red', marginBottom: '12px' }}>{serviceError}</p>}
 
-        <div className="card-b2b" style={{ padding: '20px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            <div>
-              <label style={labelStyle}>Título del servicio</label>
-              <input type="text" name="title" value={serviceForm.title} onChange={handleServiceChange} placeholder="Ej: Desarrollo de sitios web" style={inputStyle} />
+        <div className="gig-row" style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Título del servicio</label>
+              <input type="text" className="form-input" name="title" value={serviceForm.title} onChange={handleServiceChange} placeholder="Ej: Desarrollo de sitios web" />
             </div>
-            <div>
-              <label style={labelStyle}>Categoría</label>
-              <select name="category_id" value={serviceForm.category_id} onChange={handleServiceChange} style={inputStyle}>
+            <div className="form-group">
+              <label className="form-label">Categoría</label>
+              <select className="form-select" name="category_id" value={serviceForm.category_id} onChange={handleServiceChange}>
                 <option value="">Seleccionar...</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -330,38 +349,40 @@ export const UserProfile = () => {
                 ))}
               </select>
             </div>
-            <div>
-              <label style={labelStyle}>Precio (USD)</label>
-              <input type="number" name="price" value={serviceForm.price} onChange={handleServiceChange} placeholder="Ej: 1500" style={inputStyle} />
+            <div className="form-group">
+              <label className="form-label">Precio (USD)</label>
+              <input type="number" className="form-input" name="price" value={serviceForm.price} onChange={handleServiceChange} placeholder="Ej: 1500" />
             </div>
           </div>
-          <div>
-            <label style={labelStyle}>Descripción</label>
-            <textarea name="description" rows="2" value={serviceForm.description} onChange={handleServiceChange} placeholder="Detalla qué incluye el servicio..." style={{ ...inputStyle, resize: 'vertical' }} />
+          <div className="form-group">
+            <label className="form-label">Descripción</label>
+            <textarea className="form-textarea" name="description" rows="2" value={serviceForm.description} onChange={handleServiceChange} placeholder="Detallá qué incluye el servicio..." />
           </div>
-          <button type="button" className="btn-b2b-primary" style={{ alignSelf: 'flex-start' }} onClick={handleCreateService} disabled={savingService}>
-            {savingService ? 'Publicando...' : 'Publicar Servicio'}
-          </button>
+          <div className="form-actions">
+            <button type="button" className="btn-b2b-primary" onClick={handleCreateService} disabled={savingService}>
+              {savingService ? 'Publicando...' : 'Publicar Servicio'}
+            </button>
+          </div>
         </div>
 
         {myServices.length === 0 ? (
           <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-            Todavía no publicaste servicios. Usa el formulario de arriba para crear tu primero.
+            Todavía no publicaste servicios. Usá el formulario de arriba para crear el primero.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="item-list">
             {myServices.map((service) => {
               const quotes = quotationsByService[service.id] || [];
               return (
-                <div key={service.id} className="card-b2b" style={{ padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-                    <h3 style={{ fontSize: '1.1rem', margin: 0 }}>{service.title}</h3>
-                    <span className="badge-tag">{categories.find((c) => c.id === service.category_id)?.name || 'General'}</span>
+                <div key={service.id} className="gig-row">
+                  <div className="gig-row-header">
+                    <h3>{service.title}</h3>
+                    <span className="badge-gold">{categories.find((c) => c.id === service.category_id)?.name || 'General'}</span>
                   </div>
                   <p style={{ margin: '4px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     {service.description || 'Sin descripción.'}
                   </p>
-                  <p style={{ margin: '0 0 10px', fontWeight: '700' }}>
+                  <p style={{ margin: '0 0 12px', fontWeight: '700' }}>
                     {service.price != null ? `$${service.price}` : 'Precio a convenir'}
                   </p>
 
@@ -371,14 +392,14 @@ export const UserProfile = () => {
                       Aún no hay solicitudes de cotización para este servicio.
                     </p>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div className="item-list">
                       {quotes.map((quote) => (
-                        <div key={quote.id} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', padding: '12px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                            <strong style={{ fontSize: '0.9rem' }}>Solicitante #{quote.customerId}</strong>
-                            <span className="badge-tag">{quote.status || 'PENDING'}</span>
+                        <div key={quote.id} className="item-row">
+                          <div className="item-row-header">
+                            <span>Solicitante #{quote.customerId}</span>
+                            <span className="badge-gold">{quote.status || 'PENDING'}</span>
                           </div>
-                          <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>{quote.message}</p>
+                          <p>{quote.message}</p>
                         </div>
                       ))}
                     </div>
@@ -388,7 +409,7 @@ export const UserProfile = () => {
             })}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 };

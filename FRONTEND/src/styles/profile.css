@@ -1,0 +1,157 @@
+/* =====================================================
+   Páginas de perfil (profesional y empresa)
+   ===================================================== */
+.profile-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 20px 72px;
+}
+
+/* Tarjeta de presentación del perfil */
+.profile-hero {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(255, 111, 77, 0.25), transparent 50%),
+    radial-gradient(circle at 88% 85%, rgba(217, 164, 65, 0.3), transparent 45%),
+    linear-gradient(135deg, #16233F 0%, #27375C 100%);
+  border-radius: 18px;
+  padding: 30px 32px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-card-hover);
+  margin-bottom: 28px;
+}
+
+.profile-hero-info {
+  flex: 1;
+  min-width: 220px;
+}
+
+.profile-hero-name {
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-hero-name .badge-verified {
+  background: rgba(255, 111, 77, 0.9);
+  color: #FFFFFF;
+}
+
+.profile-hero-sub {
+  color: rgba(247, 243, 236, 0.78);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.profile-hero-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.profile-hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Avatar grande de perfil */
+.profile-avatar-lg {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.profile-avatar-lg--gold { background: var(--gold); color: var(--navy); }
+.profile-avatar-lg--coral { background: var(--coral); color: #FFFFFF; }
+
+/* Rating de estrellas (oro) */
+.review-stars {
+  color: var(--gold);
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+}
+
+.review-item {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+}
+
+.review-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.review-item small {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.review-item p {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+/* Barra de acciones de formulario */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* Tarjetas de items dentro del perfil (servicios propios) */
+.gig-row {
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+}
+
+.gig-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.gig-row-header h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
