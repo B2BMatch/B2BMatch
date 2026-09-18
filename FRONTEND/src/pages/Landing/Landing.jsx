@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getOfertas } from '../../services/ofertasService';
 import perfilesService from '../../services/perfilesService';
+import catalogoService from '../../services/catalogoService';
 import './Landing.css';
 
 const PARTNERS = [
@@ -14,64 +15,111 @@ const PARTNERS = [
     'InnovateLab',
 ];
 
+const POPULAR_CATEGORIES = [
+    { name: 'Desarrollo', icon: '💻' },
+    { name: 'Diseño', icon: '🎨' },
+    { name: 'Marketing', icon: '📈' },
+    { name: 'Datos', icon: '📊' },
+    { name: 'Escritura', icon: '✍️' },
+    { name: 'Finanzas', icon: '💰' },
+    { name: 'Soporte', icon: '🤝' },
+    { name: 'Video', icon: '🎬' },
+];
+
+const getInitials = (name = '') => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase() || 'B2B';
+};
+
 export const Landing = () => {
-    const [currentSlide, setCurrentSlide] = useState(0);
+    const navigate = useNavigate();
+    const [search, setSearch] = useState('');
     const [featuredJobs, setFeaturedJobs] = useState([]);
     const [companies, setCompanies] = useState([]);
-    const [loadingJobs, setLoadingJobs] = useState(true);
+    const [services, setServices] = useState([]);
+    const [professionals, setProfessionals] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % Math.max(featuredJobs.length, 1));
-        }, 4000);
-        return () => clearInterval(timer);
-    }, [featuredJobs.length]);
-
-    useEffect(() => {
-        const loadFeaturedJobs = async () => {
+        const loadLandingData = async () => {
             try {
-                const [jobs, comps] = await Promise.all([
+                const [jobs, comps, proServices, profs] = await Promise.all([
                     getOfertas(),
                     perfilesService.getCompanyProfiles(),
+                    catalogoService.getProfessionalServices(),
+                    perfilesService.getProfessionalProfiles(),
                 ]);
-                setFeaturedJobs(jobs.slice(0, 4));
+                setFeaturedJobs((jobs || []).slice(0, 6));
                 setCompanies(comps || []);
+                setServices((proServices || []).slice(0, 8));
+                setProfessionals(profs || []);
             } catch (err) {
-                console.error('Error cargando ofertas destacadas:', err);
+                console.error('Error cargando datos del landing:', err);
             } finally {
-                setLoadingJobs(false);
+                setLoading(false);
             }
         };
 
-        loadFeaturedJobs();
+        loadLandingData();
     }, []);
 
     const getCompanyName = (companyId) => {
         return companies.find((company) => company.id === companyId)?.companyName || `Empresa ${companyId ?? ''}`.trim();
     };
 
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % Math.max(featuredJobs.length, 1));
+    const getProviderName = (professionalId) => {
+        const prof = professionals.find((p) => p.id === professionalId);
+        if (prof?.firstName || prof?.lastName) return `${prof.firstName || ''} ${prof.lastName || ''}`.trim();
+        return `Profesional #${professionalId}`;
     };
 
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev === 0 ? Math.max(featuredJobs.length, 1) - 1 : prev - 1));
+    const handleSearch = (e) => {
+        e.preventDefault();
+        navigate(search.trim() ? `/servicios?q=${encodeURIComponent(search.trim())}` : '/servicios');
     };
 
     return (
         <div className="landing-container">
+            {/* HERO */}
             <section className="hero-section">
                 <div className="hero-content">
                     <span className="hero-badge">⚡ La plataforma B2B #1 de Talent Matching</span>
                     <h1 className="hero-title">
-                        Conectamos el <span className="highlight-text">Talento Tech</span> con las mejores Empresas B2B
+                        El talento que tu empresa necesita, <span className="highlight-text">al alcance de un búsqueda</span>
                     </h1>
                     <p className="hero-subtitle">
-                        Encuentra vacantes de alto impacto o contrata talento verificado en tiempo récord. Sin intermediarios innecesarios.
+                        Contratá servicios profesionales verificados o encontrá la oferta ideal para tu carrera.
+                        Dos flujos, una sola plataforma.
                     </p>
+
+                    <form className="hero-search" onSubmit={handleSearch} role="search">
+                        <span className="hero-search-icon">🔍</span>
+                        <input
+                            type="text"
+                            placeholder="¿Qué servicio profesional estás buscando?"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            aria-label="Buscar servicios"
+                        />
+                        <button type="submit" className="btn-b2b-primary hero-search-btn">
+                            Buscar
+                        </button>
+                    </form>
+
+                    <div className="hero-chips">
+                        {POPULAR_CATEGORIES.map((category) => (
+                            <Link key={category.name} to="/servicios" className="hero-chip">
+                                <span className="hero-chip-icon">{category.icon}</span>
+                                {category.name}
+                            </Link>
+                        ))}
+                    </div>
+
                     <div className="hero-cta-group">
-                        <Link to="/empleos" className="btn-b2b-primary btn-large">🔍 Explorar Ofertas</Link>
-                        <Link to="/register" className="btn-b2b-outline btn-large">🏢 Publicar Empleo</Link>
+                        <Link to="/servicios" className="btn-b2b-primary btn-large">🔍 Explorar servicios</Link>
+                        <Link to="/empleos" className="btn-b2b-outline btn-large">Explorar ofertas de empleo</Link>
                     </div>
 
                     <div className="hero-stats">
@@ -82,7 +130,7 @@ export const Landing = () => {
                         <div className="stat-divider" />
                         <div className="stat-item">
                             <h3>+12,000</h3>
-                            <p>Candidatos activos</p>
+                            <p>Profesionales activos</p>
                         </div>
                         <div className="stat-divider" />
                         <div className="stat-item">
@@ -93,78 +141,135 @@ export const Landing = () => {
                 </div>
             </section>
 
+            {/* BARRA DE CONFIANZA */}
             <section className="partners-section">
                 <p className="partners-title">Confían en nosotros las empresas líderes de la industria</p>
                 <div className="marquee">
                     <div className="marquee-content">
                         {PARTNERS.concat(PARTNERS).map((partner, index) => (
                             <div key={index} className="partner-item">
-                                <span className="partner-logo">⚡ {partner}</span>
+                                <span className="partner-logo">{partner}</span>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
+            {/* SERVICIOS POPULARES */}
+            <section className="popular-section">
+                <div className="section-header">
+                    <div>
+                        <h2>Servicios populares</h2>
+                        <p>Profesionales verificados listos para cotizarte hoy.</p>
+                    </div>
+                    <Link to="/servicios" className="btn-b2b-accent btn-growth">📈 Ver crecimiento</Link>
+                </div>
+
+                {loading ? (
+                    <div className="card-b2b">
+                        <p style={{ margin: 0 }}>Cargando servicios...</p>
+                    </div>
+                ) : services.length === 0 ? (
+                    <div className="card-b2b">
+                        <p style={{ margin: 0, color: 'var(--text-muted)' }}>No hay servicios publicados todavía.</p>
+                    </div>
+                ) : (
+                    <div className="gig-track">
+                        {services.map((service) => {
+                            const providerName = getProviderName(service.professional_id);
+                            return (
+                                <article key={service.id} className="gig-card gig-card--compact">
+                                    <div className="gig-cover">
+                                        <span className="badge-gold">Top</span>
+                                    </div>
+                                    <div className="gig-body">
+                                        <div className="gig-provider">
+                                            <span className={`gig-avatar ${service.professional_id % 2 ? 'gig-avatar--navy' : 'gig-avatar--gold'}`}>
+                                                {getInitials(providerName)}
+                                            </span>
+                                            <div style={{ minWidth: 0 }}>
+                                                <p className="gig-provider-name">{providerName}</p>
+                                                <span className="badge-verified">✓ Profesional verificado</span>
+                                            </div>
+                                        </div>
+                                        <h3 className="gig-title">{service.title}</h3>
+                                        <p className="gig-desc">{service.description || 'Sin descripción.'}</p>
+                                        <div className="gig-meta">
+                                            {service.rating ? (
+                                                <span className="gig-rating">★ {service.rating}</span>
+                                            ) : (
+                                                <span className="gig-rating gig-rating--gold">★ 4.9</span>
+                                            )}
+                                            <span className="gig-price">
+                                                <small>Desde</small>
+                                                {service.price != null ? `$${service.price}` : 'A convenir'}
+                                            </span>
+                                        </div>
+                                        <Link to="/servicios" className="btn-pill">Solicitar cotización</Link>
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+                )}
+            </section>
+
+            {/* OFERTAS DESTACADAS */}
             <section className="featured-section">
                 <div className="section-header">
                     <div>
-                        <h2>Ofertas Destacadas de la Semana</h2>
-                        <p>Oportunidades seleccionadas con salarios competitivos y flexibilidad laboral.</p>
+                        <h2>Ofertas destacadas de la semana</h2>
+                        <p>Oportunidades seleccionadas con presupuestos competitivos.</p>
                     </div>
-                    <div className="carousel-controls">
-                        <button onClick={prevSlide} className="carousel-btn" aria-label="Anterior">←</button>
-                        <button onClick={nextSlide} className="carousel-btn" aria-label="Siguiente">→</button>
-                    </div>
+                    <Link to="/empleos" className="btn-b2b-outline btn-more">Ver todas</Link>
                 </div>
 
-                <div className="carousel-wrapper">
-                    <div className="carousel-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-                        {loadingJobs ? (
-                            <div className="carousel-slide">
-                                <div className="job-card-featured">
-                                    <h3>Cargando ofertas...</h3>
-                                </div>
-                            </div>
-                        ) : featuredJobs.length > 0 ? (
-                            featuredJobs.map((job) => (
-                                <div key={job.id} className="carousel-slide">
-                                    <div className="job-card-featured">
-                                        <div className="job-card-header">
-                                            <span className="job-badge">{job.status || 'ACTIVO'}</span>
-                                            <span className="job-type">{job.deadline ? 'Hasta ' + new Date(job.deadline).toLocaleDateString() : 'Oferta abierta'}</span>
-                                        </div>
-                                        <h3>{job.title}</h3>
-                                        <p className="company-name">🏢 {getCompanyName(job.companyId)}</p>
-                                        <div className="job-details">
-                                            <span>📍 {job.categoryId ? `Categoría ${job.categoryId}` : 'Sin categoría'}</span>
-                                            <span className="salary-text">💰 {job.budget ? `$${job.budget}` : 'Sin presupuesto'}</span>
-                                        </div>
-                                        <Link to="/empleos" className="btn-b2b-outline btn-full">Ver Detalles</Link>
+                {loading ? (
+                    <div className="card-b2b">
+                        <p style={{ margin: 0 }}>Cargando ofertas...</p>
+                    </div>
+                ) : featuredJobs.length === 0 ? (
+                    <div className="card-b2b">
+                        <p style={{ margin: 0, color: 'var(--text-muted)' }}>No hay ofertas destacadas disponibles.</p>
+                    </div>
+                ) : (
+                    <div className="jobs-grid">
+                        {featuredJobs.map((job) => {
+                            const companyName = getCompanyName(job.companyId);
+                            return (
+                                <article key={job.id} className="gig-card">
+                                    <div className="gig-cover">
+                                        <span className="badge-gold">
+                                            {job.status || 'ACTIVO'}
+                                        </span>
                                     </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="carousel-slide">
-                                <div className="job-card-featured">
-                                    <h3>No hay ofertas destacadas disponibles.</h3>
-                                </div>
-                            </div>
-                        )}
+                                    <div className="gig-body">
+                                        <div className="gig-provider">
+                                            <span className="gig-avatar gig-avatar--navy">{getInitials(companyName)}</span>
+                                            <div style={{ minWidth: 0 }}>
+                                                <p className="gig-provider-name">{companyName}</p>
+                                                <span className="badge-verified">✓ Empresa verificada</span>
+                                            </div>
+                                        </div>
+                                        <h3 className="gig-title">{job.title || 'Oferta sin título'}</h3>
+                                        <p className="gig-desc">{job.description || 'Sin descripción.'}</p>
+                                        <div className="gig-meta">
+                                            <span className="badge-neutral">📍 Categoría {job.categoryId ?? '—'}</span>
+                                            <span className="gig-price">
+                                                <small>Salario</small>
+                                                {job.budget ? `$${job.budget}` : 'A convenir'}
+                                            </span>
+                                        </div>
+                                        <Link to="/empleos" className="btn-pill">Aplicar ahora</Link>
+                                    </div>
+                                </article>
+                            );
+                        })}
                     </div>
-                </div>
-
-                <div className="carousel-dots">
-                    {featuredJobs.length > 0 ? featuredJobs.map((_, index) => (
-                        <button
-                            key={index}
-                            className={`dot ${currentSlide === index ? 'active' : ''}`}
-                            onClick={() => setCurrentSlide(index)}
-                        />
-                    )) : null}
-                </div>
+                )}
             </section>
 
+            {/* FEATURES */}
             <section className="features-grid-section">
                 <h2>Diseñado para agilizar la contratación B2B</h2>
                 <div className="features-grid">
@@ -183,6 +288,15 @@ export const Landing = () => {
                         <h3>Proceso 3x más rápido</h3>
                         <p>Reduce el tiempo medio de contratación de 45 días a solo 14 días gracias a la postulación directa.</p>
                     </div>
+                </div>
+            </section>
+
+            {/* CTA DE CRECIMIENTO */}
+            <section className="cta-band">
+                <div className="cta-band-inner">
+                    <h2>¿Querés hacer crecer tu organización?</h2>
+                    <p>Publicá servicios o abrí ofertas: el talento adecuado te está esperando.</p>
+                    <Link to="/register" className="btn-b2b-accent btn-large">🚀 Ver crecimiento</Link>
                 </div>
             </section>
         </div>

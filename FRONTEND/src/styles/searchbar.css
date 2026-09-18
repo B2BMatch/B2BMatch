@@ -1,11 +1,19 @@
 .searchbar-container {
   display: flex;
-  gap: 12px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  padding: 8px 16px;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  padding: 10px 16px;
   border-radius: 12px;
   width: 100%;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchbar-container:focus-within {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgba(255, 111, 77, 0.15);
 }
 
 .searchbar-input {
@@ -14,5 +22,11 @@
   outline: none;
   color: var(--text-main);
   width: 100%;
-  font-size: 1rem;
+  font-size: 0.98rem;
+  font-family: var(--font-body);
+}
+
+.searchbar-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
 }

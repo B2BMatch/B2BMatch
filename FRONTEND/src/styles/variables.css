@@ -1,50 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
 /* ==========================================================================
-   PALETA DE COLORES Y VARIABLES CSS (MODO OSCURO POR DEFECTO)
+   B2BMATCH — DESIGN TOKENS
+   Identidad visual: Navy #16233F · Coral #FF6F4D · Oro #D9A441 · Crema #F7F3EC
+   Tipografía: Sora (titulares) / Work Sans (cuerpo)
    ========================================================================== */
+
 :root {
-  /* Fondo principal y contenedores (Modo Oscuro) */
-  --bg-main: #063561;          /* TEAL BLUE */
-  --bg-card: #0A1C3A;          /* OXFORD BLUE */
-  --bg-navbar: rgba(10, 28, 58, 0.9); /* OXFORD BLUE con opacidad */
-  --bg-modal: #0E2A13;         /* BUSH */
-  --bg-input: rgba(192, 218, 237, 0.1); /* SPINDLE translúcido */
+  /* Fondo y superficies */
+  --bg-main: #F7F3EC;            /* Crema */
+  --bg-card: #FFFFFF;            /* Blanco tarjetas */
+  --bg-navbar: rgba(255, 255, 255, 0.92);
+  --bg-modal: #FFFFFF;
+  --bg-input: #F7F3EC;
+  --bg-soft: #F1EBE0;            /* Crestas sutiles sobre crema */
+  --bg-footer: #16233F;          /* Navy */
 
   /* Textos */
-  --text-main: #FFF8E7;        /* COSMIC LATTE */
-  --text-muted: #C0DAED;       /* SPINDLE */
-  --text-accent: #9DC7E4;      /* REGENT ST BLUE */
+  --text-main: #16233F;          /* Navy */
+  --text-muted: #5B6472;
+  --text-accent: #FF6F4D;        /* Coral */
+  --texto-claro: #16233F;
 
-  /* Detalles y Bordes */
-  --border-color: rgba(157, 199, 228, 0.25);
-  --red-glow: #930500;         /* SANGRIA */
-  --regent-st-blue: #9DC7E4;   /* REGENT ST BLUE */
-  --hippie-blue: #5894BA;     /* HIPPIE BLUE */
-  --texto-claro: #fff;     /* TETO CLARO*/
-  --cornflower: #95BBEA;      /* CORN FLOWER */
-  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+  /* Marca */
+  --navy: #16233F;
+  --coral: #FF6F4D;
+  --gold: #D9A441;
+  --cream: #F7F3EC;
+
+  /* Detalles y bordes */
+  --border-color: #ECE7DC;
+  --red-glow: #FF6F4D;           /* Alias legacy → coral */
+  --regent-st-blue: #FF6F4D;     /* Alias legacy para hovers → coral */
+  --hippie-blue: #5B6472;
+  --cornflower: #D9A441;
+  --shadow-card: 0 4px 14px rgba(22, 35, 63, 0.08);
+  --shadow-card-hover: 0 12px 28px rgba(22, 35, 63, 0.14);
+
+  /* Tipografía */
+  --font-display: 'Sora', 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Work Sans', 'Plus Jakarta Sans', sans-serif;
 }
 
-/* ==========================================================================
-   PALETA PARA MODO CLARO (LIGHT MODE)
-   ========================================================================== */
-[data-theme="light"] {
-  --bg-main: #FFF8E7;          /* COSMIC LATTE */
-  --bg-card: #F9FBE7;          /* IVORY */
-  --bg-navbar: rgba(255, 248, 231, 0.92); 
-  --bg-modal: #FFF8E7;         /* COSMIC LATTE */
-  --bg-input: #C0DAED;         /* SPINDLE */
+/* Modo oscuro: variante navy de la misma identidad */
+[data-theme="dark"] {
+  --bg-main: #0F1A2E;
+  --bg-card: #16233F;
+  --bg-navbar: rgba(15, 26, 46, 0.92);
+  --bg-modal: #1B2A47;
+  --bg-input: rgba(255, 255, 255, 0.06);
+  --bg-soft: #1B2A47;
+  --bg-footer: #0B1424;
 
-  --text-main: #0A1C3A;        /* OXFORD BLUE */
-  --text-muted: #063561;       /* TEAL BLUE */
-  --text-accent: #5894BA;      /* HIPPIE BLUE */
+  --text-main: #F7F3EC;
+  --text-muted: #AEB6C5;
+  --text-accent: #FF8A6E;
+  --texto-claro: #F7F3EC;
 
-  --border-color: rgba(6, 53, 97, 0.2);
-  --red-glow: #930500;         /* SANGRIA */
-  --regent-st-blue: #063561;   /* TEAL BLUE para acentos oscuros */
-  --hippie-blue: #5894BA;     /* HIPPIE BLUE */
-  --texto-claro: #0A1C3A;     /* TEXTO OSCURO*/
-  --cornflower: #95BBEA;      /* CORN FLOWER */
-  --shadow-card: 0 10px 25px rgba(6, 53, 97, 0.08);
+  --border-color: rgba(247, 243, 236, 0.14);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 16px 36px rgba(0, 0, 0, 0.5);
 }

@@ -1,15 +1,16 @@
+/* Tarjeta base */
 .card-b2b {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 24px;
   box-shadow: var(--shadow-card);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .card-b2b:hover {
-  border-color: var(--regent-st-blue);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 111, 77, 0.45);
+  box-shadow: var(--shadow-card-hover);
 }
 
 /* Variante para tarjetas interactivas (clic / enlace) */
@@ -19,5 +20,191 @@
 
 .card-b2b-lift:hover {
   transform: translateY(-4px);
-  border-color: var(--regent-st-blue);
+  border-color: rgba(255, 111, 77, 0.45);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* =====================================================
+   Tarjeta tipo "gig" (servicios y ofertas)
+   ===================================================== */
+.gig-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.gig-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 111, 77, 0.4);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Franja superior con degradado de marca */
+.gig-cover {
+  height: 108px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 111, 77, 0.22), transparent 55%),
+    radial-gradient(circle at 85% 10%, rgba(217, 164, 65, 0.28), transparent 45%),
+    linear-gradient(135deg, #16233F 0%, #27375C 100%);
+}
+
+/* Cuerpo de la tarjeta */
+.gig-body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+/* Avatar circular con iniciales */
+.gig-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: #FFFFFF;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.gig-avatar--navy { background: var(--navy); }
+.gig-avatar--gold { background: var(--gold); color: var(--navy); }
+.gig-avatar--coral { background: var(--coral); }
+.gig-avatar--sm { width: 36px; height: 36px; font-size: 0.85rem; }
+.gig-avatar--lg { width: 56px; height: 56px; font-size: 1.25rem; }
+
+/* Fila proveedor: avatar + nombre + badge */
+.gig-provider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gig-provider-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text-main);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.gig-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text-main);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.gig-desc {
+  color: var(--text-muted);
+  font-size: 0.87rem;
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Rating con estrellas en oro */
+.gig-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.gig-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gig-price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.gig-price small {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Pill de acción coral */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--coral);
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-pill:hover {
+  background: #F05A36;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.btn-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-pill--outline {
+  background: transparent;
+  color: var(--navy);
+  border: 1.5px solid var(--border-color);
+}
+
+.btn-pill--outline:hover {
+  background: var(--bg-soft);
+  color: var(--navy);
+  border-color: rgba(255, 111, 77, 0.4);
+}
+
+[data-theme="dark"] .btn-pill--outline {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .btn-pill--outline:hover {
+  color: var(--text-main);
+  background: rgba(247, 243, 236, 0.08);
 }

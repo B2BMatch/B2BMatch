@@ -26,7 +26,7 @@ import UserAdmin from './pages/Admin/User';
 import logoB2B from './assets/img/logo.png'; 
 
 export function App() {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [modalState, setModalState] = useState({ isOpen: false, type: null });
   
   // Obtenemos el usuario actual del AuthContext

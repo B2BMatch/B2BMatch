@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(22, 35, 63, 0.5);
   backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
@@ -20,7 +20,7 @@
   border-radius: 20px;
   width: 90%;
   max-width: 460px;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-card-hover);
   animation: modal-in 0.2s ease-out;
 }
 
@@ -31,7 +31,7 @@
   left: 24px;
   right: 24px;
   height: 3px;
-  background: linear-gradient(90deg, var(--red-glow), var(--text-accent));
+  background: linear-gradient(90deg, var(--coral), var(--gold));
   border-radius: 0 0 6px 6px;
 }
 
@@ -50,7 +50,7 @@
   height: 32px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
-  background: var(--bg-input);
+  background: var(--bg-soft);
   color: var(--text-main);
   cursor: pointer;
   display: flex;
@@ -62,7 +62,7 @@
 }
 
 .modal-close:hover {
-  border-color: var(--red-glow);
+  border-color: var(--coral);
   transform: rotate(90deg);
 }
 

@@ -4,23 +4,88 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+html,
 body {
   background-color: var(--bg-main);
   color: var(--text-main);
   min-height: 100vh;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--text-main);
+}
+
+a {
+  color: var(--text-accent);
+}
+
+/* Badge genérico de estado (legacy) — ahora coral */
 .badge-tag {
-  background: rgba(147, 5, 0, 0.15);
-  color: var(--texto-claro);
-  border: 1px solid var(--red-glow);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 111, 77, 0.12);
+  color: var(--coral);
+  border: 1px solid rgba(255, 111, 77, 0.28);
   padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
   font-weight: 700;
-  display: inline-block;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Badge de verificación en coral */
+.badge-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 111, 77, 0.12);
+  color: var(--coral);
+  border: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Badge de crecimiento/éxito en oro */
+.badge-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(217, 164, 65, 0.16);
+  color: var(--gold);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Badge neutral de estado */
+.badge-neutral {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-soft);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
