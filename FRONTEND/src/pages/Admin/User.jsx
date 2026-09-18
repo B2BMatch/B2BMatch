@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import usersService from '../../services/usersService';
+import '../../styles/admin.css';
 
 export const User = () => {
   const [usersList, setUsersList] = useState([]);
@@ -52,41 +53,48 @@ export const User = () => {
   if (loading) return <p style={{ padding: '20px' }}>Cargando usuarios...</p>;
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Administrar Usuarios</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Gestión de cuentas de postulantes y perfiles profesionales</p>
+    <div className="admin-page">
+      <header className="admin-head">
+        <span className="badge-gold">Admin · Usuarios</span>
+        <h1>Administrar Usuarios</h1>
+        <p>Gestión de cuentas de postulantes y perfiles profesionales</p>
+      </header>
 
       {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
 
-      <div className="card-b2b" style={{ padding: '0', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
-              <th style={{ padding: '16px 20px' }}>ID</th>
-              <th style={{ padding: '16px 20px' }}>Correo</th>
-              <th style={{ padding: '16px 20px' }}>Rol</th>
-              <th style={{ padding: '16px 20px' }}>Estado</th>
-              <th style={{ padding: '16px 20px', textAlign: 'right' }}>Acciones</th>
+            <tr>
+              <th>ID</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th className="cell-actions">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {usersList.map((usr) => {
               const isSuspended = usr.status === 'SUSPENDED';
               return (
-                <tr key={usr.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '16px 20px', fontWeight: '600' }}>{usr.id}</td>
-                  <td style={{ padding: '16px 20px', color: 'var(--text-muted)' }}>{usr.email}</td>
-                  <td style={{ padding: '16px 20px' }}>{usr.roleName || usr.role}</td>
-                  <td style={{ padding: '16px 20px' }}>
-                    <span className="badge-tag">{usr.status}</span>
+                <tr key={usr.id}>
+                  <td className="cell-strong">{usr.id}</td>
+                  <td className="cell-muted">{usr.email}</td>
+                  <td>
+                    <span className="badge-status badge-status--neutral">{usr.roleName || usr.role}</span>
                   </td>
-                  <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                  <td>
+                    <span className={`badge-status ${isSuspended ? 'badge-status--suspended' : 'badge-status--active'}`}>
+                      {usr.status}
+                    </span>
+                  </td>
+                  <td className="cell-actions">
                     {isSuspended ? (
-                      <button className="btn-b2b-outline" style={{ padding: '4px 12px', fontSize: '0.8rem' }} onClick={() => handleReactivate(usr.id)}>
+                      <button className="btn-b2b-outline" onClick={() => handleReactivate(usr.id)}>
                         Reactivar
                       </button>
                     ) : (
-                      <button className="btn-b2b-outline" style={{ padding: '4px 12px', fontSize: '0.8rem', color: '#EF4444', borderColor: '#EF4444' }} onClick={() => handleSuspend(usr.id)}>
+                      <button className="btn-b2b-outline btn-danger" onClick={() => handleSuspend(usr.id)}>
                         Suspender
                       </button>
                     )}

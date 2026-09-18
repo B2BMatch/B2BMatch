@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import perfilesService from '../../services/perfilesService';
 import usersService from '../../services/usersService';
+import '../../styles/admin.css';
+import '../../styles/cards.css';
+
+const getInitials = (name = '') => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase() || 'E';
+};
 
 export const Companies = () => {
   const [companiesList, setCompaniesList] = useState([]);
@@ -39,42 +48,53 @@ export const Companies = () => {
   if (loading) return <p style={{ padding: '20px' }}>Cargando empresas...</p>;
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Administrar Empresas</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Listado de empresas registradas y su estado de verificación</p>
+    <div className="admin-page">
+      <header className="admin-head">
+        <span className="badge-gold">Admin · Empresas</span>
+        <h1>Administrar Empresas</h1>
+        <p>Listado de empresas registradas y su estado de verificación</p>
+      </header>
 
       {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
 
-      <div className="card-b2b" style={{ padding: '0', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
-              <th style={{ padding: '16px 20px' }}>Empresa</th>
-              <th style={{ padding: '16px 20px' }}>Correo</th>
-              <th style={{ padding: '16px 20px' }}>Estado</th>
-              <th style={{ padding: '16px 20px' }}>Registro</th>
-              <th style={{ padding: '16px 20px', textAlign: 'right' }}>Acciones</th>
+            <tr>
+              <th>Empresa</th>
+              <th>Correo</th>
+              <th>Estado</th>
+              <th>Registro</th>
+              <th className="cell-actions">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {companiesList.map((comp) => (
-              <tr key={comp.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '16px 20px', fontWeight: '600' }}>{comp.companyName || comp.name}</td>
-                <td style={{ padding: '16px 20px', color: 'var(--text-muted)' }}>{comp.email}</td>
-                <td style={{ padding: '16px 20px' }}>
-                  <span className="badge-tag">Verificada</span>
-                </td>
-                <td style={{ padding: '16px 20px', color: 'var(--text-muted)' }}>{comp.createdAt ? new Date(comp.createdAt).toLocaleDateString() : ''}</td>
-                <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                  <button className="btn-b2b-outline" style={{ padding: '4px 12px', fontSize: '0.8rem', marginRight: '8px' }} onClick={() => handleStatusChange(comp, 'ACTIVE', 'Aprobar')}>
-                    Aprobar
-                  </button>
-                  <button className="btn-b2b-outline" style={{ padding: '4px 12px', fontSize: '0.8rem', color: '#EF4444', borderColor: '#EF4444' }} onClick={() => handleStatusChange(comp, 'SUSPENDED', 'Bloquear')}>
-                    Bloquear
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {companiesList.map((comp) => {
+              const companyName = comp.companyName || comp.name || '';
+              return (
+                <tr key={comp.id}>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className="gig-avatar gig-avatar--sm gig-avatar--navy">{getInitials(companyName)}</span>
+                      <span className="cell-strong">{companyName}</span>
+                    </div>
+                  </td>
+                  <td className="cell-muted">{comp.email}</td>
+                  <td>
+                    <span className="badge-status badge-status--active">Verificada</span>
+                  </td>
+                  <td className="cell-muted">{comp.createdAt ? new Date(comp.createdAt).toLocaleDateString() : ''}</td>
+                  <td className="cell-actions">
+                    <button className="btn-b2b-outline" onClick={() => handleStatusChange(comp, 'ACTIVE', 'Aprobar')}>
+                      Aprobar
+                    </button>
+                    <button className="btn-b2b-outline btn-danger" onClick={() => handleStatusChange(comp, 'SUSPENDED', 'Bloquear')}>
+                      Bloquear
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

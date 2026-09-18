@@ -4,6 +4,7 @@ import usersService from '../../services/usersService';
 import perfilesService from '../../services/perfilesService';
 import { getOfertas } from '../../services/ofertasService';
 import applicationsService from '../../services/applicationsService';
+import '../../styles/admin.css';
 
 export const AdminDashboard = () => {
   const [stats, setStats] = useState([]);
@@ -21,10 +22,10 @@ export const AdminDashboard = () => {
         ]);
 
         setStats([
-          { label: 'Usuarios Totales', value: users.length, change: '+12% este mes' },
-          { label: 'Empresas Registradas', value: companies.length, change: '+5 este mes' },
-          { label: 'Ofertas Activas', value: offers.length, change: '+18%' },
-          { label: 'Postulaciones Totales', value: applications.length, change: '+25%' }
+          { label: 'Usuarios Totales', value: users.length, change: '+12% este mes', accent: 'coral' },
+          { label: 'Empresas Registradas', value: companies.length, change: '+5 este mes', accent: 'gold' },
+          { label: 'Ofertas Activas', value: offers.length, change: '+18%', accent: 'navy' },
+          { label: 'Postulaciones Totales', value: applications.length, change: '+25%', accent: 'gold' }
         ]);
       } catch (err) {
         console.error('Error cargando métricas de administrador', err);
@@ -46,40 +47,46 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Panel de Administración</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Métricas y gestión global del ecosistema B2B</p>
+    <div className="admin-page">
+      <header className="admin-head">
+        <span className="badge-gold">Consola admin</span>
+        <h1>Panel de Administración</h1>
+        <p>Métricas y gestión global del ecosistema B2B</p>
+      </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+      <div className="stat-grid">
         {stats.map((stat, idx) => (
-          <div key={idx} className="card-b2b" style={{ padding: '20px' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{stat.label}</span>
-            <h2 style={{ fontSize: '2rem', margin: '8px 0 4px', fontWeight: '700' }}>{stat.value}</h2>
-            <span style={{ color: 'var(--text-accent)', fontSize: '0.8rem' }}>{stat.change}</span>
+          <div key={idx} className={`stat-card stat-card--${stat.accent}`}>
+            <span className="stat-label">{stat.label}</span>
+            <div className="stat-value">{stat.value}</div>
+            <span className="stat-change">{stat.change}</span>
           </div>
         ))}
       </div>
 
-      <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Módulos de Gestión</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+      <h2 style={{ fontSize: '1.25rem', margin: '0 0 16px', color: 'var(--text-main)' }}>Módulos de Gestión</h2>
+      <div className="module-grid">
         <Link to="/admin/empresas" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="card-b2b card-b2b-lift" style={{ padding: '24px', cursor: 'pointer' }}>
-            <h3 style={{ marginBottom: '8px' }}>🏢 Gestión de Empresas</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Aprobar solicitudes, verificar y suspender cuentas de empresas.</p>
+          <div className="module-card">
+            <h3>🏢 Gestión de Empresas</h3>
+            <p>Aprobar solicitudes, verificar y suspender cuentas de empresas.</p>
+            <span className="module-cta">Ir al módulo →</span>
           </div>
         </Link>
 
         <Link to="/admin/ofertas" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="card-b2b card-b2b-lift" style={{ padding: '24px', cursor: 'pointer' }}>
-            <h3 style={{ marginBottom: '8px' }}>💼 Gestión de Ofertas</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Supervisar convocatorias activas, moderación y reportes.</p>
+          <div className="module-card">
+            <h3>💼 Gestión de Ofertas</h3>
+            <p>Supervisar convocatorias activas, moderación y reportes.</p>
+            <span className="module-cta">Ir al módulo →</span>
           </div>
         </Link>
 
         <Link to="/admin/usuarios" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="card-b2b card-b2b-lift" style={{ padding: '24px', cursor: 'pointer' }}>
-            <h3 style={{ marginBottom: '8px' }}>👨‍💻 Gestión de Usuarios</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Administración de candidatos, roles y credenciales.</p>
+          <div className="module-card">
+            <h3>👨‍💻 Gestión de Usuarios</h3>
+            <p>Administración de candidatos, roles y credenciales.</p>
+            <span className="module-cta">Ir al módulo →</span>
           </div>
         </Link>
       </div>
