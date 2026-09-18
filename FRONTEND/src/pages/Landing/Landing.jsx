@@ -195,11 +195,7 @@ export const Landing = () => {
                                         <h3 className="gig-title">{service.title}</h3>
                                         <p className="gig-desc">{service.description || 'Sin descripción.'}</p>
                                         <div className="gig-meta">
-                                            {service.rating ? (
-                                                <span className="gig-rating">★ {service.rating}</span>
-                                            ) : (
-                                                <span className="gig-rating gig-rating--gold">★ 4.9</span>
-                                            )}
+                                            <span className="badge-gold">Top</span>
                                             <span className="gig-price">
                                                 <small>Desde</small>
                                                 {service.price != null ? `$${service.price}` : 'A convenir'}

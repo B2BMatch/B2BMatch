@@ -1,0 +1,154 @@
+/* =====================================================
+   Páginas de listado / catálogo (Servicios y Empleos)
+   ===================================================== */
+
+/* Encabezado de página */
+.page-head {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 44px 20px 8px;
+}
+
+.page-head h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.page-head p {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  max-width: 640px;
+}
+
+/* Layout con sidebar + resultados */
+.catalog-layout {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px 72px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.catalog-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 100px;
+}
+
+.catalog-main {
+  min-width: 0;
+}
+
+/* Grid de resultados (tarjetas gig) */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.result-grid .gig-card {
+  height: 100%;
+}
+
+/* Caja de cotización dentro de la tarjeta */
+.quote-box {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 14px;
+}
+
+/* Estado vacío */
+.empty-state {
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: 16px;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state strong {
+  color: var(--text-main);
+  font-family: var(--font-display);
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Tarjeta contenedora genérica (secciones dentro de la página) */
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  margin-top: 28px;
+}
+
+.section-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+
+.section-card .section-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 18px;
+}
+
+/* Lista vertical de ítems (cotizaciones, postulaciones) */
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-row {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-soft);
+  padding: 14px 16px;
+}
+
+.item-row-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.item-row p {
+  margin: 4px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.item-row small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .catalog-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-sidebar {
+    position: static;
+  }
+}

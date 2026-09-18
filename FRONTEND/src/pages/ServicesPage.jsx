@@ -1,12 +1,20 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import catalogoService from '../services/catalogoService';
 import perfilesService from '../services/perfilesService';
 import quotationsService from '../services/quotationsService';
 import SearchBar from '../components/SearchBar';
-import Sidebar from '../components/Sidebar';
 import SidebarFilters from '../components/SidebarFilters';
 import Button from '../components/Button';
+import '../styles/catalog.css';
+
+const getInitials = (name = '') => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase() || 'B2B';
+};
 
 const ServicesPage = () => {
   const { currentUser } = useAuth();
@@ -112,107 +120,113 @@ const ServicesPage = () => {
   if (error) return <p style={{ padding: '20px', color: 'red' }}>{error}</p>;
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Servicios Profesionales</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
-        Explora servicios ofrecidos por profesionales y solicita una cotización
-      </p>
+    <div>
+      <header className="page-head">
+        <span className="badge-gold">Catálogo de servicios</span>
+        <h1>Servicios Profesionales</h1>
+        <p>Explorá servicios ofrecidos por profesionales verificados y solicitá una cotización.</p>
+      </header>
 
-      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <Sidebar>
+      <div className="catalog-layout">
+        <aside className="catalog-sidebar">
+          <SearchBar placeholder="Buscar por título o descripción..." value={query} onChange={(e) => setQuery(e.target.value)} />
           <SidebarFilters categories={categories} value={categoryFilter} onChange={setCategoryFilter} />
-        </Sidebar>
+        </aside>
 
-        <div style={{ flex: 1, minWidth: '280px' }}>
-          <div style={{ marginBottom: '20px' }}>
-            <SearchBar placeholder="Buscar por título o descripción..." value={query} onChange={(e) => setQuery(e.target.value)} />
-          </div>
+        <div className="catalog-main">
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>
+            {filteredServices.length} servicio{filteredServices.length === 1 ? '' : 's'} disponible{filteredServices.length === 1 ? '' : 's'}
+          </p>
 
           {filteredServices.length === 0 ? (
-            <div className="card-b2b" style={{ padding: '24px' }}>
-              <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-                No hay servicios que coincidan con tu búsqueda.
-              </p>
+            <div className="empty-state">
+              <strong>Sin resultados</strong>
+              <span>No hay servicios que coincidan con tu búsqueda o filtro de categoría.</span>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              {filteredServices.map((service) => (
-                <div key={service.id} className="card-b2b" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <span className="badge-tag" style={{ alignSelf: 'flex-start' }}>
-                    {getCategoryName(service.category_id)}
-                  </span>
-                  <h3 style={{ fontSize: '1.15rem', margin: 0 }}>{service.title}</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
-                    Ofrecido por {getProfessionalName(service.professional_id)}
-                  </p>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, flex: 1 }}>
-                    {service.description || 'Sin descripción.'}
-                  </p>
-                  <p style={{ fontWeight: '700', margin: 0, fontSize: '1.05rem' }}>
-                    {service.price != null ? `$${service.price}` : 'Precio a convenir'}
-                  </p>
-
-                  {currentUser && (
-                    <div style={{ marginTop: '6px' }}>
-                      <textarea
-                        rows="2"
-                        placeholder="Describe qué necesitas..."
-                        value={quotationMessage[service.id] || ''}
-                        onChange={(e) => setQuotationMessage((prev) => ({ ...prev, [service.id]: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          boxSizing: 'border-box',
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          background: 'var(--bg-input)',
-                          color: 'var(--text-main)',
-                          border: '1px solid var(--border-color)',
-                          resize: 'vertical',
-                          outline: 'none',
-                        }}
-                      />
-                      <Button
-                        variant="primary"
-                        disabled={sendingServiceId === service.id}
-                        onClick={() => handleRequestQuotation(service.id)}
-                        style={{ marginTop: '8px', width: '100%' }}
-                      >
-                        {sendingServiceId === service.id ? 'Enviando...' : 'Solicitar Cotización'}
-                      </Button>
+            <div className="result-grid">
+              {filteredServices.map((service) => {
+                const providerName = getProfessionalName(service.professional_id);
+                return (
+                  <article key={service.id} className="gig-card">
+                    <div className="gig-cover">
+                      <span className="badge-gold">{getCategoryName(service.category_id)}</span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    <div className="gig-body">
+                      <div className="gig-provider">
+                        <span className={`gig-avatar gig-avatar--sm ${service.professional_id % 2 ? 'gig-avatar--navy' : 'gig-avatar--gold'}`}>
+                          {getInitials(providerName)}
+                        </span>
+                        <div style={{ minWidth: 0 }}>
+                          <p className="gig-provider-name">{providerName}</p>
+                          <span className="badge-verified">✓ Profesional verificado</span>
+                        </div>
+                      </div>
+                      <h3 className="gig-title">{service.title}</h3>
+                      <p className="gig-desc">{service.description || 'Sin descripción.'}</p>
+                      <div className="gig-meta">
+                        <span className="badge-gold">Top</span>
+                        <span className="gig-price">
+                          <small>Desde</small>
+                          {service.price != null ? `$${service.price}` : 'A convenir'}
+                        </span>
+                      </div>
+
+                      {currentUser ? (
+                        <div className="quote-box">
+                          <textarea
+                            className="form-textarea"
+                            rows="2"
+                            placeholder="Describe qué necesitas..."
+                            value={quotationMessage[service.id] || ''}
+                            onChange={(e) => setQuotationMessage((prev) => ({ ...prev, [service.id]: e.target.value }))}
+                          />
+                          <Button
+                            variant="primary"
+                            disabled={sendingServiceId === service.id}
+                            onClick={() => handleRequestQuotation(service.id)}
+                            style={{ marginTop: '8px', width: '100%' }}
+                          >
+                            {sendingServiceId === service.id ? 'Enviando...' : 'Solicitar Cotización'}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Link to="/login" className="btn-pill btn-pill--outline">
+                          Iniciar sesión para cotizar
+                        </Link>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
 
           {currentUser && (
-            <div className="card-b2b" style={{ padding: '24px', marginTop: '28px' }}>
-              <h2 style={{ fontSize: '1.3rem', marginBottom: '6px' }}>Mis Cotizaciones</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>
-                Solicitudes de cotización que enviaste
-              </p>
+            <section className="section-card">
+              <h2>Mis Cotizaciones</h2>
+              <p className="section-sub">Solicitudes de cotización que enviaste</p>
               {myQuotations.length === 0 ? (
                 <p style={{ margin: 0, color: 'var(--text-muted)' }}>
                   Todavía no solicitaste ninguna cotización.
                 </p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div className="item-list">
                   {myQuotations.map((quotation) => (
-                    <div key={quotation.id} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', padding: '14px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '4px' }}>
-                        <strong>{getServiceTitle(quotation.serviceId)}</strong>
-                        <span className="badge-tag">{quotation.status || 'PENDING'}</span>
+                    <div key={quotation.id} className="item-row">
+                      <div className="item-row-header">
+                        <span>{getServiceTitle(quotation.serviceId)}</span>
+                        <span className="badge-gold">{quotation.status || 'PENDING'}</span>
                       </div>
-                      <p style={{ margin: '4px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{quotation.message}</p>
-                      <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                      <p>{quotation.message}</p>
+                      <small>
                         Enviada el {quotation.createdAt ? new Date(quotation.createdAt).toLocaleDateString() : 'sin fecha'}
-                      </p>
+                      </small>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </section>
           )}
         </div>
       </div>
