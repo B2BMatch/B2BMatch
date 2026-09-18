@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getOfertas } from '../services/ofertasService';
 import applicationsService from '../services/applicationsService';
 import catalogoService from '../services/catalogoService';
 import perfilesService from '../services/perfilesService';
+import '../styles/catalog.css';
+
+const getInitials = (name = '') => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase() || 'B2B';
+};
 
 const OfertasPage = () => {
   const { currentUser } = useAuth();
@@ -81,28 +90,72 @@ const OfertasPage = () => {
   if (error) return <p style={{ padding: '20px', color: 'red' }}>{error}</p>;
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '24px' }}>Ofertas de Empleo</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-        {ofertas.map((oferta) => (
-          <div key={oferta.id} className="card-b2b" style={{ padding: '24px' }}>
-            <h3>{oferta.title || 'Oferta sin título'}</h3>
-            <p style={{ color: 'var(--text-muted)' }}>{getCompanyName(oferta.companyId)}</p>
-            <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>{oferta.description}</p>
-            <p style={{ marginTop: '12px', fontWeight: '600' }}>{oferta.budget ? `$${oferta.budget}` : 'Precio no definido'}</p>
-            <span className="badge-tag" style={{ display: 'inline-block', marginBottom: '12px' }}>{getCategoryName(oferta.categoryId)}</span>
-            <div>
-              <button
-                className="btn-b2b-primary"
-                onClick={() => handleApply(oferta)}
-                disabled={applyingOfferId === oferta.id}
-                style={{ opacity: applyingOfferId === oferta.id ? 0.6 : 1 }}
-              >
-                {applyingOfferId === oferta.id ? 'Postulando...' : 'Postular'}
-              </button>
-            </div>
+    <div>
+      <header className="page-head">
+        <span className="badge-gold">Mercado laboral</span>
+        <h1>Ofertas de Empleo</h1>
+        <p>Encontrá oportunidades de empresas verificadas y postulate de forma directa.</p>
+      </header>
+
+      <div className="list-page">
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>
+          {ofertas.length} oferta{ofertas.length === 1 ? '' : 's'} disponible{ofertas.length === 1 ? '' : 's'}
+        </p>
+
+        {ofertas.length === 0 ? (
+          <div className="empty-state">
+            <strong>Sin ofertas publicadas</strong>
+            <span>Volvé más tarde: las empresas están cargando nuevas vacantes.</span>
           </div>
-        ))}
+        ) : (
+          <div className="result-grid">
+            {ofertas.map((oferta) => {
+              const companyName = getCompanyName(oferta.companyId);
+              return (
+                <article key={oferta.id} className="gig-card">
+                  <div className="gig-cover">
+                    <span className="badge-gold">{oferta.status || 'ACTIVO'}</span>
+                  </div>
+                  <div className="gig-body">
+                    <div className="gig-provider">
+                      <span className="gig-avatar gig-avatar--sm gig-avatar--navy">{getInitials(companyName)}</span>
+                      <div style={{ minWidth: 0 }}>
+                        <p className="gig-provider-name">{companyName}</p>
+                        <span className="badge-verified">✓ Empresa verificada</span>
+                      </div>
+                    </div>
+                    <h3 className="gig-title">{oferta.title || 'Oferta sin título'}</h3>
+                    <p className="gig-desc">{oferta.description}</p>
+                    <div className="gig-meta">
+                      <span className="badge-neutral">{getCategoryName(oferta.categoryId)}</span>
+                      <span className="gig-price">
+                        <small>Presupuesto</small>
+                        {oferta.budget ? `$${oferta.budget}` : 'A convenir'}
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                      {oferta.deadline ? `Cierra el ${new Date(oferta.deadline).toLocaleDateString()}` : 'Oferta abierta'}
+                    </p>
+                    {currentUser ? (
+                      <button
+                        className="btn-pill"
+                        onClick={() => handleApply(oferta)}
+                        disabled={applyingOfferId === oferta.id}
+                        style={{ alignSelf: 'flex-start', marginTop: '4px' }}
+                      >
+                        {applyingOfferId === oferta.id ? 'Postulando...' : 'Aplicar'}
+                      </button>
+                    ) : (
+                      <Link to="/login" className="btn-pill btn-pill--outline" style={{ alignSelf: 'flex-start', marginTop: '4px' }}>
+                        Iniciar sesión para postular
+                      </Link>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
