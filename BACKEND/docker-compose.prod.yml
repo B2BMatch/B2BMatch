@@ -1,0 +1,70 @@
+# Entorno de PRODUCCION.
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Importante: NO incluye docker-compose.override.yml, asi que ningun servicio
+# publica puertos al host. Lo unico expuesto a internet es Caddy (80/443).
+#
+# Tampoco define FLYWAY_LOCATIONS, por lo que cada servicio usa su valor por
+# defecto (classpath:db/migration): los datos demo de db/seed-dev NO se cargan.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: "${DOMAIN:?Definir DOMAIN en BACKEND/.env, por ejemplo api.tudominio.cl}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      gateway:
+        condition: service_started
+    mem_limit: 64m
+
+  postgre-db:
+    mem_limit: 512m
+    shm_size: 256m
+
+  usuarios:
+    mem_limit: 384m
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+  perfiles:
+    mem_limit: 384m
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+  catalogo:
+    mem_limit: 384m
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+  ofertas:
+    mem_limit: 384m
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+  resenias:
+    mem_limit: 384m
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+  notificaciones:
+    mem_limit: 384m
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+  gateway:
+    mem_limit: 320m
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+volumes:
+  caddy_data:
+  caddy_config:

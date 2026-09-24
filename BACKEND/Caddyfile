@@ -1,0 +1,40 @@
+# Unico punto de entrada publico. Caddy obtiene y renueva el certificado
+# TLS de Let's Encrypt automaticamente para {$DOMAIN}.
+#
+# Requisitos previos:
+#   1. Un registro DNS A (y AAAA si hay IPv6) de {$DOMAIN} apuntando al VPS.
+#   2. Puertos 80 y 443 abiertos en el firewall del host.
+#
+# El frontend NO se sirve desde aca: va en un hosting estatico aparte
+# (Cloudflare Pages) y consume esta API por su dominio.
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Cabeceras de seguridad basicas
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy gateway:8080 {
+		header_up X-Real-IP {remote_host}
+	}
+
+	log {
+		output file /data/access.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}
+
+# Variante para staging sin dominio todavia: comenta el bloque de arriba,
+# descomenta este, y entra por http://IP-DEL-VPS
+# :80 {
+# 	encode zstd gzip
+# 	reverse_proxy gateway:8080
+# }

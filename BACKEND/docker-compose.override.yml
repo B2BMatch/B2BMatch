@@ -1,0 +1,55 @@
+# Entorno de DESARROLLO.
+# Docker Compose carga este archivo automaticamente junto a docker-compose.yml,
+# asi que `docker compose up` sigue funcionando igual que antes.
+#
+# Publica los puertos de cada servicio (util para depurar sin pasar por el
+# gateway) y carga los datos demo. En produccion este archivo NO se usa:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  postgre-db:
+    ports:
+      - "5433:5432"
+
+  usuarios:
+    ports:
+      - "8081:8081"
+    environment:
+      FLYWAY_LOCATIONS: classpath:db/migration,classpath:db/seed-dev
+      SHOW_SQL: "true"
+
+  perfiles:
+    ports:
+      - "8082:8082"
+    environment:
+      FLYWAY_LOCATIONS: classpath:db/migration,classpath:db/seed-dev
+      SHOW_SQL: "true"
+
+  catalogo:
+    ports:
+      - "8083:8083"
+    environment:
+      SHOW_SQL: "true"
+
+  ofertas:
+    ports:
+      - "8084:8084"
+    environment:
+      FLYWAY_LOCATIONS: classpath:db/migration,classpath:db/seed-dev
+      SHOW_SQL: "true"
+
+  resenias:
+    ports:
+      - "8085:8085"
+    environment:
+      SHOW_SQL: "true"
+
+  notificaciones:
+    ports:
+      - "8086:8086"
+    environment:
+      SHOW_SQL: "true"
+
+  gateway:
+    ports:
+      - "8080:8080"

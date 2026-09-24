@@ -8,8 +8,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       POSTGRES_DB: ${POSTGRES_DB:?Definir POSTGRES_DB en BACKEND/.env}
-    ports:
-      - "5433:5432"
     volumes:
       - postgre_data:/var/lib/postgresql/data
     healthcheck:
@@ -27,8 +25,6 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
       ADMIN_BOOTSTRAP_KEY: ${ADMIN_BOOTSTRAP_KEY:?Definir ADMIN_BOOTSTRAP_KEY en BACKEND/.env}
-    ports:
-      - "8081:8081"
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -41,8 +37,6 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
-    ports:
-      - "8082:8082"
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -57,8 +51,6 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
-    ports:
-      - "8083:8083"
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -74,8 +66,6 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
-    ports:
-      - "8084:8084"
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -93,8 +83,6 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
-    ports:
-      - "8085:8085"
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -110,8 +98,6 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
-    ports:
-      - "8086:8086"
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -124,8 +110,6 @@ services:
     container_name: gateway
     environment:
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
-    ports:
-      - "8080:8080"
     restart: unless-stopped
     depends_on:
       postgre-db:
