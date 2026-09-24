@@ -1,13 +1,8 @@
--- Inserta un professional_profile para el usuario webtester@example.com (si existe y no tiene perfil)
-INSERT INTO professional_profile (user_id, first_name, last_name, phone, biography, experience_years, hourly_rate, city, country)
-SELECT u.id, 'Web', 'Tester', '123456789', 'Perfil de prueba creado por migraciones para pruebas web.', 2, 20.00, 'Ciudad Test', 'Pais Test'
-FROM usuarios.app_user u
-WHERE u.email = 'webtester@example.com'
-  AND NOT EXISTS (SELECT 1 FROM professional_profile p WHERE p.user_id = u.id);
-
--- Inserta un company_profile para el usuario companytester@example.com (si existe y no tiene perfil)
-INSERT INTO company_profile (user_id, company_name, tax_id, industry, website, email, phone, address, city, country, company_description)
-SELECT u.id, 'Company Tester SRL', 'TAX-0001', 'Servicios TI', 'https://companytester.local', u.email, '987654321', 'Calle Falsa 123', 'Ciudad Test', 'Pais Test', 'Empresa usada para pruebas'
-FROM usuarios.app_user u
-WHERE u.email = 'companytester@example.com'
-  AND NOT EXISTS (SELECT 1 FROM company_profile c WHERE c.user_id = u.id);
+-- Sin datos semilla de produccion para este microservicio.
+--
+-- Los perfiles demo (webtester / companytester) se movieron a
+-- db/seed-dev/V900__demo_profiles.sql y solo se cargan cuando
+-- FLYWAY_LOCATIONS incluye classpath:db/seed-dev (entorno de desarrollo).
+--
+-- La version V2 se conserva vacia a proposito: eliminarla romperia la
+-- validacion de Flyway en bases donde ya fue aplicada.
