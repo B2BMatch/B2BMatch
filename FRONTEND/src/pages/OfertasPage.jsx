@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getOfertas } from '../services/ofertasService';
@@ -48,8 +48,8 @@ const OfertasPage = () => {
     return categories.find((category) => category.id === categoryId)?.name || 'General';
   };
 
-  const getCompanyName = (companyId) => {
-    return companies.find((company) => company.id === companyId)?.companyName || `Empresa ${companyId ?? ''}`.trim();
+  const getCompanyName = (userId) => {
+    return companies.find((company) => company.userId === userId)?.companyName || `Empresa ${userId ?? ''}`.trim();
   };
 
   const handleApply = async (offer) => {
@@ -73,7 +73,6 @@ const OfertasPage = () => {
 
       await applicationsService.createApplication({
         jobOfferId: offer.id,
-        professionalId: profile.id,
         proposal: `Estoy interesado en la vacante ${offer.title}.`,
         expectedPrice: offer.budget || 0
       });
@@ -110,7 +109,7 @@ const OfertasPage = () => {
         ) : (
           <div className="result-grid">
             {ofertas.map((oferta) => {
-              const companyName = getCompanyName(oferta.companyId);
+              const companyName = getCompanyName(oferta.userId);
               return (
                 <article key={oferta.id} className="gig-card">
                   <div className="gig-cover">

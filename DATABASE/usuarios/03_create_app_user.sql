@@ -22,6 +22,8 @@ CREATE TABLE app_user (
 
     email VARCHAR(150) NOT NULL,
 
+    name VARCHAR(150),
+
     password_hash VARCHAR(255) NOT NULL,
 
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
@@ -61,6 +63,8 @@ COMMENT ON COLUMN app_user.role_id IS 'User role';
 
 COMMENT ON COLUMN app_user.email IS 'Unique email address';
 
+COMMENT ON COLUMN app_user.name IS 'Display name of the user';
+
 COMMENT ON COLUMN app_user.password_hash IS 'Encrypted password';
 
 COMMENT ON COLUMN app_user.status IS 'Account status';
@@ -74,3 +78,6 @@ ON app_user(role_id);
 
 CREATE INDEX idx_app_user_email
 ON app_user(email);
+
+-- Compatibilidad con bases existentes
+ALTER TABLE app_user ADD COLUMN IF NOT EXISTS name VARCHAR(150);

@@ -15,8 +15,8 @@ export const getReviewsByProfessional = async (professionalId) => {
   return res.data;
 };
 
-export const getReviewsByCustomer = async (customerId) => {
-  const res = await api.get(`/reviews/customer/${customerId}`);
+export const getReviewsByUser = async (userId) => {
+  const res = await api.get(`/reviews/user/${userId}`);
   return res.data;
 };
 
@@ -39,7 +39,7 @@ export default {
   getReviews,
   getReviewById,
   getReviewsByProfessional,
-  getReviewsByCustomer,
+  getReviewsByUser,
   createReview,
   updateReview,
   deleteReview,

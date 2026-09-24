@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getOfertasByCompany, deleteOferta } from '../../services/ofertasService';
+import { getOfertasByUser, deleteOferta } from '../../services/ofertasService';
 import perfilesService from '../../services/perfilesService';
 import applicationsService from '../../services/applicationsService';
 import reviewsService from '../../services/reviewsService';
@@ -23,11 +23,11 @@ export const CompanyOffers = () => {
   const [error, setError] = useState('');
   const [expandedOfferId, setExpandedOfferId] = useState(null);
   const [applicantsByOffer, setApplicantsByOffer] = useState({});
-  const [profilesByProf, setProfilesByProf] = useState({});
-  const [reviewsByProf, setReviewsByProf] = useState({});
+  const [profilesByUser, setProfilesByUser] = useState({});
+  const [reviewsByUser, setReviewsByUser] = useState({});
   const [reviewForm, setReviewForm] = useState({});
   const [loadingApplicants, setLoadingApplicants] = useState(false);
-  const [sendingReviewId, setSendingReviewId] = useState(null);
+  const [sendingReviewUserId, setSendingReviewUserId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -38,7 +38,7 @@ export const CompanyOffers = () => {
           setError('Debes completar tu perfil de empresa para ver tus ofertas.');
           return;
         }
-        const data = await getOfertasByCompany(profile.id);
+        const data = await getOfertasByUser(user.id);
         setOffers(data || []);
       } catch (err) {
         console.error('Error cargando ofertas', err);
@@ -84,22 +84,23 @@ export const CompanyOffers = () => {
       setApplicantsByOffer((prev) => ({ ...prev, [offerId]: list || [] }));
 
       for (const app of list || []) {
-        if (!app.professionalId) continue;
-        if (!profilesByProf[app.professionalId]) {
+        if (!app.userId) continue;
+        let prof = profilesByUser[app.userId];
+        if (!prof) {
           try {
-            const p = await perfilesService.getProfessionalProfileById(app.professionalId);
-            if (p) setProfilesByProf((prev) => ({ ...prev, [app.professionalId]: p }));
+            prof = await perfilesService.getProfessionalProfileByUser(app.userId);
+            if (prof) setProfilesByUser((prev) => ({ ...prev, [app.userId]: prof }));
           } catch (err) {
             console.error('Error cargando perfil profesional', err);
           }
         }
-        if (reviewsByProf[app.professionalId] === undefined) {
+        if (prof?.id && reviewsByUser[app.userId] === undefined) {
           try {
-            const r = await reviewsService.getReviewsByProfessional(app.professionalId);
-            setReviewsByProf((prev) => ({ ...prev, [app.professionalId]: r || [] }));
+            const r = await reviewsService.getReviewsByProfessional(prof.id);
+            setReviewsByUser((prev) => ({ ...prev, [app.userId]: r || [] }));
           } catch (err) {
             console.error('Error cargando reseñas', err);
-            setReviewsByProf((prev) => ({ ...prev, [app.professionalId]: [] }));
+            setReviewsByUser((prev) => ({ ...prev, [app.userId]: [] }));
           }
         }
       }
@@ -111,13 +112,18 @@ export const CompanyOffers = () => {
     }
   };
 
-  const handleReviewChange = (professionalId, field, value) => {
-    setReviewForm((prev) => ({ ...prev, [professionalId]: { ...prev[professionalId], [field]: value } }));
+  const handleReviewChange = (userId, field, value) => {
+    setReviewForm((prev) => ({ ...prev, [userId]: { ...prev[userId], [field]: value } }));
   };
 
-  const handleReviewSubmit = async (professionalId) => {
+  const handleReviewSubmit = async (userId) => {
     if (!user?.id) return;
-    const form = reviewForm[professionalId] || {};
+    const profile = profilesByUser[userId];
+    if (!profile?.id) {
+      alert('No se pudo identificar el perfil profesional del postulante.');
+      return;
+    }
+    const form = reviewForm[userId] || {};
     const rating = Number(form.rating);
 
     if (!rating || rating < 1 || rating > 5) {
@@ -125,30 +131,29 @@ export const CompanyOffers = () => {
       return;
     }
 
-    setSendingReviewId(professionalId);
+    setSendingReviewUserId(userId);
     try {
       await reviewsService.createReview({
-        customerId: user.id,
-        professionalId,
+        professionalId: profile.id,
         rating,
         comment: form.comment?.trim() || null,
       });
-      const r = await reviewsService.getReviewsByProfessional(professionalId);
-      setReviewsByProf((prev) => ({ ...prev, [professionalId]: r || [] }));
-      setReviewForm((prev) => ({ ...prev, [professionalId]: { rating: '5', comment: '' } }));
+      const r = await reviewsService.getReviewsByProfessional(profile.id);
+      setReviewsByUser((prev) => ({ ...prev, [userId]: r || [] }));
+      setReviewForm((prev) => ({ ...prev, [userId]: { rating: '5', comment: '' } }));
       alert('Reseña publicada correctamente.');
     } catch (err) {
       console.error('Error publicando reseña', err);
       alert('No se pudo publicar la reseña. Intenta de nuevo.');
     } finally {
-      setSendingReviewId(null);
+      setSendingReviewUserId(null);
     }
   };
 
-  const getApplicantName = (professionalId) => {
-    const p = profilesByProf[professionalId];
+  const getApplicantName = (userId) => {
+    const p = profilesByUser[userId];
     if (p?.firstName || p?.lastName) return `${p.firstName || ''} ${p.lastName || ''}`.trim();
-    return `Profesional #${professionalId}`;
+    return `Profesional #${userId}`;
   };
 
   return (
@@ -212,18 +217,18 @@ export const CompanyOffers = () => {
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                         {(applicantsByOffer[offer.id] || []).map((app) => {
-                          const professionalId = app.professionalId;
-                          const existingReviews = reviewsByProf[professionalId] || [];
+                          const applicantUserId = app.userId;
+                          const existingReviews = reviewsByUser[applicantUserId] || [];
                           const avg =
                             existingReviews.length > 0
                               ? (existingReviews.reduce((acc, r) => acc + (r.rating || 0), 0) / existingReviews.length).toFixed(1)
                               : null;
-                          const form = reviewForm[professionalId] || { rating: '5', comment: '' };
+                          const form = reviewForm[applicantUserId] || { rating: '5', comment: '' };
 
                           return (
                             <div key={app.id} className="gig-row">
                               <UserCard
-                                name={getApplicantName(professionalId)}
+                                name={getApplicantName(applicantUserId)}
                                 role={app.proposal || 'Sin propuesta adjunta'}
                                 skills={`Precio esperado: $${app.expectedPrice ?? 0} · ${existingReviews.length} reseña${existingReviews.length === 1 ? '' : 's'}${avg ? ` · Promedio: ${avg}★` : ''}`}
                               />
@@ -255,7 +260,7 @@ export const CompanyOffers = () => {
                                     <select
                                       className="form-select"
                                       value={form.rating}
-                                      onChange={(e) => handleReviewChange(professionalId, 'rating', e.target.value)}
+                                      onChange={(e) => handleReviewChange(applicantUserId, 'rating', e.target.value)}
                                     >
                                       {[5, 4, 3, 2, 1].map((n) => (
                                         <option key={n} value={n}>
@@ -271,15 +276,15 @@ export const CompanyOffers = () => {
                                       className="form-input"
                                       placeholder="Escribí tu experiencia..."
                                       value={form.comment || ''}
-                                      onChange={(e) => handleReviewChange(professionalId, 'comment', e.target.value)}
+                                      onChange={(e) => handleReviewChange(applicantUserId, 'comment', e.target.value)}
                                     />
                                   </div>
                                   <button
                                     className="btn-b2b-primary btn-xs"
-                                    onClick={() => handleReviewSubmit(professionalId)}
-                                    disabled={sendingReviewId === professionalId}
+                                    onClick={() => handleReviewSubmit(applicantUserId)}
+                                    disabled={sendingReviewUserId === applicantUserId}
                                   >
-                                    {sendingReviewId === professionalId ? 'Publicando...' : 'Publicar Reseña'}
+                                    {sendingReviewUserId === applicantUserId ? 'Publicando...' : 'Publicar Reseña'}
                                   </button>
                                 </div>
                               </div>

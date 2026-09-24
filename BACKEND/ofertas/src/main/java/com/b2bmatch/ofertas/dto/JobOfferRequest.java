@@ -2,8 +2,10 @@ package com.b2bmatch.ofertas.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,9 +18,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class JobOfferRequest {
 
-    @NotNull(message = "companyId is required")
-    private Long companyId;
-
     @NotNull(message = "categoryId is required")
     private Long categoryId;
 
@@ -30,10 +29,10 @@ public class JobOfferRequest {
     private String description;
 
     @NotNull(message = "budget is required")
+    @Positive(message = "budget debe ser mayor a 0")
     private BigDecimal budget;
 
     @NotNull(message = "deadline is required")
+    @Future(message = "deadline debe ser una fecha futura")
     private LocalDate deadline;
-
-    private String status;
 }

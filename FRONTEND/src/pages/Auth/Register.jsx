@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register as registerService } from '../../services/authService';
 import '../../styles/auth.css';
@@ -31,8 +31,8 @@ export const Register = ({ onSwitchToLogin, onSuccess }) => {
   const isEmbedded = typeof onSwitchToLogin === 'function';
 
   const roleMap = {
-    user: 3, // PROFESSIONAL
-    company: 4, // COMPANY
+    user: 'PROFESSIONAL',
+    company: 'COMPANY',
   };
 
   const handleChange = (e) => {
@@ -47,9 +47,10 @@ export const Register = ({ onSwitchToLogin, onSuccess }) => {
 
     try {
       await registerService({
+        name: formData.name,
         email: formData.email,
         password: formData.password,
-        roleId: roleMap[userType],
+        roleName: roleMap[userType],
       });
 
       const message = 'Registro exitoso. Ahora puedes iniciar sesión.';

@@ -12,9 +12,9 @@ export const getOfertaById = async (id) => {
     return response.data;
 };
 
-// Obtener ofertas por empresa (company profile id)
-export const getOfertasByCompany = async (companyId) => {
-    const response = await api.get(`/job-offers/company/${companyId}`);
+// Obtener ofertas de un usuario (dueño de la oferta)
+export const getOfertasByUser = async (userId) => {
+    const response = await api.get(`/job-offers/user/${userId}`);
     return response.data;
 };
 
@@ -45,7 +45,7 @@ export const deleteOferta = async (id) => {
 export default {
     getOfertas,
     getOfertaById,
-    getOfertasByCompany,
+    getOfertasByUser,
     createOferta,
     updateOferta,
     updateOfertaStatus,

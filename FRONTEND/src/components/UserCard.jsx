@@ -1,4 +1,4 @@
-import React from 'react';
+
 import '../styles/cards.css';
 
 export const UserCard = ({ name, role, skills }) => {

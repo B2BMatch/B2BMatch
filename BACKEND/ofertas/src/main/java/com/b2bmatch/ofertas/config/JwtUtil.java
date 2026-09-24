@@ -28,6 +28,7 @@ public class JwtUtil {
         Date now = new Date();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
+                .claim("userId", userId)
                 .claim("email", email)
                 .claim("role", role)
                 .issuedAt(now)

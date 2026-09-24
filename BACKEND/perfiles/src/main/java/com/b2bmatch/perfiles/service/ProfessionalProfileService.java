@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.b2bmatch.perfiles.dto.ProfessionalProfileRequest;
 import com.b2bmatch.perfiles.dto.ProfessionalProfileResponse;
@@ -20,27 +21,67 @@ public class ProfessionalProfileService {
 
     private final ProfessionalProfileRepository repository;
 
-    public List<ProfessionalProfileResponse> findAll() {
+    public List<ProfessionalProfileResponse> findAll(Long requesterId, String requesterRole) {
+        boolean full = isFullAccess(null, requesterId, requesterRole);
         return repository.findByStatusNot("DELETED").stream()
                 .map(ProfessionalProfileResponse::fromEntity)
+                .map(dto -> full ? dto : mask(dto))
                 .toList();
     }
 
-    public ProfessionalProfileResponse findById(Long id) {
+    public ProfessionalProfileResponse findById(Long id, Long requesterId, String requesterRole) {
         ProfessionalProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));
-        return ProfessionalProfileResponse.fromEntity(entity);
+        if ("DELETED".equals(entity.getStatus())) {
+            throw new ProfileNotFoundException("Professional profile not found with id: " + id);
+        }
+        return toResponse(entity, requesterId, requesterRole);
     }
 
-    public ProfessionalProfileResponse findByUserId(Long userId) {
+    public ProfessionalProfileResponse findByUserId(Long userId, Long requesterId, String requesterRole) {
         ProfessionalProfile entity = repository.findByUserId(userId)
                 .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found for user id: " + userId));
-        return ProfessionalProfileResponse.fromEntity(entity);
+        if ("DELETED".equals(entity.getStatus())) {
+            throw new ProfileNotFoundException("Professional profile not found for user id: " + userId);
+        }
+        return toResponse(entity, requesterId, requesterRole);
     }
 
+    private boolean isFullAccess(ProfessionalProfile entity, Long requesterId, String requesterRole) {
+        if ("ADMIN".equals(requesterRole)) {
+            return true;
+        }
+        return entity != null && requesterId != null && entity.getUserId().equals(requesterId);
+    }
+
+    private ProfessionalProfileResponse toResponse(ProfessionalProfile entity, Long requesterId, String requesterRole) {
+        ProfessionalProfileResponse dto = ProfessionalProfileResponse.fromEntity(entity);
+        return isFullAccess(entity, requesterId, requesterRole) ? dto : mask(dto);
+    }
+
+    private ProfessionalProfileResponse mask(ProfessionalProfileResponse dto) {
+        dto.setUserId(null);
+        dto.setPhone(null);
+        dto.setPortfolioUrl(null);
+        dto.setLinkedinUrl(null);
+        dto.setGithubUrl(null);
+        return dto;
+    }
+
+    @Transactional
     public ProfessionalProfileResponse create(ProfessionalProfileRequest request) {
-        ProfessionalProfile entity = new ProfessionalProfile();
-        entity.setUserId(request.getUserId());
+        if (repository.findByUserId(request.getUserId())
+                .map(ProfessionalProfile::getStatus)
+                .filter("ACTIVE"::equals)
+                .isPresent()) {
+            throw new IllegalArgumentException("El usuario ya tiene un perfil profesional registrado");
+        }
+        ProfessionalProfile entity = repository.findByUserId(request.getUserId()).orElse(null);
+        if (entity == null) {
+            entity = new ProfessionalProfile();
+            entity.setUserId(request.getUserId());
+            entity.setCreatedAt(LocalDateTime.now());
+        }
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
         entity.setPhone(request.getPhone());
@@ -53,13 +94,27 @@ public class ProfessionalProfileService {
         entity.setCity(request.getCity());
         entity.setCountry(request.getCountry());
         entity.setStatus("ACTIVE");
-        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
         return ProfessionalProfileResponse.fromEntity(repository.save(entity));
     }
 
-    public ProfessionalProfileResponse update(Long id, ProfessionalProfileRequest request) {
+    @Transactional
+    public ProfessionalProfileResponse update(Long id, ProfessionalProfileRequest request,
+            Long requesterId, String requesterRole) {
         ProfessionalProfile existing = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));
+
+        boolean isOwner = existing.getUserId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo puedes modificar tu propio perfil, o ser ADMIN");
+        }
+
+        if ("DELETED".equals(existing.getStatus())) {
+            throw new IllegalArgumentException("El perfil está eliminado, no se puede modificar");
+        }
+
         existing.setFirstName(request.getFirstName());
         existing.setLastName(request.getLastName());
         existing.setPhone(request.getPhone());
@@ -75,6 +130,7 @@ public class ProfessionalProfileService {
         return ProfessionalProfileResponse.fromEntity(repository.save(existing));
     }
 
+    @Transactional
     public void delete(Long id, Long requesterId, String requesterRole) {
         ProfessionalProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));
@@ -95,6 +151,7 @@ public class ProfessionalProfileService {
         repository.save(entity);
     }
 
+    @Transactional
     public ProfessionalProfileResponse reactivate(Long id, Long requesterId, String requesterRole) {
         ProfessionalProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Professional profile not found with id: " + id));

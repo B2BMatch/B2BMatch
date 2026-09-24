@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import catalogoService from '../services/catalogoService';
@@ -54,7 +54,7 @@ const ServicesPage = () => {
     const loadMyQuotations = async () => {
       if (!currentUser?.id) return;
       try {
-        const list = await quotationsService.getQuotationsByCustomer(currentUser.id);
+const list = await quotationsService.getQuotationsByUser(currentUser.id);
         setMyQuotations(Array.isArray(list) ? list : []);
       } catch (err) {
         console.error('Error cargando mis cotizaciones', err);
@@ -101,12 +101,11 @@ const ServicesPage = () => {
     try {
       await quotationsService.createQuotation({
         serviceId,
-        customerId: currentUser.id,
         message,
       });
       alert('Cotización solicitada correctamente.');
       setQuotationMessage((prev) => ({ ...prev, [serviceId]: '' }));
-      const list = await quotationsService.getQuotationsByCustomer(currentUser.id);
+      const list = await quotationsService.getQuotationsByUser(currentUser.id);
       setMyQuotations(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error('Error solicitando cotización', err);

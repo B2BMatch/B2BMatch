@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import usersService from '../../services/usersService';
 import '../../styles/admin.css';
 
@@ -7,22 +7,23 @@ export const User = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const load = async () => {
-    try {
-      const data = await usersService.getUsers();
-      setUsersList(data || []);
-      setError('');
-    } catch (err) {
-      console.error('Error cargando usuarios', err);
-      setError('No se pudieron cargar los usuarios.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await usersService.getUsers();
+        setUsersList(data || []);
+        setError('');
+      } catch (err) {
+        console.error('Error cargando usuarios', err);
+        setError('No se pudieron cargar los usuarios.');
+      } finally {
+        setLoading(false);
+      }
+    };
     load();
-  }, []);
+  }, [reloadKey]);
 
   const handleSuspend = async (id) => {
     const confirmed = window.confirm('¿Suspender este usuario? Podrás reactivarlo luego.');
@@ -30,7 +31,7 @@ export const User = () => {
     try {
       await usersService.updateUserStatus(id, 'SUSPENDED');
       alert('Usuario suspendido.');
-      load();
+      setReloadKey((k) => k + 1);
     } catch (err) {
       console.error(err);
       alert('No se pudo suspender el usuario.');
@@ -43,7 +44,7 @@ export const User = () => {
     try {
       await usersService.updateUserStatus(id, 'ACTIVE');
       alert('Usuario reactivado.');
-      load();
+      setReloadKey((k) => k + 1);
     } catch (err) {
       console.error(err);
       alert('No se pudo reactivar el usuario.');

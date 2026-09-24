@@ -34,8 +34,8 @@ public class JobApplication {
     @JoinColumn(name = "job_offer_id", nullable = false)
     private JobOffer jobOffer;
 
-    @Column(name = "professional_id", nullable = false)
-    private Long professionalId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String proposal;

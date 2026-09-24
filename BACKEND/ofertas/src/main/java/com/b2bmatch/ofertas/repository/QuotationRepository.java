@@ -8,6 +8,6 @@ import com.b2bmatch.ofertas.model.Quotation;
 @Repository
 public interface QuotationRepository extends JpaRepository<Quotation, Long> {
     List<Quotation> findByServiceId(Long serviceId);
-    List<Quotation> findByCustomerId(Long customerId);
+    List<Quotation> findByUserId(Long userId);
 }
 

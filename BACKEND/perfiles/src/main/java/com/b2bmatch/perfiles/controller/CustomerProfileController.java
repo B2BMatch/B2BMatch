@@ -18,6 +18,7 @@ import com.b2bmatch.perfiles.config.JwtService;
 
 import com.b2bmatch.perfiles.dto.CustomerProfileRequest;
 import com.b2bmatch.perfiles.dto.CustomerProfileResponse;
+import com.b2bmatch.perfiles.exception.ForbiddenException;
 import com.b2bmatch.perfiles.service.CustomerProfileService;
 
 import io.jsonwebtoken.Claims;
@@ -33,29 +34,75 @@ public class CustomerProfileController {
     private final JwtService jwtService;
 
     @GetMapping
-    public ResponseEntity<List<CustomerProfileResponse>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<CustomerProfileResponse>> findAll(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Claims claims = optionalClaims(authHeader);
+        return ResponseEntity.ok(service.findAll(
+                claims != null ? claims.get("userId", Long.class) : null,
+                claims != null ? claims.get("role", String.class) : null));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerProfileResponse> findById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<CustomerProfileResponse> findById(@PathVariable("id") Long id,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Claims claims = optionalClaims(authHeader);
+        return ResponseEntity.ok(service.findById(id,
+                claims != null ? claims.get("userId", Long.class) : null,
+                claims != null ? claims.get("role", String.class) : null));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<CustomerProfileResponse> findByUserId(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(service.findByUserId(userId));
+    public ResponseEntity<CustomerProfileResponse> findByUserId(@PathVariable("userId") Long userId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Claims claims = optionalClaims(authHeader);
+        return ResponseEntity.ok(service.findByUserId(userId,
+                claims != null ? claims.get("userId", Long.class) : null,
+                claims != null ? claims.get("role", String.class) : null));
+    }
+
+    private Claims optionalClaims(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        try {
+            return jwtService.parseToken(authHeader.substring(7));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @PostMapping
-    public ResponseEntity<CustomerProfileResponse> create(@Valid @RequestBody CustomerProfileRequest request) {
+    public ResponseEntity<CustomerProfileResponse> create(@Valid @RequestBody CustomerProfileRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        Claims claims = jwtService.parseToken(token);
+
+        Long requesterId = claims.get("userId", Long.class);
+        String requesterRole = claims.get("role", String.class);
+
+        if (!"ADMIN".equals(requesterRole)) {
+            if (!"CUSTOMER".equals(requesterRole)) {
+                throw new ForbiddenException("Solo los clientes pueden registrar un perfil de cliente");
+            }
+            request.setUserId(requesterId);
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomerProfileResponse> update(@PathVariable("id") Long id,
-            @Valid @RequestBody CustomerProfileRequest request) {
-        return ResponseEntity.ok(service.update(id, request));
+            @Valid @RequestBody CustomerProfileRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        Claims claims = jwtService.parseToken(token);
+
+        Long requesterId = claims.get("userId", Long.class);
+        String requesterRole = claims.get("role", String.class);
+
+        return ResponseEntity.ok(service.update(id, request, requesterId, requesterRole));
     }
 
     @DeleteMapping("/{id}")

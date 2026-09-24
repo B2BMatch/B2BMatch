@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.b2bmatch.notificaciones.dto.NotificationRequest;
 import com.b2bmatch.notificaciones.dto.NotificationResponse;
@@ -20,11 +21,20 @@ public class NotificationService {
 
     private final NotificationRepository repository;
 
+    @Transactional
     public NotificationResponse create(NotificationRequest request, String requesterRole) {
         if (!"ADMIN".equals(requesterRole)) {
             throw new ForbiddenException("Solo ADMIN puede crear notificaciones directamente");
         }
+        return persist(request);
+    }
 
+    @Transactional
+    public NotificationResponse createInternal(NotificationRequest request) {
+        return persist(request);
+    }
+
+    private NotificationResponse persist(NotificationRequest request) {
         Notification entity = new Notification();
         entity.setUserId(request.getUserId());
         entity.setTitle(request.getTitle());
@@ -55,6 +65,7 @@ public class NotificationService {
         return NotificationResponse.fromEntity(entity);
     }
 
+    @Transactional
     public NotificationResponse markAsRead(Long id, Long requesterId, String requesterRole) {
         Notification entity = repository.findById(id)
                 .orElseThrow(() -> new NotificationNotFoundException("Notification not found with id: " + id));
@@ -64,6 +75,7 @@ public class NotificationService {
         return NotificationResponse.fromEntity(repository.save(entity));
     }
 
+    @Transactional
     public void delete(Long id, Long requesterId, String requesterRole) {
         Notification entity = repository.findById(id)
                 .orElseThrow(() -> new NotificationNotFoundException("Notification not found with id: " + id));

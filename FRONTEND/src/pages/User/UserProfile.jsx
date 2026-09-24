@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import perfilesService from '../../services/perfilesService';
 import reviewsService from '../../services/reviewsService';
@@ -396,7 +396,7 @@ export const UserProfile = () => {
                       {quotes.map((quote) => (
                         <div key={quote.id} className="item-row">
                           <div className="item-row-header">
-                            <span>Solicitante #{quote.customerId}</span>
+                            <span>Solicitante #{quote.userId}</span>
                             <span className="badge-gold">{quote.status || 'PENDING'}</span>
                           </div>
                           <p>{quote.message}</p>

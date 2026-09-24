@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,6 +37,10 @@ public class AppUser {
     @NotBlank(message = "El email es obligatorio")
     @Column(nullable = false, unique = true, length = 150)
     private String email;
+
+    @Size(max = 150)
+    @Column(length = 150)
+    private String name;
 
     @NotBlank(message = "El password es obligatorio")
     @Column(name = "password_hash", nullable = false, length = 255)

@@ -7,6 +7,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,20 +24,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CategoryController {
 
-	private static final String SELECT_COLUMNS = "id, name, description, created_at";
+	private static final String SELECT_COLUMNS = "id, name, description, status, created_at, updated_at";
 
 	private final JdbcTemplate jdbc;
 
 	@GetMapping
 	public ResponseEntity<List<Map<String, Object>>> findAll() {
-		List<Map<String, Object>> rows = jdbc.queryForList("SELECT " + SELECT_COLUMNS + " FROM catalogo.category ORDER BY name");
+		List<Map<String, Object>> rows = jdbc.queryForList("SELECT " + SELECT_COLUMNS + " FROM catalogo.category WHERE status <> 'DELETED' ORDER BY name");
 		return ResponseEntity.ok(rows);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Map<String, Object>> findById(@PathVariable Long id) {
 		try {
-			Map<String, Object> row = jdbc.queryForMap("SELECT " + SELECT_COLUMNS + " FROM catalogo.category WHERE id = ?", id);
+			Map<String, Object> row = jdbc.queryForMap("SELECT " + SELECT_COLUMNS + " FROM catalogo.category WHERE id = ? AND status <> 'DELETED'", id);
 			return ResponseEntity.ok(row);
 		} catch (EmptyResultDataAccessException ex) {
 			return ResponseEntity.notFound().build();
@@ -44,12 +45,13 @@ public class CategoryController {
 	}
 
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Map<String, Object>> create(@RequestBody Map<String, Object> body) {
-		String name = (String) body.get("name");
-		if (name == null || name.isBlank()) {
+		String name = requireText(body.get("name"));
+		if (name == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		String description = (String) body.get("description");
+		String description = optionalText(body.get("description"));
 		Map<String, Object> created = jdbc.queryForMap(
 				"INSERT INTO catalogo.category(name, description) VALUES (?, ?) RETURNING " + SELECT_COLUMNS,
 				name, description);
@@ -57,10 +59,14 @@ public class CategoryController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-		String name = (String) body.get("name");
-		String description = (String) body.get("description");
-		int updated = jdbc.update("UPDATE catalogo.category SET name = ?, description = ? WHERE id = ?", name, description, id);
+		String name = requireText(body.get("name"));
+		if (name == null) {
+			return ResponseEntity.badRequest().build();
+		}
+		String description = optionalText(body.get("description"));
+		int updated = jdbc.update("UPDATE catalogo.category SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status <> 'DELETED'", name, description, id);
 		if (updated == 0) {
 			return ResponseEntity.notFound().build();
 		}
@@ -69,11 +75,26 @@ public class CategoryController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		int deleted = jdbc.update("DELETE FROM catalogo.category WHERE id = ?", id);
-		if (deleted == 0) {
+		int updated = jdbc.update("UPDATE catalogo.category SET status = 'DELETED', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status <> 'DELETED'", id);
+		if (updated == 0) {
 			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.noContent().build();
+	}
+
+	private String requireText(Object value) {
+		if (!(value instanceof String str) || str.isBlank()) {
+			return null;
+		}
+		return str.trim();
+	}
+
+	private String optionalText(Object value) {
+		if (!(value instanceof String str)) {
+			return null;
+		}
+		return str.trim();
 	}
 }

@@ -6,6 +6,21 @@ spring:
     name: gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://127.0.0.1:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
       server:
         webflux:
           routes:
@@ -22,7 +37,7 @@ spring:
             - id: catalogo
               uri: http://catalogo:8083
               predicates:
-                - Path=/api/categories/**,/api/skills/**,/api/services/**
+                - Path=/api/catalogo/**
 
             - id: ofertas
               uri: http://ofertas:8084
@@ -38,6 +53,9 @@ spring:
               uri: http://notificaciones:8086
               predicates:
                 - Path=/api/notifications/**
+
+jwt:
+  secret: ${JWT_SECRET}
 
 app:
   jwt:

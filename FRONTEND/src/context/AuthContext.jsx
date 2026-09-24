@@ -1,9 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { login as loginService } from '../services/authService';
+import { createContext, useContext } from 'react';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
-const normalizeUser = (backendUser) => {
+export const normalizeUser = (backendUser) => {
   if (!backendUser) return null;
 
   const roleName = (backendUser.roleName || backendUser.role || '').toUpperCase();
@@ -26,49 +25,6 @@ const normalizeUser = (backendUser) => {
     role: normalizedRole,
     name,
   };
-};
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(normalizeUser(JSON.parse(storedUser)));
-    }
-    setLoading(false);
-  }, []);
-
-  const loginUser = async (credentials) => {
-    const data = await loginService(credentials);
-    const { token, ...userData } = data || {};
-
-    if (token) {
-      localStorage.setItem('token', token);
-    }
-
-    const normalized = normalizeUser(userData);
-
-    if (normalized) {
-      localStorage.setItem('user', JSON.stringify(normalized));
-      setUser(normalized);
-    }
-
-    return normalized;
-  };
-
-  const logoutUser = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ currentUser: user, user, isAuthenticated: !!user, loginUser, logoutUser, logout: logoutUser, loading }}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
 };
 
 // Hook personalizado para usar el contexto más fácil en cualquier componente

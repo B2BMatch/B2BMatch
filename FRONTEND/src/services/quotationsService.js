@@ -15,8 +15,8 @@ export const getQuotationsByService = async (serviceId) => {
   return res.data;
 };
 
-export const getQuotationsByCustomer = async (customerId) => {
-  const res = await api.get(`/quotations/customer/${customerId}`);
+export const getQuotationsByUser = async (userId) => {
+  const res = await api.get(`/quotations/user/${userId}`);
   return res.data;
 };
 
@@ -39,7 +39,7 @@ export default {
   getQuotations,
   getQuotationById,
   getQuotationsByService,
-  getQuotationsByCustomer,
+  getQuotationsByUser,
   createQuotation,
   updateQuotation,
   deleteQuotation,

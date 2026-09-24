@@ -5,8 +5,8 @@ export const getApplications = async () => {
   return res.data;
 };
 
-export const getApplicationsByProfessionalId = async (professionalId) => {
-  const res = await api.get(`/job-applications/professional/${professionalId}`);
+export const getApplicationsByUserId = async (userId) => {
+  const res = await api.get(`/job-applications/user/${userId}`);
   return res.data;
 };
 
@@ -22,7 +22,7 @@ export const createApplication = async (payload) => {
 
 export default {
   getApplications,
-  getApplicationsByProfessionalId,
+  getApplicationsByUserId,
   getApplicationsByJobOfferId,
   createApplication,
 };

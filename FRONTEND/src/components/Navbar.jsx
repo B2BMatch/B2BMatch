@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -9,6 +9,14 @@ import {
 import '../styles/navbar.css';
 import '../styles/buttons.css';
 
+const fetchNotifications = async (userId) => {
+  const [list, count] = await Promise.all([
+    getNotificationsByUser(userId),
+    countUnreadNotifications(userId),
+  ]);
+  return [Array.isArray(list) ? list : [], count || 0];
+};
+
 export const Navbar = ({ logo, theme, onToggleTheme, onOpenModal }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -18,23 +26,24 @@ export const Navbar = ({ logo, theme, onToggleTheme, onOpenModal }) => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  const loadNotifications = useCallback(async () => {
-    if (!currentUser?.id) return;
-    try {
-      const [list, count] = await Promise.all([
-        getNotificationsByUser(currentUser.id),
-        countUnreadNotifications(currentUser.id),
-      ]);
-      setNotifications(Array.isArray(list) ? list : []);
-      setUnreadCount(count || 0);
-    } catch (err) {
-      console.error('Error al cargar notificaciones', err);
-    }
-  }, [currentUser?.id]);
-
   useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+    if (!currentUser?.id) return;
+    let ignore = false;
+    const load = async () => {
+      try {
+        const [list, count] = await fetchNotifications(currentUser.id);
+        if (ignore) return;
+        setNotifications(list);
+        setUnreadCount(count);
+      } catch (err) {
+        console.error('Error al cargar notificaciones', err);
+      }
+    };
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [currentUser?.id]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -55,12 +64,17 @@ export const Navbar = ({ logo, theme, onToggleTheme, onOpenModal }) => {
     navigate('/');
   };
 
-  const handleToggleNotif = () => {
-    setIsNotifOpen((prev) => {
-      const next = !prev;
-      if (next) loadNotifications();
-      return next;
-    });
+  const handleToggleNotif = async () => {
+    const next = !isNotifOpen;
+    setIsNotifOpen(next);
+    if (!next || !currentUser?.id) return;
+    try {
+      const [list, count] = await fetchNotifications(currentUser.id);
+      setNotifications(list);
+      setUnreadCount(count);
+    } catch (err) {
+      console.error('Error al cargar notificaciones', err);
+    }
   };
 
   const handleMarkRead = async (id) => {

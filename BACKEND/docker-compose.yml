@@ -5,108 +5,143 @@ services:
     container_name: postgre
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgre123
-      POSTGRES_DB: b2bmatch
+      POSTGRES_USER: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
+      POSTGRES_DB: ${POSTGRES_DB:?Definir POSTGRES_DB en BACKEND/.env}
     ports:
       - "5433:5432"
     volumes:
       - postgre_data:/var/lib/postgresql/data
-      - ../DATABASE:/sql
-      - ./init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   usuarios:
     build: ./usuarios
     container_name: usuarios
     environment:
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgre123
-      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+      DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      ADMIN_BOOTSTRAP_KEY: ${ADMIN_BOOTSTRAP_KEY:?Definir ADMIN_BOOTSTRAP_KEY en BACKEND/.env}
     ports:
       - "8081:8081"
     restart: unless-stopped
     depends_on:
-      - postgre-db
+      postgre-db:
+        condition: service_healthy
 
   perfiles:
     build: ./perfiles
     container_name: perfiles
     environment:
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgre123
-      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+      DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
     ports:
       - "8082:8082"
     restart: unless-stopped
     depends_on:
-      - postgre-db
+      postgre-db:
+        condition: service_healthy
+      usuarios:
+        condition: service_healthy
 
   catalogo:
     build: ./catalogo
     container_name: catalogo
     environment:
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgre123
+      DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
     ports:
       - "8083:8083"
     restart: unless-stopped
     depends_on:
-      - postgre-db
+      postgre-db:
+        condition: service_healthy
+      perfiles:
+        condition: service_healthy
 
   ofertas:
     build: ./ofertas
     container_name: ofertas
     environment:
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgre123
-      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+      DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
     ports:
       - "8084:8084"
     restart: unless-stopped
     depends_on:
-      - postgre-db
+      postgre-db:
+        condition: service_healthy
+      perfiles:
+        condition: service_healthy
+      catalogo:
+        condition: service_healthy
 
   resenias:
     build: ./resenias
     container_name: resenias
     environment:
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgre123
-      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+      DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
     ports:
       - "8085:8085"
     restart: unless-stopped
     depends_on:
-      - postgre-db
+      postgre-db:
+        condition: service_healthy
+      perfiles:
+        condition: service_healthy
 
   notificaciones:
     build: ./notificaciones
     container_name: notificaciones
     environment:
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgre123
-      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+      DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
     ports:
       - "8086:8086"
     restart: unless-stopped
     depends_on:
-      - postgre-db
+      postgre-db:
+        condition: service_healthy
+      usuarios:
+        condition: service_healthy
 
   gateway:
     build: ./gateway
     container_name: gateway
     environment:
-      JWT_SECRET: b2bmatch-super-secreto-cambiar-en-produccion-2026-minimo32car
+      JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
     ports:
       - "8080:8080"
     restart: unless-stopped
     depends_on:
-      - usuarios
-      - perfiles
-      - catalogo
-      - ofertas
-      - resenias
-      - notificaciones
+      postgre-db:
+        condition: service_healthy
+      usuarios:
+        condition: service_healthy
+      perfiles:
+        condition: service_healthy
+      catalogo:
+        condition: service_healthy
+      ofertas:
+        condition: service_healthy
+      resenias:
+        condition: service_healthy
+      notificaciones:
+        condition: service_healthy
 
 volumes:
   postgre_data:

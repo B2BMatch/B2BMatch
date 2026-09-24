@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import catalogoService from '../../services/catalogoService';
 import { getOfertaById, updateOferta } from '../../services/ofertasService';
@@ -8,7 +8,6 @@ export const EditOffer = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [formData, setFormData] = useState({
-    companyId: null,
     categoryId: null,
     title: '',
     budget: '',
@@ -30,7 +29,6 @@ export const EditOffer = () => {
 
         setCategories(cats || []);
         setFormData({
-          companyId: offer.companyId || null,
           categoryId: offer.categoryId || (cats.length > 0 ? cats[0].id : null),
           title: offer.title || '',
           budget: offer.budget ?? '',
@@ -45,12 +43,8 @@ export const EditOffer = () => {
       }
     };
 
-    if (id) {
-      loadData();
-    } else {
-      setError('ID de oferta inválido.');
-      setLoading(false);
-    }
+    if (!id) return;
+    loadData();
   }, [id]);
 
   const handleChange = (e) => {
@@ -73,7 +67,6 @@ export const EditOffer = () => {
     setSubmitting(true);
     try {
       await updateOferta(id, {
-        companyId: formData.companyId,
         categoryId: Number(formData.categoryId),
         title: formData.title,
         description: formData.description,
@@ -88,6 +81,10 @@ export const EditOffer = () => {
       setSubmitting(false);
     }
   };
+
+  if (!id) {
+    return <p style={{ padding: '20px' }}>ID de oferta inválido.</p>;
+  }
 
   if (loading) {
     return <p style={{ padding: '20px' }}>Cargando oferta...</p>;

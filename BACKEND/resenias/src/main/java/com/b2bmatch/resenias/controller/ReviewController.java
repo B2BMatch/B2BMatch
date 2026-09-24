@@ -6,10 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.b2bmatch.resenias.config.JwtService;
+import com.b2bmatch.resenias.dto.ReviewCreateRequestDto;
 import com.b2bmatch.resenias.model.Review;
 import com.b2bmatch.resenias.service.ReviewService;
 
 import io.jsonwebtoken.Claims;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,15 +37,34 @@ public class ReviewController {
         return reviewService.getReviewsByProfessional(professionalId);
     }
 
-    @GetMapping("/customer/{customerId}")
-    public List<Review> getReviewsByCustomer(@PathVariable("customerId") Long customerId) {
-        return reviewService.getReviewsByCustomer(customerId);
+    @GetMapping("/user/{userId}")
+    public List<Review> getReviewsByUser(@PathVariable("userId") Long userId) {
+        return reviewService.getReviewsByUser(userId);
+    }
+
+    @GetMapping("/me")
+    public List<Review> getMyReviews(@RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        Long userId = claims.get("userId", Long.class);
+        return reviewService.getReviewsByUser(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Review createReview(@RequestBody Review review) {
-        return reviewService.createReview(review);
+    public Review createReview(@Valid @RequestBody ReviewCreateRequestDto dto,
+            @RequestHeader("Authorization") String authHeader) {
+
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        Long requesterId = claims.get("userId", Long.class);
+        String requesterRole = claims.get("role", String.class);
+
+        Review review = Review.builder()
+                .professionalId(dto.getProfessionalId())
+                .rating(dto.getRating())
+                .comment(dto.getComment())
+                .build();
+
+        return reviewService.createReview(review, requesterId, requesterRole);
     }
 
     @PutMapping("/{id}")

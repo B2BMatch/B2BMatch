@@ -7,6 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,13 +29,18 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column (nullable = false)
-    private Long customerId; //puede cambiarse a customerId para seguir convencion, se tendria que agregar name = "customer_id" a parametro de la columna.
+    @Column(name = "user_id", nullable = false)
+    @NotNull(message = "userId es obligatorio")
+    private Long userId;
 
     @Column (nullable = false)
+    @NotNull(message = "professionalId es obligatorio")
     private Long professionalId;
 
     @Column (nullable = false)
+    @NotNull(message = "rating es obligatorio")
+    @Min(value = 1, message = "rating debe ser al menos 1")
+    @Max(value = 5, message = "rating no puede ser mayor a 5")
     private Integer rating;
 
     @Column (columnDefinition = "TEXT")

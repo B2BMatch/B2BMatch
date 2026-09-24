@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getOfertas, updateOfertaStatus } from '../../services/ofertasService';
 import '../../styles/admin.css';
 
@@ -13,22 +13,23 @@ export const Offers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const load = async () => {
-    try {
-      const data = await getOfertas();
-      setOffersList(data || []);
-      setError('');
-    } catch (err) {
-      console.error('Error cargando ofertas admin', err);
-      setError('No se pudieron cargar las ofertas.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getOfertas();
+        setOffersList(data || []);
+        setError('');
+      } catch (err) {
+        console.error('Error cargando ofertas admin', err);
+        setError('No se pudieron cargar las ofertas.');
+      } finally {
+        setLoading(false);
+      }
+    };
     load();
-  }, []);
+  }, [reloadKey]);
 
   const handleToggleStatus = async (offer, nextStatus) => {
     const action = nextStatus === 'ACTIVE' ? 'Activar' : 'Bajar';
@@ -37,7 +38,7 @@ export const Offers = () => {
     try {
       await updateOfertaStatus(offer.id, nextStatus);
       alert(`Oferta ${action.toLowerCase()} correctamente.`);
-      load();
+      setReloadKey((k) => k + 1);
     } catch (err) {
       console.error(err);
       alert('No se pudo actualizar la oferta.');
@@ -74,7 +75,7 @@ export const Offers = () => {
               return (
                 <tr key={offer.id}>
                   <td className="cell-strong">{offer.title || offer.titulo}</td>
-                  <td className="cell-muted">{offer.companyId}</td>
+                  <td className="cell-muted">{offer.userId}</td>
                   <td className="cell-muted">{offer.categoryId}</td>
                   <td className="cell-strong" style={{ color: 'var(--gold)' }}>{offer.budget ? `$${offer.budget}` : '—'}</td>
                   <td>

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom'; // 1. Importar BrowserRouter
 import App from './App.jsx';
-import { AuthProvider } from './context/AuthContext.jsx';
+import { AuthProvider } from './context/AuthProvider.jsx';
 import './styles/global.css';
 import './styles/cards.css';
 

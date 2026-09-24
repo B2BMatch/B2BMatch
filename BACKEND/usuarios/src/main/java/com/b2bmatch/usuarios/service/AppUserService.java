@@ -1,18 +1,30 @@
 package com.b2bmatch.usuarios.service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.annotation.PostConstruct;
 
 import com.b2bmatch.usuarios.config.JwtService;
+import com.b2bmatch.usuarios.dto.AppUserAdminRegisterRequestDto;
 import com.b2bmatch.usuarios.dto.AppUserRegisterRequestDto;
 import com.b2bmatch.usuarios.dto.AppUserResponseDto;
 import com.b2bmatch.usuarios.dto.AppUserUpdateRequestDto;
 import com.b2bmatch.usuarios.dto.LoginRequestDto;
 import com.b2bmatch.usuarios.dto.LoginResponseDto;
+import com.b2bmatch.usuarios.exception.ForbiddenException;
 import com.b2bmatch.usuarios.model.AppUser;
 import com.b2bmatch.usuarios.model.Role;
 import com.b2bmatch.usuarios.repository.AppUserRepository;
@@ -27,29 +39,63 @@ public class AppUserService {
     private static final Pattern PASSWORD_PATTERN =
         Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
 
+    private static final int MAX_LOGIN_ATTEMPTS = 5;
+    private static final long LOCK_DURATION_MINUTES = 15;
+    private static final int MAX_LOGIN_TRACKED_EMAILS = 10_000;
+
+    @Value("${app.admin-bootstrap-key:}")
+    private String adminBootstrapKey;
+
     private final RoleRepository roleRepository;
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final DataSource dataSource;
+
+    private JdbcTemplate jdbcTemplate;
+
+    private final ConcurrentHashMap<String, LoginAttempt> loginAttempts = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    void init() {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
     public AppUserResponseDto register(AppUserRegisterRequestDto request) {
         String normalizedEmail = request.getEmail().toLowerCase().trim();
+        checkNewEmail(normalizedEmail);
+        checkPasswordPattern(request.getPassword());
 
-        if (appUserRepository.findByEmail(normalizedEmail).isPresent()) {
-            throw new IllegalArgumentException("El email ya está registrado");
-        }
-
-        if (!PASSWORD_PATTERN.matcher(request.getPassword()).matches()) {
-            throw new IllegalArgumentException(
-                "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número");
-        }
-
-        Role role = roleRepository.findById(request.getRoleId())
+        Role role = roleRepository.findByName(request.getRoleName().toUpperCase().trim())
                 .orElseThrow(() -> new IllegalArgumentException("El rol especificado no existe"));
 
+        if ("ADMIN".equals(role.getName())) {
+            throw new IllegalArgumentException("No está permitido registrarse como administrador");
+        }
+
+        return createUser(normalizedEmail, request.getName().trim(), request.getPassword(), role);
+    }
+
+    public AppUserResponseDto registerAdmin(AppUserAdminRegisterRequestDto request, String bootstrapKey) {
+        if (!isValidBootstrapKey(bootstrapKey)) {
+            throw new ForbiddenException("Clave de bootstrap inválida");
+        }
+
+        String normalizedEmail = request.getEmail().toLowerCase().trim();
+        checkNewEmail(normalizedEmail);
+        checkPasswordPattern(request.getPassword());
+
+        Role adminRole = roleRepository.findByName("ADMIN")
+                .orElseThrow(() -> new IllegalArgumentException("El rol ADMIN no existe"));
+
+        return createUser(normalizedEmail, request.getName().trim(), request.getPassword(), adminRole);
+    }
+
+    private AppUserResponseDto createUser(String normalizedEmail, String name, String password, Role role) {
         AppUser appUser = new AppUser();
         appUser.setEmail(normalizedEmail);
-        appUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        appUser.setName(name);
+        appUser.setPasswordHash(passwordEncoder.encode(password));
         appUser.setRole(role);
         appUser.setStatus("ACTIVE");
         appUser.setCreatedAt(LocalDateTime.now());
@@ -57,22 +103,83 @@ public class AppUserService {
         return toDto(appUserRepository.save(appUser));
     }
 
+    private void checkNewEmail(String normalizedEmail) {
+        if (appUserRepository.findByEmail(normalizedEmail).isPresent()) {
+            throw new IllegalArgumentException("El email ya está registrado");
+        }
+    }
+
+    private void checkPasswordPattern(String password) {
+        if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            throw new IllegalArgumentException(
+                "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número");
+        }
+    }
+
+    private boolean isValidBootstrapKey(String presentedKey) {
+        if (presentedKey == null || adminBootstrapKey == null || adminBootstrapKey.isEmpty()) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                adminBootstrapKey.getBytes(StandardCharsets.UTF_8),
+                presentedKey.getBytes(StandardCharsets.UTF_8));
+    }
+
     public LoginResponseDto login(LoginRequestDto request) {
         String normalizedEmail = request.getEmail().toLowerCase().trim();
+        pruneLoginAttempts();
+
+        LoginAttempt attempt = loginAttempts.get(normalizedEmail);
+        if (attempt != null && attempt.lockedUntil != null) {
+            if (LocalDateTime.now().isBefore(attempt.lockedUntil)) {
+                throw new IllegalArgumentException(
+                        "Demasiados intentos fallidos. Cuenta bloqueada temporalmente, intente nuevamente más tarde");
+            }
+            loginAttempts.remove(normalizedEmail);
+        }
 
         AppUser appUser = appUserRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Email o contraseña incorrectos"));
 
-        if ("DELETED".equals(appUser.getStatus())) {
-            throw new IllegalArgumentException("Esta cuenta está deshabilitada");
+        if (!"ACTIVE".equals(appUser.getStatus())) {
+            throw new IllegalArgumentException("Esta cuenta no está activa");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), appUser.getPasswordHash())) {
+            registerLoginFailure(normalizedEmail);
             throw new IllegalArgumentException("Email o contraseña incorrectos");
         }
 
+        loginAttempts.remove(normalizedEmail);
+
         String token = jwtService.generateToken(appUser.getEmail(), appUser.getRole().getName(), appUser.getId());
-        return new LoginResponseDto(appUser.getId(), token, appUser.getEmail(), appUser.getRole().getName());
+        return new LoginResponseDto(appUser.getId(), appUser.getName(), token, appUser.getEmail(), appUser.getRole().getName());
+    }
+
+    private void registerLoginFailure(String email) {
+        pruneLoginAttempts();
+        LoginAttempt attempt = loginAttempts.computeIfAbsent(email, k -> new LoginAttempt());
+        attempt.count++;
+        if (attempt.count >= MAX_LOGIN_ATTEMPTS) {
+            attempt.lockedUntil = LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES);
+            attempt.count = 0;
+        }
+    }
+
+    private void pruneLoginAttempts() {
+        if (loginAttempts.size() <= MAX_LOGIN_TRACKED_EMAILS) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        loginAttempts.entrySet().removeIf(entry -> {
+            LoginAttempt attempt = entry.getValue();
+            return attempt.lockedUntil == null || attempt.lockedUntil.isBefore(now);
+        });
+    }
+
+    private static final class LoginAttempt {
+        int count;
+        LocalDateTime lockedUntil;
     }
 
     public AppUserResponseDto update(Long id, AppUserUpdateRequestDto request) {
@@ -91,6 +198,7 @@ public class AppUserService {
                 .orElseThrow(() -> new IllegalArgumentException("El rol especificado no existe"));
 
         appUser.setEmail(normalizedEmail);
+        appUser.setName(request.getName().trim());
         appUser.setRole(role);
         appUser.setUpdatedAt(LocalDateTime.now());
 
@@ -115,6 +223,7 @@ public class AppUserService {
                 .toList();
     }
 
+    @Transactional
     public void delete(Long id) {
         AppUser appUser = appUserRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
@@ -126,6 +235,67 @@ public class AppUserService {
         appUser.setStatus("DELETED");
         appUser.setUpdatedAt(LocalDateTime.now());
         appUserRepository.save(appUser);
+
+        cascadeSoftDeleteDependentData(id);
+    }
+
+    private void cascadeSoftDeleteDependentData(Long userId) {
+        jdbcTemplate.update(
+                "UPDATE perfiles.company_profile SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE user_id=? AND status<>'DELETED'", userId);
+        jdbcTemplate.update(
+                "UPDATE perfiles.professional_profile SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE user_id=? AND status<>'DELETED'", userId);
+        jdbcTemplate.update(
+                "UPDATE perfiles.customer_profile SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE user_id=? AND status<>'DELETED'", userId);
+        jdbcTemplate.update("DELETE FROM notificaciones.notification WHERE user_id=?", userId);
+        jdbcTemplate.update(
+                "UPDATE ofertas.job_offer SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE status<>'DELETED' AND user_id=?", userId);
+        jdbcTemplate.update(
+                "UPDATE ofertas.application_table SET status='REJECTED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE status='PENDING' AND job_offer_id IN "
+                        + "(SELECT id FROM ofertas.job_offer WHERE user_id=?)", userId);
+        jdbcTemplate.update(
+                "UPDATE catalogo.professional_service SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE status<>'DELETED' AND professional_id IN "
+                        + "(SELECT id FROM perfiles.professional_profile WHERE user_id=?)", userId);
+        jdbcTemplate.update(
+                "UPDATE catalogo.company_service SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE status<>'DELETED' AND company_id IN "
+                        + "(SELECT id FROM perfiles.company_profile WHERE user_id=?)", userId);
+        jdbcTemplate.update(
+                "UPDATE ofertas.application_table SET status='REJECTED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE status='PENDING' AND user_id=?", userId);
+        jdbcTemplate.update(
+                "UPDATE ofertas.quotation SET status='EXPIRED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE status='PENDING' AND user_id=?", userId);
+        jdbcTemplate.update(
+                "UPDATE ofertas.quotation SET status='EXPIRED', updated_at=CURRENT_TIMESTAMP "
+                        + "WHERE status='PENDING' AND service_id IN "
+                        + "(SELECT ps.id FROM catalogo.professional_service ps "
+                        + "JOIN perfiles.professional_profile pp ON pp.id = ps.professional_id WHERE pp.user_id=?)",
+                userId);
+        jdbcTemplate.update("DELETE FROM resenias.review WHERE user_id=?", userId);
+    }
+
+    public AppUserResponseDto updateStatus(Long id, String status) {
+        AppUser appUser = appUserRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
+
+        if ("DELETED".equals(appUser.getStatus())) {
+            throw new IllegalArgumentException("No se puede cambiar el estado de una cuenta eliminada");
+        }
+
+        String newStatus = status.toUpperCase();
+        if (!List.of("ACTIVE", "INACTIVE", "SUSPENDED").contains(newStatus)) {
+            throw new IllegalArgumentException("Estado no válido");
+        }
+
+        appUser.setStatus(newStatus);
+        appUser.setUpdatedAt(LocalDateTime.now());
+        return toDto(appUserRepository.save(appUser));
     }
 
     public AppUserResponseDto reactivate(Long id) {
@@ -145,6 +315,7 @@ public class AppUserService {
         return new AppUserResponseDto(
                 appUser.getId(),
                 appUser.getEmail(),
+                appUser.getName(),
                 appUser.getStatus(),
                 appUser.getRole().getName(),
                 appUser.getCreatedAt(),

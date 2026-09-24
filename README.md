@@ -47,7 +47,7 @@ b2breact/
 │   ├── notificaciones/  # 8086
 │   ├── docker-compose.yml
 │   └── init/            # Script que ejecuta las migraciones SQL
-└── DATABASE/            # Scripts SQL por microservicio
+└── DATABASE/            # Scripts SQL históricos (referencia; el schema real lo arma Flyway de cada microservicio)
 ```
 
 ## Roles
@@ -57,7 +57,7 @@ b2breact/
 | **ADMIN** | No (solo seed) | Dashboard, aprobar/bloquear empresas, suspender usuarios, bajar ofertas |
 | **PROFESSIONAL** | Sí ("Postulante") | Ver ofertas, completar perfil profesional, postularse, ver postulaciones, publicar servicios y ver cotizaciones recibidas |
 | **COMPANY** | Sí ("Empresa") | Completar perfil de empresa, crear/editar/eliminar ofertas, ver postulantes de sus ofertas y dejarles reseñas |
-| **CUSTOMER** | — | Consulta de ofertas |
+| **CUSTOMER** | Sí | Consulta de ofertas |
 
 ## Usuarios demo (seed)
 
@@ -75,6 +75,8 @@ b2breact/
 
 ```bash
 cd BACKEND
+# Primera vez: crear las variables locales (nunca comitear el .env real)
+cp .env.example .env
 docker-compose up --build
 ```
 
@@ -153,12 +155,28 @@ Registro cronológico de los cambios realizados sobre el proyecto:
 - Flujo verificado en vivo vía proxy (`localhost:5173/api`): login con JWT, creación de servicio profesional, solicitud de cotización, publicación de reseña, listados públicos y protección 401 en rutas privadas.
 
 ### 12. Validación de propiedad (ownership) en el backend
-- **Regla**: cada usuario solo puede modificar/eliminar **sus propios** recursos (o ADMIN por bypass). Antes, el backend aceptaba editar cualquier recurso por ID.
-- `usuarios` (`AppUserController`): `GET /api/users`, `GET /api/users/role/{role}`, `DELETE`, `reactivate` y `status` → solo ADMIN; `GET /api/users/{id}` → admin o el propio usuario (403 en otro caso).
-- `perfiles` (Company/Professional/Customer): `create` fuerza `userId` = usuario autenticado (salvo admin); `update`/`delete` requieren ser el dueño del perfil o admin.
-- `resenias` (`ReviewController`): `createReview` fuerza `customerId` = usuario autenticado; `update`/`delete` requieren el autor de la reseña o admin.
-- `notificaciones` (`NotificationController`): consultar/marcar/eliminar → solo el dueño o admin; crear sigue siendo público para el sistema.
-- `ofertas`: las ofertas ahora guardan el **dueño** (`job_offer.user_id`) y las postulaciones también (`application_table.user_id`); `update`/`delete`/`updateStatus` de ofertas exigen ser el dueño o admin; `JobApplicationController`/`QuotationController` exigen dueño (postulante/empresa dueña de la oferta / solicitante de la cotización) o admin. `create` de ofertas/postulaciones/cotizaciones fuerza el `userId` desde el JWT.
-- **Migración SQL aplicada** en la BD en vivo (y en los DDL de `DATABASE/ofertas/`): `ALTER TABLE job_offer ADD COLUMN user_id BIGINT NOT NULL` y `application_table ADD COLUMN user_id BIGINT NOT NULL`, con backfill del dueño seed.
-- Se agregó el handler de `ResponseStatusException` en los `GlobalExceptionHandler` de todos los MS para que el 403 se devuelva como 403 real (antes terminaba como 401/404/500 por el re-dispatch de error).
+- **Regla**: cada usuario solo puede crear/modificar/eliminar **sus propios** recursos (o ADMIN por bypass). Antes, el backend confiaba en los IDs enviados por body.
+- `usuarios`: `POST /api/users/register` **no permite registrarse como ADMIN** (solo PROFESSIONAL, COMPANY o CUSTOMER); `POST /api/roles` y la gestión de usuarios quedan solo ADMIN.
+- `perfiles` (Company/Professional/Customer): `create` fuerza `userId` = usuario autenticado (salvo admin) y exige que el rol del token coincida con el tipo de perfil (COMPANY/PROFESSIONAL/CUSTOMER); `update`/`delete` requieren ser el dueño del perfil o admin.
+- `resenias`: `createReview` fuerza `customerId` del JWT, valida que el profesional exista (cross-schema `perfiles`), prohíbe auto-reseña (self-review) y duplicados por (customerId, professionalId); `update`/`delete` requieren el autor o admin.
+- `catalogo`: escrituras de categorías y skills → solo ADMIN. `professional-service`/`company-service`: `create` exige rol PROFESSIONAL/COMPANY y un perfil propio (verificado contra `perfiles`); `update`/`delete` solo del dueño o admin.
+- `ofertas` (JobOffer / JobApplication / Quotation): el esquema desplegado (migraciones Flyway `V1__init_schema.sql` de cada servicio) SÍ tiene columnas `user_id` (FK a `usuarios.app_user`) en `job_offer`, `application_table` y `quotation`, y el ownership se valida con esas columnas directas (`offer.getUserId()`), además de joins cross-schema donde hace falta (p. ej. `professional_id` de un servicio → `perfiles`). `create` de ofertas exige COMPANY y empresa propia; postulaciones exigen PROFESSIONAL, perfil propio y prohíben postularse a ofertas de la propia empresa; cotizaciones fuerzan el `user_id` del JWT y prohíben solicitudes sobre un servicio propio. `update`/`delete`/`accept`/`reject` y los reads sensibles (postulaciones por oferta, cotizaciones por servicio/usuario, etc.) verifican el dueño real o ADMIN.
+- **Importante** (origen del modelo): la carpeta `DATABASE/` es el esquema **histórico** del proyecto (numeración 01-18) y hoy **no se ejecuta**: el schema en runtime lo generan las migraciones **Flyway** embebidas en cada microservicio (`BACKEND/<servicio>/src/main/resources/db/migration`, V1 init + V2 seed), que son la fuente de verdad. `DATABASE/ofertas/` se actualizó para reflejarlo (columnas `user_id`).
 - Verificado en vivo: editar/borrar oferta ajena → 403; ver postulaciones de oferta ajena → 403; ver cotizaciones de otro → 403; editar reseña de otro → 403; editar perfil de otro → 403; `GET /api/users` con rol no-admin → 403; y los casos legítimos (dueño) siguen funcionando (200/201).
+
+### 13. Endurecimiento adicional (severidad media)
+- **Canal interno de notificaciones**: `POST /api/notifications/internal` validado con header `X-Internal-Service-Key` (variable `INTERNAL_SERVICE_KEY`, de la que hoy dependen otros microservicios); `POST /api/notifications` directo queda solo para ADMIN y el `message` se limita a 500 caracteres.
+- **PII en perfiles públicos**: los `GET` de `company-profiles` y `professional-profiles` siguen siendo públicos (marketplace) pero enmascaran los datos sensibles (`email`, `phone`, `address`, `tax_id`, `userId`, `portfolio_url`, `linkedin_url`, `github_url`) salvo para el dueño o ADMIN (token opcional en el GET). El frontend solo consume `companyName`/`firstName`/`lastName`/`city` por esas rutas.
+- **Gateway**: las rutas públicas ahora son por método y exactas (`POST /api/auth/login`, `POST /api/users/register`) más los `GET` públicos del marketplace (`job-offers`, `reviews`, `catalogo`, `company-profiles`, `professional-profiles`); ya no se abre por prefijo ajeno.
+- **Login anti fuerza bruta**: en `usuarios`, 5 intentos fallidos por email → bloqueo temporal de 15 minutos (en memoria), se limpia al loguear bien.
+- **Ofertas**: nuevo `PATCH /api/job-offers/{id}/status` (dueño de la empresa o ADMIN; `ACTIVE|INACTIVE|SUSPENDED|DELETED`); `accept()` de postulación revalida que la oferta siga `ACTIVE`; una cotización solo se puede editar en estado `PENDING`.
+- **Baja de usuario**: `DELETE /api/users/{id}` (soft delete) además desactiva en cascada sus perfiles y ofertas de su empresa y elimina sus notificaciones (mismo esquema, cross-schema), evitando recursos activos huérfanos.
+
+### 14. Bajo (A) + CORS
+- **`catalogo` (categories/skills)**: los endpoints de escritura ya no castean ciegamente el body (`(String) body.get(...)`); un `name`/`description` de tipo incorrecto devuelve **400** en vez de **500**. Se agregaron `PUT` y `DELETE` de skills (solo ADMIN), con `404`/`409` correctos.
+- **CORS**: se configuró `http://localhost:5173` y `http://127.0.0.1:5173` en los 6 microservicios (bean `CorsConfigurationSource`) y en el gateway (`spring.cloud.gateway.globalcors`). El proxy del frontend sigue siendo el camino habitual del dev.
+
+### 15. Rutas `/me` (alias por JWT)
+- `GET /api/professional-profiles/me` (_perfiles_), `GET /api/reviews/me` (_resenias_) y `GET /api/notifications/me` + `/me/unread` (_notificaciones_) resuelven el `userId` desde el token y devuelven **tus** datos sin pasar ids en la URL.
+- En `perfiles` y `resenias` se agregó un matcher `.authenticated()` específico para `/me` **antes** del `permitAll` de su familia de rutas (así `/me` exige token y los listados públicos siguen abiertos). En `notificaciones` ya estaba cubierto por `anyRequest().authenticated()`.
+- Sin cambios en el frontend (sigue usando `/user/{userId}` desde `localStorage`).

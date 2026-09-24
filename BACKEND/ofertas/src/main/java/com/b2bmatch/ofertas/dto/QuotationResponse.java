@@ -14,7 +14,7 @@ import lombok.Setter;
 public class QuotationResponse {
     private Long id;
     private Long serviceId;
-    private Long customerId;
+    private Long userId;
     private String message;
     private String status;
     private LocalDateTime createdAt;
@@ -25,7 +25,7 @@ public class QuotationResponse {
         return new QuotationResponse(
             entity.getId(),
             entity.getServiceId(),
-            entity.getCustomerId(),
+            entity.getUserId(),
             entity.getMessage(),
             entity.getStatus(),
             entity.getCreatedAt(),

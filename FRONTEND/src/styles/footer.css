@@ -13,10 +13,177 @@
 }
 
 .footer-b2b a {
-  color: var(--gold);
+  color: rgba(247, 243, 236, 0.75);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .footer-b2b a:hover {
-  text-decoration: underline;
+  color: #FF6F4D;
+}
+
+/* =====================================================
+   FOOTER MEGA (formato Fiverr)
+   ===================================================== */
+.footer-mega {
+  padding: 56px 24px 28px;
+  text-align: left;
+  background:
+    radial-gradient(900px 400px at 90% -10%, rgba(255, 111, 77, 0.1), transparent 55%),
+    var(--bg-footer);
+}
+
+.footer-mega-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.35fr repeat(5, 1fr);
+  gap: 36px 28px;
+}
+
+.footer-mega-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-mega-logo img {
+  max-height: 34px;
+  filter: brightness(0) invert(1);
+}
+
+.footer-mega-logo strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: #FFFFFF;
+}
+
+.footer-mega-tagline {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(247, 243, 236, 0.65);
+  margin: 0;
+  max-width: 300px;
+}
+
+.footer-mega-socials {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-mega-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: rgba(247, 243, 236, 0.85);
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.footer-mega-social:hover {
+  background: rgba(255, 111, 77, 0.2);
+  border-color: rgba(255, 111, 77, 0.5);
+  transform: translateY(-2px);
+}
+
+.footer-mega-social-label {
+  color: rgba(247, 243, 236, 0.85);
+}
+
+.footer-mega-heading {
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin: 0 0 14px;
+}
+
+.footer-mega-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-mega-links a {
+  font-size: 0.88rem;
+  color: rgba(247, 243, 236, 0.7);
+  white-space: nowrap;
+}
+
+.footer-mega-bottom {
+  max-width: 1240px;
+  margin: 44px auto 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.footer-mega-legal {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(247, 243, 236, 0.7);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.footer-mega-legal a {
+  color: rgba(247, 243, 236, 0.7);
+}
+
+.footer-mega-copy {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(247, 243, 236, 0.5);
+}
+
+.footer-mega-locale {
+  display: flex;
+  gap: 8px;
+}
+
+.footer-mega-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(247, 243, 236, 0.85);
+}
+
+@media (max-width: 1024px) {
+  .footer-mega-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .footer-mega-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-mega-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-mega-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -1,6 +1,12 @@
 server:
   port: 8081
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
 spring:
   application:
     name: usuarios
@@ -8,6 +14,10 @@ spring:
     url: jdbc:postgresql://postgre-db:5432/b2bmatch
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: usuarios
   jpa:
     properties:
       hibernate:
@@ -24,3 +34,4 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: 86400000
+  admin-bootstrap-key: ${ADMIN_BOOTSTRAP_KEY:}

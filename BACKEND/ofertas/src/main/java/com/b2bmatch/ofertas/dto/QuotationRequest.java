@@ -15,10 +15,5 @@ public class QuotationRequest {
     @NotNull(message = "serviceId is required")
     private Long serviceId;
 
-    @NotNull(message = "customerId is required")
-    private Long customerId;
-
     private String message;
-
-    private String status;
 }

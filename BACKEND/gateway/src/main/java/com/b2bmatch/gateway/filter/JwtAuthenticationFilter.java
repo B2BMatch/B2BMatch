@@ -27,9 +27,18 @@ public class JwtAuthenticationFilter implements WebFilter, Ordered {
     @Value("${jwt.secret}")
     private String secret;
 
-    private static final List<String> PUBLIC_PATHS = List.of(
+    private static final List<String> PUBLIC_GET_PREFIXES = List.of(
+            "/api/job-offers",
+            "/api/reviews",
+            "/api/catalogo",
+            "/api/company-profiles",
+            "/api/professional-profiles"
+    );
+
+    private static final List<String> PUBLIC_POST_PATHS = List.of(
             "/api/auth/login",
-            "/api/users/register"
+            "/api/users/register",
+            "/api/users/admin-register"
     );
 
     private static final Pattern USER_DELETE_PATTERN = Pattern.compile("^/api/users/(\\d+)$");
@@ -39,7 +48,7 @@ public class JwtAuthenticationFilter implements WebFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        if (isPublicPath(path)) {
+        if (isPublicRequest(request.getMethod(), path)) {
             return chain.filter(exchange);
         }
 
@@ -76,8 +85,14 @@ public class JwtAuthenticationFilter implements WebFilter, Ordered {
         }
     }
 
-    private boolean isPublicPath(String path) {
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+    private boolean isPublicRequest(HttpMethod method, String path) {
+        if (HttpMethod.POST.equals(method)) {
+            return PUBLIC_POST_PATHS.contains(path);
+        }
+        if (HttpMethod.GET.equals(method)) {
+            return PUBLIC_GET_PREFIXES.stream().anyMatch(path::startsWith);
+        }
+        return false;
     }
 
     private boolean isRoleCreation(HttpMethod method, String path) {

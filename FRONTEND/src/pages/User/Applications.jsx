@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import applicationsService from '../../services/applicationsService';
 import perfilesService from '../../services/perfilesService';
@@ -38,7 +38,7 @@ export const Applications = () => {
             setError('Completa tu perfil profesional para ver tus postulaciones.');
             return;
           }
-          data = await applicationsService.getApplicationsByProfessionalId(profile.id);
+          data = await applicationsService.getApplicationsByUserId(user.id);
         } else {
           data = await applicationsService.getApplications();
         }

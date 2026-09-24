@@ -8,6 +8,6 @@ import com.b2bmatch.ofertas.model.JobApplication;
 @Repository
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
     List<JobApplication> findByJobOfferId(Long jobOfferId);
-    List<JobApplication> findByProfessionalId(Long professionalId);
+    List<JobApplication> findByUserId(Long userId);
 }
 

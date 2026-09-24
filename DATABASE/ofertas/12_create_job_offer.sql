@@ -1,16 +1,26 @@
 SET search_path TO ofertas, public;
 
--- ================================================
--- Tabla: job_offer
--- Descripción: Ofertas de trabajo o proyectos publicadas por empresas para contratar profesionales a través de la plataforma.
--- Utilizada por: application
--- ================================================
+/*
+====================================================
+ Project : b2bmatch
+ File    : 12_create_job_offer.sql
+ Author  : Team b2bmatch
 
+ NOTA DE CONSISTENCIA: estas DDL son REFERENCIA HISTORICA.
+ La base de datos en ejecucion se crea con las migraciones
+ Flyway de BACKEND/<servicio>/src/main/resources/db/migration
+ (V1__init_schema.sql / V2__seed_data.sql), que son la fuente
+ de verdad. Este archivo busca reflejarlas fielmente.
+====================================================
+*/
+
+-- Tabla: job_offer
+-- Ofertas publicadas por empresas para contratar profesionales.
 CREATE TABLE job_offer (
 
     id BIGSERIAL,
 
-    company_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
 
     category_id BIGINT NOT NULL,
 
@@ -31,24 +41,24 @@ CREATE TABLE job_offer (
     CONSTRAINT pk_job_offer
         PRIMARY KEY (id),
 
+    CONSTRAINT fk_job_offer_user
+        FOREIGN KEY (user_id) REFERENCES usuarios.app_user(id),
+
+    CONSTRAINT fk_job_offer_category
+        FOREIGN KEY (category_id) REFERENCES catalogo.category(id) ON DELETE RESTRICT,
 
     CONSTRAINT ck_job_offer_status
-        CHECK (
-            status IN (
-                'ACTIVE',
-                'PENDING',
-                'SUSPENDED',
-                'INACTIVE',
-                'DELETED'
-            )
-        )
+        CHECK (status IN ('ACTIVE', 'SUSPENDED', 'INACTIVE', 'DELETED', 'CLOSED', 'EXPIRED')),
+
+    CONSTRAINT ck_job_offer_budget
+        CHECK (budget > 0),
+
+    CONSTRAINT ck_job_offer_deadline
+        CHECK (deadline > CURRENT_DATE)
 
 );
 
 COMMENT ON TABLE job_offer IS 'Job offers published by companies';
 
-CREATE INDEX idx_job_offer_company
-ON job_offer(company_id);
-
-CREATE INDEX idx_job_offer_category
-ON job_offer(category_id);
+CREATE INDEX IF NOT EXISTS idx_job_offer_user ON job_offer(user_id);
+CREATE INDEX IF NOT EXISTS idx_job_offer_category ON job_offer(category_id);

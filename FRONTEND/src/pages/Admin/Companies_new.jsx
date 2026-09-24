@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import perfilesService from '../../services/perfilesService';
 import usersService from '../../services/usersService';
 import '../../styles/admin.css';
@@ -16,20 +16,19 @@ export const Companies = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const load = async () => {
-    try {
-      const data = await perfilesService.getCompanyProfiles();
-      setCompaniesList(data || []);
-      setError('');
-    } catch (err) {
-      console.error('Error cargando empresas', err);
-      setError('No se pudieron cargar las empresas.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await perfilesService.getCompanyProfiles();
+        setCompaniesList(data || []);
+        setError('');
+      } catch (err) {
+        console.error('Error cargando empresas', err);
+        setError('No se pudieron cargar las empresas.');
+      } finally {
+        setLoading(false);
+      }
+    };
     load();
   }, []);
 

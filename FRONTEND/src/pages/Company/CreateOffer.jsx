@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import catalogoService from '../../services/catalogoService';
@@ -39,13 +39,11 @@ export const CreateOffer = () => {
     }
 
     const payload = {
-      companyId: companyProfileId,
       categoryId: categoryId,
       title: formData.title,
       description: formData.description,
       budget: formData.budget ? parseFloat(formData.budget) : 0,
       deadline: formData.deadline,
-      status: 'ACTIVE',
     };
 
     setSubmitting(true);

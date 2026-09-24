@@ -17,13 +17,8 @@ public class JobApplicationRequest {
     @NotNull(message = "jobOfferId is required")
     private Long jobOfferId;
 
-    @NotNull(message = "professionalId is required")
-    private Long professionalId;
-
     @NotBlank(message = "proposal is required")
     private String proposal;
 
     private BigDecimal expectedPrice;
-
-    private String status;
 }

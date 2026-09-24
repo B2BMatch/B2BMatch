@@ -33,34 +33,54 @@ public class QuotationController {
     private final JwtService jwtService;
 
     @GetMapping
-    public ResponseEntity<List<QuotationResponse>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<QuotationResponse>> findAll(
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findAll(claims.get("role", String.class)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuotationResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<QuotationResponse> findById(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findById(id, claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
     @GetMapping("/service/{serviceId}")
-    public ResponseEntity<List<QuotationResponse>> findByServiceId(@PathVariable Long serviceId) {
-        return ResponseEntity.ok(service.findByServiceId(serviceId));
+    public ResponseEntity<List<QuotationResponse>> findByServiceId(
+            @PathVariable Long serviceId,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findByServiceId(serviceId, claims.get("userId", Long.class),
+                claims.get("role", String.class)));
     }
 
-    @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<QuotationResponse>> findByCustomerId(@PathVariable Long customerId) {
-        return ResponseEntity.ok(service.findByCustomerId(customerId));
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<QuotationResponse>> findByUserId(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findByUserId(userId, claims.get("userId", Long.class),
+                claims.get("role", String.class)));
     }
 
     @PostMapping
-    public ResponseEntity<QuotationResponse> create(@Valid @RequestBody QuotationRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
+    public ResponseEntity<QuotationResponse> create(
+            @Valid @RequestBody QuotationRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(request, claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<QuotationResponse> update(@PathVariable Long id,
-            @Valid @RequestBody QuotationRequest request) {
-        return ResponseEntity.ok(service.update(id, request));
+            @Valid @RequestBody QuotationRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.update(id, request, claims.get("userId", Long.class),
+                claims.get("role", String.class)));
     }
 
     @DeleteMapping("/{id}")
@@ -77,7 +97,7 @@ public class QuotationController {
             @PathVariable("id") Long id,
             @RequestHeader("Authorization") String authHeader) {
         Claims claims = jwtService.parseToken(authHeader.substring(7));
-        return ResponseEntity.ok(service.accept(id, claims.get("role", String.class)));
+        return ResponseEntity.ok(service.accept(id, claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
     @PatchMapping("/{id}/reject")
@@ -85,6 +105,6 @@ public class QuotationController {
             @PathVariable("id") Long id,
             @RequestHeader("Authorization") String authHeader) {
         Claims claims = jwtService.parseToken(authHeader.substring(7));
-        return ResponseEntity.ok(service.reject(id, claims.get("role", String.class)));
+        return ResponseEntity.ok(service.reject(id, claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 }

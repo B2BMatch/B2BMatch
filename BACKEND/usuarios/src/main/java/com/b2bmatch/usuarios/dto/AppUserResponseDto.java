@@ -12,6 +12,7 @@ import lombok.Setter;
 public class AppUserResponseDto {
     private Long id;
     private String email;
+    private String name;
     private String status;
     private String roleName;
     private LocalDateTime createdAt;

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.b2bmatch.perfiles.dto.CustomerProfileRequest;
 import com.b2bmatch.perfiles.dto.CustomerProfileResponse;
@@ -20,27 +21,67 @@ public class CustomerProfileService {
 
     private final CustomerProfileRepository repository;
 
-    public List<CustomerProfileResponse> findAll() {
+    public List<CustomerProfileResponse> findAll(Long requesterId, String requesterRole) {
+        boolean full = isFullAccess(null, requesterId, requesterRole);
         return repository.findByStatusNot("DELETED").stream()
                 .map(CustomerProfileResponse::fromEntity)
+                .map(dto -> full ? dto : mask(dto))
                 .toList();
     }
 
-    public CustomerProfileResponse findById(Long id) {
+    public CustomerProfileResponse findById(Long id, Long requesterId, String requesterRole) {
         CustomerProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Customer profile not found with id: " + id));
-        return CustomerProfileResponse.fromEntity(entity);
+        if ("DELETED".equals(entity.getStatus())) {
+            throw new ProfileNotFoundException("Customer profile not found with id: " + id);
+        }
+        return toResponse(entity, requesterId, requesterRole);
     }
 
-    public CustomerProfileResponse findByUserId(Long userId) {
+    public CustomerProfileResponse findByUserId(Long userId, Long requesterId, String requesterRole) {
         CustomerProfile entity = repository.findByUserId(userId)
                 .orElseThrow(() -> new ProfileNotFoundException("Customer profile not found for user id: " + userId));
-        return CustomerProfileResponse.fromEntity(entity);
+        if ("DELETED".equals(entity.getStatus())) {
+            throw new ProfileNotFoundException("Customer profile not found for user id: " + userId);
+        }
+        return toResponse(entity, requesterId, requesterRole);
     }
 
+    private boolean isFullAccess(CustomerProfile entity, Long requesterId, String requesterRole) {
+        if ("ADMIN".equals(requesterRole)) {
+            return true;
+        }
+        return entity != null && requesterId != null && entity.getUserId().equals(requesterId);
+    }
+
+    private CustomerProfileResponse toResponse(CustomerProfile entity, Long requesterId, String requesterRole) {
+        CustomerProfileResponse dto = CustomerProfileResponse.fromEntity(entity);
+        return isFullAccess(entity, requesterId, requesterRole) ? dto : mask(dto);
+    }
+
+    private CustomerProfileResponse mask(CustomerProfileResponse dto) {
+        dto.setUserId(null);
+        dto.setFirstName(null);
+        dto.setLastName(null);
+        dto.setPhone(null);
+        dto.setAddress(null);
+        return dto;
+    }
+
+    @Transactional
     public CustomerProfileResponse create(CustomerProfileRequest request) {
-        CustomerProfile entity = new CustomerProfile();
-        entity.setUserId(request.getUserId());
+        if (repository.findByUserId(request.getUserId())
+                .map(CustomerProfile::getStatus)
+                .filter("ACTIVE"::equals)
+                .isPresent()) {
+            throw new IllegalArgumentException("El usuario ya tiene un perfil de cliente registrado");
+        }
+        CustomerProfile entity = repository.findByUserId(request.getUserId()).orElse(null);
+        if (entity == null) {
+            entity = new CustomerProfile();
+            entity.setUserId(request.getUserId());
+            entity.setCreatedAt(LocalDateTime.now());
+        }
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
         entity.setPhone(request.getPhone());
@@ -48,13 +89,27 @@ public class CustomerProfileService {
         entity.setCity(request.getCity());
         entity.setCountry(request.getCountry());
         entity.setStatus("ACTIVE");
-        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
         return CustomerProfileResponse.fromEntity(repository.save(entity));
     }
 
-    public CustomerProfileResponse update(Long id, CustomerProfileRequest request) {
+    @Transactional
+    public CustomerProfileResponse update(Long id, CustomerProfileRequest request,
+            Long requesterId, String requesterRole) {
         CustomerProfile existing = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Customer profile not found with id: " + id));
+
+        boolean isOwner = existing.getUserId().equals(requesterId);
+        boolean isAdmin = "ADMIN".equals(requesterRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("Solo puedes modificar tu propio perfil, o ser ADMIN");
+        }
+
+        if ("DELETED".equals(existing.getStatus())) {
+            throw new IllegalArgumentException("El perfil está eliminado, no se puede modificar");
+        }
+
         existing.setFirstName(request.getFirstName());
         existing.setLastName(request.getLastName());
         existing.setPhone(request.getPhone());
@@ -65,6 +120,7 @@ public class CustomerProfileService {
         return CustomerProfileResponse.fromEntity(repository.save(existing));
     }
 
+    @Transactional
     public void delete(Long id, Long requesterId, String requesterRole) {
         CustomerProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Customer profile not found with id: " + id));
@@ -85,6 +141,7 @@ public class CustomerProfileService {
         repository.save(entity);
     }
 
+    @Transactional
     public CustomerProfileResponse reactivate(Long id, Long requesterId, String requesterRole) {
         CustomerProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Customer profile not found with id: " + id));

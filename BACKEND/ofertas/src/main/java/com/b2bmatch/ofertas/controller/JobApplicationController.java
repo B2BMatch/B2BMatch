@@ -33,34 +33,54 @@ public class JobApplicationController {
     private final JwtService jwtService;
 
     @GetMapping
-    public ResponseEntity<List<JobApplicationResponse>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<JobApplicationResponse>> findAll(
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findAll(claims.get("role", String.class)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JobApplicationResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<JobApplicationResponse> findById(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findById(id, claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
     @GetMapping("/job-offer/{jobOfferId}")
-    public ResponseEntity<List<JobApplicationResponse>> findByJobOfferId(@PathVariable Long jobOfferId) {
-        return ResponseEntity.ok(service.findByJobOfferId(jobOfferId));
+    public ResponseEntity<List<JobApplicationResponse>> findByJobOfferId(
+            @PathVariable Long jobOfferId,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findByJobOfferId(jobOfferId, claims.get("userId", Long.class),
+                claims.get("role", String.class)));
     }
 
-    @GetMapping("/professional/{professionalId}")
-    public ResponseEntity<List<JobApplicationResponse>> findByProfessionalId(@PathVariable Long professionalId) {
-        return ResponseEntity.ok(service.findByProfessionalId(professionalId));
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<JobApplicationResponse>> findByUserId(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.findByUserId(userId, claims.get("userId", Long.class),
+                claims.get("role", String.class)));
     }
 
     @PostMapping
-    public ResponseEntity<JobApplicationResponse> create(@Valid @RequestBody JobApplicationRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
+    public ResponseEntity<JobApplicationResponse> create(
+            @Valid @RequestBody JobApplicationRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(request, claims.get("userId", Long.class), claims.get("role", String.class)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<JobApplicationResponse> update(@PathVariable Long id,
-            @Valid @RequestBody JobApplicationRequest request) {
-        return ResponseEntity.ok(service.update(id, request));
+            @Valid @RequestBody JobApplicationRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        Claims claims = jwtService.parseToken(authHeader.substring(7));
+        return ResponseEntity.ok(service.update(id, request, claims.get("userId", Long.class),
+                claims.get("role", String.class)));
     }
 
     @DeleteMapping("/{id}")

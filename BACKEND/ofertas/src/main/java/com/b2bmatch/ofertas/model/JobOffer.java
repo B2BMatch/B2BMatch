@@ -28,8 +28,8 @@ public class JobOffer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "company_id", nullable = false)
-    private Long companyId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "category_id", nullable = false)
     private Long categoryId;

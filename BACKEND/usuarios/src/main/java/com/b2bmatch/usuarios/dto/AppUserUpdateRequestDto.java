@@ -14,6 +14,9 @@ public class AppUserUpdateRequestDto {
     @NotBlank(message = "El email es obligatorio")
     private String email;
 
+    @NotBlank(message = "El nombre es obligatorio")
+    private String name;
+
     @NotNull(message = "El rol es obligatorio")
     private Long roleId;
 }

@@ -23,7 +23,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error?.response?.status === 401 && !error.config?.url?.includes('/users/login')) {
+        const isLoginCall = error.config?.url?.includes('/auth/login');
+        const isRegisterCall = error.config?.url?.includes('/users/register');
+        if (error?.response?.status === 401 && !isLoginCall && !isRegisterCall) {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
             if (window.location.pathname !== '/login') {

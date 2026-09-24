@@ -1,0 +1,7 @@
+# Secrets locales — nunca commitear el .env real
+.env
+.env.*
+!.env.example
+
+# Logs de builds/pruebas locales
+*.log

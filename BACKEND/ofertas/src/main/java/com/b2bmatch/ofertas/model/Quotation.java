@@ -29,8 +29,8 @@ public class Quotation {
     @Column(name = "service_id", nullable = false)
     private Long serviceId;
 
-    @Column(name = "customer_id", nullable = false)
-    private Long customerId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(columnDefinition = "TEXT")
     private String message;
