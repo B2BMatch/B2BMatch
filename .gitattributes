@@ -1,0 +1,13 @@
+# Normaliza finales de linea: LF en el repositorio, nativo al hacer checkout.
+# Evita que Windows marque como modificado todo archivo que solo cambio de CRLF.
+* text=auto
+
+# Binarios: nunca tocar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.jar binary
+*.zip binary
