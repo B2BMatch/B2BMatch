@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -43,6 +44,19 @@ public class AppUserService {
     private static final long LOCK_DURATION_MINUTES = 15;
     private static final int MAX_LOGIN_TRACKED_EMAILS = 10_000;
 
+    /**
+     * Los unicos roles que uno puede elegir al registrarse. Lo que no este aqui se
+     * rechaza, en vez de enumerar los que no: con una lista de prohibidos, el
+     * proximo rol privilegiado que se anada a la semilla queda registrable desde
+     * internet sin tocar una linea de Java, y el agujero aparece en el momento
+     * menos conveniente. Aqui ocurre al reves, anadir un rol nuevo al sistema no
+     * lo hace registrable y hay que decidirlo a mano.
+     *
+     * ADMIN entra por `registerAdmin`, que exige la clave de bootstrap.
+     */
+    private static final Set<String> ROLES_DE_AUTOSERVICIO =
+            Set.of("CUSTOMER", "PROFESSIONAL", "COMPANY");
+
     @Value("${app.admin-bootstrap-key:}")
     private String adminBootstrapKey;
 
@@ -66,12 +80,16 @@ public class AppUserService {
         checkNewEmail(normalizedEmail);
         checkPasswordPattern(request.getPassword());
 
-        Role role = roleRepository.findByName(request.getRoleName().toUpperCase().trim())
-                .orElseThrow(() -> new IllegalArgumentException("El rol especificado no existe"));
-
-        if ("ADMIN".equals(role.getName())) {
-            throw new IllegalArgumentException("No está permitido registrarse como administrador");
+        String roleName = request.getRoleName().toUpperCase().trim();
+        if (!ROLES_DE_AUTOSERVICIO.contains(roleName)) {
+            // Se responde igual tanto si el rol existe pero no es de autoservicio
+            // como si no existe, para no confirmar desde fuera que nombres hay en
+            // la tabla. Y se corta aqui, antes de la consulta.
+            throw new IllegalArgumentException("Ese rol no se puede elegir en el registro");
         }
+
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new IllegalArgumentException("Ese rol no está disponible"));
 
         return createUser(normalizedEmail, request.getName().trim(), request.getPassword(), role);
     }
