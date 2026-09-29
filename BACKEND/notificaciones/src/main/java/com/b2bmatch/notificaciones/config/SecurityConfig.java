@@ -2,6 +2,7 @@ package com.b2bmatch.notificaciones.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,10 +24,27 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
+    /**
+     * Origenes a los que se responde con cabeceras CORS, separados por coma.
+     *
+     * Estaban fijos en el codigo a los dos localhost del dev server, y en
+     * produccion el frontend vive en otro dominio (Cloudflare Pages), asi que
+     * ningun origen permitido podia responder y el navegador bloqueaba todas las
+     * peticiones cross-origin. Configurarlo por ambiente evita tener que
+     * recompilar los siete servicios para cambiarlo.
+     *
+     * La lista va separada por property, no compartida, porque el monorepo no
+     * tiene modulo comun. Si se toca uno hay que tocar los seis, y por eso el
+     * unico sitio donde la lista puede cambiar de verdad es la variable de
+     * entorno, que es lo mismo para todos.
+     */
+    @Value("${app.cors.allowed-origins}")
+    private List<String> corsAllowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        config.setAllowedOrigins(corsAllowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

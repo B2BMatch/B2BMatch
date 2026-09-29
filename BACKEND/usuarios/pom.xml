@@ -126,6 +126,14 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Para CorsConfigTest: hace falta la cadena de filtros real, que es donde
+		     vive el CorsFilter, para comprobar que el preflight sale bien y no solo
+		     que el bean tiene los origins puestos. -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>

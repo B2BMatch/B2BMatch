@@ -21,6 +21,7 @@ services:
     build: ./usuarios
     container_name: usuarios
     environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
@@ -34,6 +35,7 @@ services:
     build: ./perfiles
     container_name: perfiles
     environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
@@ -48,6 +50,7 @@ services:
     build: ./catalogo
     container_name: catalogo
     environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
@@ -62,6 +65,7 @@ services:
     build: ./ofertas
     container_name: ofertas
     environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
@@ -79,6 +83,7 @@ services:
     build: ./resenias
     container_name: resenias
     environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
@@ -94,6 +99,7 @@ services:
     build: ./notificaciones
     container_name: notificaciones
     environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
@@ -109,6 +115,7 @@ services:
     build: ./gateway
     container_name: gateway
     environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
     restart: unless-stopped
     depends_on:

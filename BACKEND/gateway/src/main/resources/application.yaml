@@ -6,23 +6,29 @@ spring:
     name: gateway
   cloud:
     gateway:
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:5173"
-              - "http://127.0.0.1:5173"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - PATCH
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
       server:
         webflux:
+          # Esto vivia en `spring.cloud.gateway.globalcors`, que es el prefijo de
+          # Gateway 4. En la 5 el prefijo lleva `server.webflux` delante, con lo que
+          # el bloque no se enlazaba: el mapa llegaba vacio y el gateway se quedaba
+          # sin ninguna configuracion de CORS. Siendo el unico punto de entrada en
+          # produccion, ahi se rechazaba todo lo cross-origin.
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                # Origenes permitidos, separados por coma. Ademas de estar fijos en
+                # el codigo, produccion no habria tenido ninguno valido: el frontend
+                # se sirve desde Cloudflare Pages y la API desde otro dominio.
+                allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
           routes:
             - id: usuarios
               uri: http://usuarios:8081
