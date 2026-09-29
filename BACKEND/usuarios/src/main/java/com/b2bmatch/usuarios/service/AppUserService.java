@@ -187,8 +187,12 @@ public class AppUserService {
         LocalDateTime lockedUntil;
     }
 
+    // Nadie lo llama: no hay endpoint que llegue aqui. Se le pone el finder con rol
+    // igual que a los vivos para no dejar un metodo que revienta en cuanto alguien
+    // lo cablee, pero sin test propio, porque un test de codigo muerto estorba mas
+    // que ayuda.
     public AppUserResponseDto update(Long id, AppUserUpdateRequestDto request) {
-        AppUser appUser = appUserRepository.findById(id)
+        AppUser appUser = appUserRepository.findPorIdConRol(id)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
 
         String normalizedEmail = request.getEmail().toLowerCase().trim();
@@ -216,21 +220,21 @@ public class AppUserService {
 
     public List<AppUserResponseDto> findAll(boolean includeDeleted) {
         List<AppUser> users = includeDeleted
-                ? appUserRepository.findAll()
-                : appUserRepository.findByDeletedAtIsNull();
+                ? appUserRepository.findTodosConRol()
+                : appUserRepository.findVivosConRol();
         return users.stream()
                 .map(this::toDto)
                 .toList();
     }
 
     public AppUserResponseDto findById(Long id) {
-        AppUser appUser = appUserRepository.findById(id)
+        AppUser appUser = appUserRepository.findPorIdConRol(id)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
         return toDto(appUser);
     }
 
     public List<AppUserResponseDto> findByRole(String roleName) {
-        return appUserRepository.findByRole_NameAndDeletedAtIsNull(roleName.toUpperCase()).stream()
+        return appUserRepository.findPorRolConRol(roleName.toUpperCase()).stream()
                 .map(this::toDto)
                 .toList();
     }
@@ -291,6 +295,13 @@ public class AppUserService {
                 + " WHERE deleted_at IS NOT NULL AND " + condition, userId);
     }
 
+    // Transaccional, igual que `delete` y `reactivate`, y por dos motivos. Uno: el
+    // DTO se arma sobre lo que devuelve `save()`, y el resultado de un `merge` sale
+    // con un proxy de rol nuevo que sin sesion abierta no se puede leer. Un
+    // `JOIN FETCH` en la carga no arregla eso, porque la entidad que se lee despues
+    // no es la que se cargo. Dos: es un leer-modificar-escribir, y sin transaccion
+    // dos cambios de estado concurrentes se pisan sin que nadie lo note.
+    @Transactional
     public AppUserResponseDto updateStatus(Long id, String status) {
         AppUser appUser = appUserRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
