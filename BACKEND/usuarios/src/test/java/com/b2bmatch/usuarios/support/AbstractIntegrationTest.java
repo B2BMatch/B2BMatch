@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -42,9 +43,13 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected JdbcTemplate jdbc;
 
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
+
     protected Long usuario;
     protected Long profesional;
     protected Long empresa;
+    protected Long rol;
 
     @BeforeEach
     void prepararDatos() {
@@ -55,7 +60,7 @@ public abstract class AbstractIntegrationTest {
 
         // V2 ya siembra los roles, asi que se reutiliza el existente en vez de
         // insertar uno nuevo (role.name es UNIQUE).
-        Long rol = jdbc.queryForObject(
+        rol = jdbc.queryForObject(
                 "SELECT id FROM usuarios.role WHERE name = 'PROFESSIONAL'", Long.class);
         // El cascade resuelve los servicios por subconsulta a perfiles, asi que
         // hace falta un profesional con sus perfiles y servicios, y una empresa
@@ -73,6 +78,17 @@ public abstract class AbstractIntegrationTest {
         return jdbc.queryForObject(
                 "INSERT INTO usuarios.app_user(role_id, email, password_hash) VALUES (?, ?, 'x') RETURNING id",
                 Long.class, rol, email);
+    }
+
+    /**
+     * Usuario con una clave de verdad, para los tests que pasan por el login. El
+     * resto del fixture usa 'x' porque a la cascada no le importa la clave, y
+     * meter un BCrypt real en todos haria el setup mas lento sin ganar nada.
+     */
+    protected Long crearUsuarioConClave(String email, String clave) {
+        return jdbc.queryForObject(
+                "INSERT INTO usuarios.app_user(role_id, email, password_hash) VALUES (?, ?, ?) RETURNING id",
+                Long.class, rol, email, passwordEncoder.encode(clave));
     }
 
     protected Long perfilEmpresa(Long userId) {

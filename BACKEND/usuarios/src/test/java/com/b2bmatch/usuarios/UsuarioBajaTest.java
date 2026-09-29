@@ -7,6 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.b2bmatch.usuarios.dto.AppUserRegisterRequestDto;
+import com.b2bmatch.usuarios.dto.LoginRequestDto;
 import com.b2bmatch.usuarios.service.AppUserService;
 import com.b2bmatch.usuarios.support.AbstractIntegrationTest;
 
@@ -147,5 +149,87 @@ class UsuarioBajaTest extends AbstractIntegrationTest {
         servicio.delete(usuario);
 
         assertThat(dadasDeBaja("usuarios.app_user")).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("dar de baja impide volver a autenticarse, con la clave correcta")
+    void laBajaImpideAutenticarse() {
+        String email = "baja@test.local";
+        String clave = "ClaveValida1";
+        Long userId = crearUsuarioConClave(email, clave);
+
+        // Antes de la baja entra: si no, el test pasaria por un motivo equivocado.
+        assertThat(servicio.login(credenciales(email, clave)).getId()).isEqualTo(userId);
+
+        servicio.delete(userId);
+
+        // Y despues no, aunque la clave siga siendo la correcta. Aqui es donde
+        // importa que la baja no pise `status`: la cuenta sigue en ACTIVE, asi
+        // que un login que solo mirase el estado la devolveria al mundo.
+        assertThatThrownBy(() -> servicio.login(credenciales(email, clave)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Email o contraseña incorrectos");
+    }
+
+    @Test
+    @DisplayName("la baja no se distingue de una cuenta que no existe")
+    void laBajaNoSeDistingueDeUnaInexistente() {
+        String email = "baja@test.local";
+        String clave = "ClaveValida1";
+        Long userId = crearUsuarioConClave(email, clave);
+        servicio.delete(userId);
+
+        String mensajeDeLaBaja = assertThatThrownBy(() -> servicio.login(credenciales(email, clave)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .actual().getMessage();
+        String mensajeDeLaInexistente = assertThatThrownBy(
+                () -> servicio.login(credenciales("nadie@test.local", clave)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .actual().getMessage();
+
+        // Si divergieran, el login confirmaria que ese email existio y fue dado de
+        // baja, que es justo la confirmacion que el mensaje generico esconde.
+        assertThat(mensajeDeLaBaja).isEqualTo(mensajeDeLaInexistente);
+    }
+
+    @Test
+    @DisplayName("reactivar devuelve al usuario a poder autenticarse")
+    void reactivarPermiteAutenticarseDeNuevo() {
+        String email = "reactivado@test.local";
+        String clave = "ClaveValida1";
+        Long userId = crearUsuarioConClave(email, clave);
+        servicio.delete(userId);
+        servicio.reactivate(userId);
+
+        assertThat(servicio.login(credenciales(email, clave)).getId()).isEqualTo(userId);
+    }
+
+    @Test
+    @DisplayName("el email de un usuario dado de baja sigue reservado")
+    void elEmailDeLaBajaSigueReservado() {
+        String email = "reservado@test.local";
+        Long userId = crearUsuarioConClave(email, "ClaveValida1");
+        servicio.delete(userId);
+
+        // El registro mira tambien entre las dadas de baja a proposito: el UNIQUE
+        // de email lo reserva igual, y avisar "ya esta registrado" es mejor que
+        // dejar que reviente la constraint con un 409 que no explica nada.
+        AppUserRegisterRequestDto alta = new AppUserRegisterRequestDto();
+        alta.setEmail(email);
+        alta.setName("Nombre");
+        alta.setPassword("ClaveValida1");
+        alta.setRoleName("PROFESSIONAL");
+
+        assertThatThrownBy(() -> servicio.register(alta))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("El email ya está registrado");
+        assertThat(estado("usuarios.app_user", userId)).isEqualTo("ACTIVE");
+    }
+
+    private LoginRequestDto credenciales(String email, String clave) {
+        LoginRequestDto dto = new LoginRequestDto();
+        dto.setEmail(email);
+        dto.setPassword(clave);
+        return dto;
     }
 }

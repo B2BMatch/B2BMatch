@@ -138,7 +138,12 @@ public class AppUserService {
             loginAttempts.remove(normalizedEmail);
         }
 
-        AppUser appUser = appUserRepository.findByEmail(normalizedEmail)
+        // Filtra por `deleted_at` y no solo por `status`: dar de baja no pisa el
+        // estado, asi que un usuario borrado sigue en ACTIVE y entraria con el
+        // token que le emite este mismo metodo, otra vez y otra vez. El mensaje
+        // es el de una cuenta inexistente a proposito: distinguirlos confirmaria
+        // que el email existe y esta dado de baja.
+        AppUser appUser = appUserRepository.findVivaByEmail(normalizedEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Email o contraseña incorrectos"));
 
         if (!"ACTIVE".equals(appUser.getStatus())) {
