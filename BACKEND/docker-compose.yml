@@ -25,6 +25,10 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      # Antes la caducidad venia fija en cada application.yaml y cambiar la
+      # variable no hacia nada. Con default, para no romper despliegues que no la
+      # definan: es un ajuste, no un secreto.
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       ADMIN_BOOTSTRAP_KEY: ${ADMIN_BOOTSTRAP_KEY:?Definir ADMIN_BOOTSTRAP_KEY en BACKEND/.env}
     restart: unless-stopped
     depends_on:
@@ -39,6 +43,10 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      # Antes la caducidad venia fija en cada application.yaml y cambiar la
+      # variable no hacia nada. Con default, para no romper despliegues que no la
+      # definan: es un ajuste, no un secreto.
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -54,6 +62,10 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      # Antes la caducidad venia fija en cada application.yaml y cambiar la
+      # variable no hacia nada. Con default, para no romper despliegues que no la
+      # definan: es un ajuste, no un secreto.
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
     restart: unless-stopped
     depends_on:
       postgre-db:
@@ -69,6 +81,10 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      # Antes la caducidad venia fija en cada application.yaml y cambiar la
+      # variable no hacia nada. Con default, para no romper despliegues que no la
+      # definan: es un ajuste, no un secreto.
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
     restart: unless-stopped
     depends_on:
@@ -87,6 +103,10 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      # Antes la caducidad venia fija en cada application.yaml y cambiar la
+      # variable no hacia nada. Con default, para no romper despliegues que no la
+      # definan: es un ajuste, no un secreto.
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
     restart: unless-stopped
     depends_on:
@@ -103,6 +123,10 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?Definir POSTGRES_USER en BACKEND/.env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en BACKEND/.env}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
+      # Antes la caducidad venia fija en cada application.yaml y cambiar la
+      # variable no hacia nada. Con default, para no romper despliegues que no la
+      # definan: es un ajuste, no un secreto.
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Definir INTERNAL_SERVICE_KEY en BACKEND/.env}
     restart: unless-stopped
     depends_on:
@@ -117,7 +141,7 @@ services:
     environment:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       JWT_SECRET: ${JWT_SECRET:?Definir JWT_SECRET en BACKEND/.env}
-    restart: unless-stopped
+      restart: unless-stopped
     depends_on:
       postgre-db:
         condition: service_healthy

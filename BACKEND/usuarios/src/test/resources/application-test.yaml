@@ -13,9 +13,9 @@ spring:
 
 jwt:
   secret: clave-de-prueba-solo-para-tests-no-usar-en-ningun-ambiente-real
-  expiration-ms: 86400000
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 app:
   jwt:
     secret: clave-de-prueba-solo-para-tests-no-usar-en-ningun-ambiente-real
-    expiration-ms: 86400000
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
