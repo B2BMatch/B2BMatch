@@ -2,10 +2,11 @@ package com.b2bmatch.usuarios.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
@@ -40,9 +41,13 @@ public class AppUserService {
     private static final Pattern PASSWORD_PATTERN =
         Pattern.compile("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
 
-    private static final int MAX_LOGIN_ATTEMPTS = 5;
-    private static final long LOCK_DURATION_MINUTES = 15;
-    private static final int MAX_LOGIN_TRACKED_EMAILS = 10_000;
+    /** Fallos por par (IP, email) antes de frenar ese par concreto. */
+    private static final int MAX_INTENTOS_POR_CUENTA = 5;
+    /** Fallos desde una misma IP. Mas alto que el de cuenta porque una oficina
+     *  entera detras de una NAT comparte IP y hay gente que se equivoca. */
+    private static final int MAX_INTENTOS_POR_IP = 20;
+    private static final long DURACION_BLOQUEO_MINUTOS = 15;
+    private static final int MAX_INTENTOS_SEGUIDOS = 10_000;
 
     /**
      * Los unicos roles que uno puede elegir al registrarse. Lo que no este aqui se
@@ -68,7 +73,12 @@ public class AppUserService {
 
     private JdbcTemplate jdbcTemplate;
 
-    private final ConcurrentHashMap<String, LoginAttempt> loginAttempts = new ConcurrentHashMap<>();
+    private final ContadorIntentos intentosDeLogin = new ContadorIntentos(
+            MAX_INTENTOS_POR_CUENTA,
+            MAX_INTENTOS_POR_IP,
+            Duration.ofMinutes(DURACION_BLOQUEO_MINUTOS),
+            MAX_INTENTOS_SEGUIDOS,
+            Clock.systemDefaultZone());
 
     @PostConstruct
     void init() {
@@ -143,66 +153,67 @@ public class AppUserService {
                 presentedKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public LoginResponseDto login(LoginRequestDto request) {
-        String normalizedEmail = request.getEmail().toLowerCase().trim();
-        pruneLoginAttempts();
+    /**
+     * Un unico mensaje para todo lo que no es un acierto. Tres casos distintos
+     * llegaban con tres textos: cuenta inexistente, cuenta suspendida y cuenta
+     * bloqueada por intentos. Con eso el login servia para enumerar quien tiene
+     * cuenta, y bastaba con cinco intentos fallidos y un sexto para leer la
+     * respuesta y saber si el email estaba registrado.
+     *
+     * El precio es que un usuario al que le ha caducado la ventana de bloqueo ve
+     * "contraseña incorrecta" en vez de "espera 15 minutos". Se acepta: la
+     * alternativa es confirmar la existencia de la cuenta a quien la ataca.
+     */
+    private static final String CREDENCIALES_INVALIDAS = "Email o contraseña incorrectos";
 
-        LoginAttempt attempt = loginAttempts.get(normalizedEmail);
-        if (attempt != null && attempt.lockedUntil != null) {
-            if (LocalDateTime.now().isBefore(attempt.lockedUntil)) {
-                throw new IllegalArgumentException(
-                        "Demasiados intentos fallidos. Cuenta bloqueada temporalmente, intente nuevamente más tarde");
-            }
-            loginAttempts.remove(normalizedEmail);
+    public LoginResponseDto login(LoginRequestDto request, String origen) {
+        String normalizedEmail = request.getEmail().toLowerCase().trim();
+        String ip = normalizarOrigen(origen);
+
+        // Dos contadores, no uno. El de por IP acota la enumeracion desde una sola
+        // maquina. El de cuenta combina IP y email, y esa combinacion es lo que
+        // quita el bloqueo como arma: con el contador por email solo, cinco
+        // intentos bloqueaban la cuenta de una victima desde cualquier sitio y
+        // durante quince minutos, o sea que el endpoint servia tanto para tumbar
+        // cuentas como para adivinarlas. Con la IP en la clave, atacar a alguien
+        // desde una maquina solo te frena a ti.
+        String claveCuenta = "cuenta|" + ip + "|" + normalizedEmail;
+        String claveIp = "ip|" + ip;
+
+        if (intentosDeLogin.bloqueado(claveCuenta) || intentosDeLogin.bloqueado(claveIp)) {
+            throw new IllegalArgumentException(CREDENCIALES_INVALIDAS);
         }
 
         // Filtra por `deleted_at` y no solo por `status`: dar de baja no pisa el
         // estado, asi que un usuario borrado sigue en ACTIVE y entraria con el
-        // token que le emite este mismo metodo, otra vez y otra vez. El mensaje
-        // es el de una cuenta inexistente a proposito: distinguirlos confirmaria
-        // que el email existe y esta dado de baja.
+        // token que le emite este mismo metodo, otra vez y otra vez.
         AppUser appUser = appUserRepository.findVivaByEmail(normalizedEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Email o contraseña incorrectos"));
+                .orElseThrow(() -> new IllegalArgumentException(CREDENCIALES_INVALIDAS));
 
+        // Mismo mensaje que el de una cuenta que no existe. Antes decia "esta
+        // cuenta no esta activa", y con eso un POST bastaba para confirmar que el
+        // email estaba registrado y ademas suspendido.
         if (!"ACTIVE".equals(appUser.getStatus())) {
-            throw new IllegalArgumentException("Esta cuenta no está activa");
+            throw new IllegalArgumentException(CREDENCIALES_INVALIDAS);
         }
 
         if (!passwordEncoder.matches(request.getPassword(), appUser.getPasswordHash())) {
-            registerLoginFailure(normalizedEmail);
-            throw new IllegalArgumentException("Email o contraseña incorrectos");
+            intentosDeLogin.falloDeCuenta(claveCuenta);
+            intentosDeLogin.falloDeIp(claveIp);
+            throw new IllegalArgumentException(CREDENCIALES_INVALIDAS);
         }
 
-        loginAttempts.remove(normalizedEmail);
+        intentosDeLogin.exito(claveCuenta, claveIp);
 
         String token = jwtService.generateToken(appUser.getEmail(), appUser.getRole().getName(), appUser.getId());
         return new LoginResponseDto(appUser.getId(), appUser.getName(), token, appUser.getEmail(), appUser.getRole().getName());
     }
 
-    private void registerLoginFailure(String email) {
-        pruneLoginAttempts();
-        LoginAttempt attempt = loginAttempts.computeIfAbsent(email, k -> new LoginAttempt());
-        attempt.count++;
-        if (attempt.count >= MAX_LOGIN_ATTEMPTS) {
-            attempt.lockedUntil = LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES);
-            attempt.count = 0;
+    private String normalizarOrigen(String origen) {
+        if (origen == null || origen.isBlank()) {
+            return "desconocida";
         }
-    }
-
-    private void pruneLoginAttempts() {
-        if (loginAttempts.size() <= MAX_LOGIN_TRACKED_EMAILS) {
-            return;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        loginAttempts.entrySet().removeIf(entry -> {
-            LoginAttempt attempt = entry.getValue();
-            return attempt.lockedUntil == null || attempt.lockedUntil.isBefore(now);
-        });
-    }
-
-    private static final class LoginAttempt {
-        int count;
-        LocalDateTime lockedUntil;
+        return origen.trim();
     }
 
     // Nadie lo llama: no hay endpoint que llegue aqui. Se le pone el finder con rol

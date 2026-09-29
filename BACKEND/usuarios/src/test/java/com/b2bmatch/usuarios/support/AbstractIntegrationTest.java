@@ -10,6 +10,10 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
+import com.b2bmatch.usuarios.dto.LoginRequestDto;
+import com.b2bmatch.usuarios.dto.LoginResponseDto;
+import com.b2bmatch.usuarios.service.AppUserService;
+
 /**
  * Base de los tests de integracion de usuarios: Postgres real via Testcontainers
  * y las migraciones Flyway de usuarios aplicadas tal cual.
@@ -45,6 +49,9 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected PasswordEncoder passwordEncoder;
+
+    @Autowired
+    protected AppUserService appUserService;
 
     protected Long usuario;
     protected Long profesional;
@@ -139,5 +146,34 @@ public abstract class AbstractIntegrationTest {
 
     protected String estado(String tabla, Long id) {
         return jdbc.queryForObject("SELECT status FROM " + tabla + " WHERE id = ?", String.class, id);
+    }
+
+    /**
+     * IP de mentira para llamar al login por debajo de HTTP. El servicio la usa
+     * de clave en el limite de intentos, asi que los tests que quieren el
+     * comportamiento normal necesitan una fija y los que quieren probar el
+     * bloqueo por IP o por cuenta necesitan cambiarla a proposito.
+     */
+    protected static final String IP_DE_PRUEBA = "203.0.113.7";
+
+    protected LoginRequestDto credenciales(String email, String clave) {
+        LoginRequestDto dto = new LoginRequestDto();
+        dto.setEmail(email);
+        dto.setPassword(clave);
+        return dto;
+    }
+
+    protected LoginResponseDto login(String email, String clave, String ip) {
+        return appUserService.login(credenciales(email, clave), ip);
+    }
+
+    /** Login fallido que devuelve el mensaje, para comparar respuestas. */
+    protected String mensajeDeLoginFallido(String email, String clave, String ip) {
+        try {
+            login(email, clave, ip);
+            throw new AssertionError("el login deberia haber fallado");
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
     }
 }

@@ -159,14 +159,14 @@ class UsuarioBajaTest extends AbstractIntegrationTest {
         Long userId = crearUsuarioConClave(email, clave);
 
         // Antes de la baja entra: si no, el test pasaria por un motivo equivocado.
-        assertThat(servicio.login(credenciales(email, clave)).getId()).isEqualTo(userId);
+        assertThat(servicio.login(credenciales(email, clave), IP_DE_PRUEBA).getId()).isEqualTo(userId);
 
         servicio.delete(userId);
 
         // Y despues no, aunque la clave siga siendo la correcta. Aqui es donde
         // importa que la baja no pise `status`: la cuenta sigue en ACTIVE, asi
         // que un login que solo mirase el estado la devolveria al mundo.
-        assertThatThrownBy(() -> servicio.login(credenciales(email, clave)))
+        assertThatThrownBy(() -> servicio.login(credenciales(email, clave), IP_DE_PRUEBA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Email o contraseña incorrectos");
     }
@@ -179,11 +179,11 @@ class UsuarioBajaTest extends AbstractIntegrationTest {
         Long userId = crearUsuarioConClave(email, clave);
         servicio.delete(userId);
 
-        String mensajeDeLaBaja = assertThatThrownBy(() -> servicio.login(credenciales(email, clave)))
+        String mensajeDeLaBaja = assertThatThrownBy(() -> servicio.login(credenciales(email, clave), IP_DE_PRUEBA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .actual().getMessage();
         String mensajeDeLaInexistente = assertThatThrownBy(
-                () -> servicio.login(credenciales("nadie@test.local", clave)))
+                () -> servicio.login(credenciales("nadie@test.local", clave), IP_DE_PRUEBA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .actual().getMessage();
 
@@ -201,7 +201,7 @@ class UsuarioBajaTest extends AbstractIntegrationTest {
         servicio.delete(userId);
         servicio.reactivate(userId);
 
-        assertThat(servicio.login(credenciales(email, clave)).getId()).isEqualTo(userId);
+        assertThat(servicio.login(credenciales(email, clave), IP_DE_PRUEBA).getId()).isEqualTo(userId);
     }
 
     @Test
@@ -226,10 +226,4 @@ class UsuarioBajaTest extends AbstractIntegrationTest {
         assertThat(estado("usuarios.app_user", userId)).isEqualTo("ACTIVE");
     }
 
-    private LoginRequestDto credenciales(String email, String clave) {
-        LoginRequestDto dto = new LoginRequestDto();
-        dto.setEmail(email);
-        dto.setPassword(clave);
-        return dto;
-    }
 }
