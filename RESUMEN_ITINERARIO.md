@@ -1336,3 +1336,167 @@ notificaciones   BUILD SUCCESS    (sin tests)
    (`vite.config.js`), osea same-origin, asi que el CORS ni se ejercita. Para verlo
    funcionar haria falta un origen cruzado de verdad, osea levantar el frontend
    contra un dominio distinto al suyo.
+
+---
+
+## Bloque: login sin filtrar cuentas ni usarse para tumbar cuentas
+
+Revision de `usuarios` que no venia de un fallo reportado sino de mirar el
+modulo. Salieron dos problemas reales en el login, ambos con mensajes distintos para
+casos que no deberian distinguirse.
+
+### 1. El login confirmaba que un email estaba registrado
+
+Habia tres fallos distintos con tres textos distintos:
+
+| caso | mensaje |
+|---|---|
+| no existe | `Email o contraseña incorrectos` |
+| suspendido o inactivo | `Esta cuenta no está activa` |
+| bloqueado por intentos | `Demasiados intentos fallidos...` |
+
+El primero ya estaba tapado a proposito desde el bloque de bajas, pero los otros
+dos seguian justo debajo. Comprobado contra la base de datos real:
+
+```
+existe y ACTIVE, clave incorrecta  -> Email o contraseña incorrectos
+existe y SUSPENDED                 -> Esta cuenta no está activa
+existe y DADO DE BAJA              -> Email o contraseña incorrectos
+NO existe en la base               -> Email o contraseña incorrectos
+```
+
+Y el del bloqueo era el mas comodo de los tres, porque no dependia del estado:
+cinco intentos con clave mala y el sexto ya contestaba distinto. Seis peticiones
+a un email cualquiera bastaban para tener el padron de cuentas registradas.
+
+### 2. El bloqueo por intentos era un arma de denegacion de servicio
+
+El contador iba por email solo. Cinco intentos con clave mala desde cualquier
+maquina dejaban la cuenta bloqueada quince minutos, sin limite por IP y sin tope
+de cuentas que se puedan bloquear a la vez. Un atacante podia ir dejando fuera a
+los usuarios uno por uno, y sin querer de paso se llevaba el padron.
+
+### Lo que se hizo
+
+**Un solo mensaje.** Todo lo que no sea un acierto contesta
+`Email o contraseña incorrectos`, incluidos suspendido, inactivo y bloqueado. Se
+asume el coste: un usuario al que se le ha caducado la ventana de bloqueo ve
+"contraseña incorrecta" en vez de "espera 15 minutos". La alternativa es
+confirmarle la existencia de la cuenta a quien la ataca.
+
+**Dos contadores en vez de uno.** El de cuenta va por el par IP y email, y el de
+IP agrega por IP:
+
+| | tope | protege |
+|---|---|---|
+| `cuenta\|ip\|email` | 5 | que un atacante no bloquee a una victima |
+| `ip\|ip` | 20 | la enumeracion desde una sola maquina |
+
+Con la IP en la clave del contador de cuenta, atacar a alguien desde una maquina
+solo frena a quien ataca: la victima entra bien desde la suya. Los topes son
+distintos a proposito; si compartieran, la primera cuenta que alguien atacara
+cerraria la IP entera, y con una oficina detras de una NAT eso es tirar a todos
+los coworkers de golpe. El de IP es mas alto (20) por eso.
+
+La IP la lee `AuthController` de la cabecera `X-Forwarded-For`, con vuelta a
+`getRemoteAddr()`. Sin esto el servicio, que solo ve al gateway, trataria a
+todos los clientes como a uno solo y un ataque torpe cerraria el servicio
+entero. Un origen vacio se agrupa bajo `"desconocida"` para que el limite siga
+contando en vez de quedarse sin contabilizar.
+
+**La poda del mapa tambien estaba mal, en dos sentidos.** El codigo anterior
+boraba en un solo `removeIf` todo lo que no estuviera bloqueado en ese instante,
+o sea todos los contadores a medias: en cuanto alguien llenaba el mapa, un
+inundador ponia a cero el progreso de todo el mundo de golpe y el limite se
+quedaba sin efecto. Ahora `ContadorIntentos` evicta una entrada por cada una que
+se pasa del tope, primero lo caducado y luego lo mas viejo dando margen a los
+bloqueos vivos.
+
+Por el camino se metio una version intermedia que se negaba a llevar la cuenta de
+las claves nuevas cuando el mapa estaba lleno, y era **peor**: un tope que se
+ignora cuando aprieta no es un tope, y con eso bastaba llenar el mapa para que el
+limitador dejara de contar y el atacante pasara ilimitado. Se quedo con la
+politica de evictar lo justo.
+
+### La logica de conteo se movio a `ContadorIntentos`
+
+El prune era imposible de probar por el login: necesita miles de entradas y cada
+intento real paga un BCrypt. La clase lleva un `Clock` inyectado, asi que la
+caducidad se prueba sin dormir quince minutos.
+
+### Caducidad del token: `JWT_EXPIRATION_MS` no hacia nada
+
+Estaba en el `.env` y en el `.env.example`, pero los seis `application.yaml` la
+traian como un `86400000` escrito a mano y ninguna propiedad la leia. Quien
+quisiera acortar la caducidad de los tokens no notaba nada.
+
+Ahora los seis leen `${JWT_EXPIRATION_MS:86400000}` y `docker-compose.yml` pasa
+la variable a los seis servicios que la usan. El gateway **no** la recibe: solo
+reenvia tokens, no los emite, y su `application.yaml` no tiene la propiedad.
+Meterla ahi seria volver a crear config muerta, que es el defecto que se acaba de
+corregir. Comprobado con `docker compose config`.
+
+El `application-test.yaml` de `usuarios` tambien paso a placeholder, con el mismo
+default. Sigue siendo determinista (el default es el mismo numero de antes) pero
+permite que un test sustituya la variable y compruebe el cableado, que es
+justamente lo que un literal oculta.
+
+### Tests
+
+15 nuevos, todos con verificacion por mutacion:
+
+- `LoginNoDivulgacionTest` (6, contra la base real): todos los fallos dicen lo
+  mismo; el bloqueo no distingue entre que existe y que no; bloquear desde una IP
+  no afecta a las demas; el limite por IP frena la enumeracion; el acierto
+  reinicia el presupuesto; sin IP el login funciona pero el limite sigue contando.
+- `ContadorIntentosTest` (8, reloj falso): bloqueo al maximo, caducidad, los dos
+  topes son distintos, el acierto borra los dos contadores, desbordar el mapa no
+  borra el progreso de los demas, la poda no evapora un bloqueo vivo, el hueco se
+  recupera solo, y el tope del mapa se respeta siempre.
+- `CaducidadDeTokenTest` (1): el token caduca cuando dice la variable.
+
+Se revirtieron los cinco cambios de uno en uno para comprobar que los tests los
+detectan. Tambien se revirtio el `application-test.yaml` a literal, y
+`CaducidadDeTokenTest` lo detecta. Importa decirlo porque sin esa comprobacion
+cuatro de los tests nuevos habrian pasado en verde con el defecto puesto: un test
+que no falla cuando debe no esta mirando nada.
+
+### Estado
+
+```
+usuarios         BUILD SUCCESS   49 tests
+gateway          BUILD SUCCESS    4 tests
+perfiles         BUILD SUCCESS    7 tests
+catalogo         BUILD SUCCESS    8 tests
+ofertas          BUILD SUCCESS   30 tests
+resenias         BUILD SUCCESS   20 tests
+notificaciones   BUILD SUCCESS    (sin tests)
+```
+
+118 tests, +15 respecto a los 103 de antes.
+
+### Lo que sigue sin resolver
+
+1. **El estado del limite de intentos vive en memoria**, o sea en un solo proceso.
+   Con varias replicas del microservicio cada una lleva la suya y el tope se
+   relaja en la practica tantas veces como replicas haya. Cierra en serio con un
+   almacen compartido (Redis), que es otro bloque.
+2. **`X-Forwarded-For` se toma tal cual.** Es la primera entrada, que es la del
+   cliente original, y eso supone que quien llega al gateway no puede falsear la
+   cabecera. En produccion el gateway es la unica entrada y no hay nada delante
+   segun lo que se ve en el repositorio, pero es una **dependencia de despliegue,
+   no de codigo**: si algun dia se pone un CDN o un proxy delante del gateway, hay
+   que revisar esta parte. Falsearla permitiria saltarse el tope por IP.
+3. **Un ataque distribuido no se para.** Con IPs repartidas, el tope por IP no
+   aplica y cada victima recibe cinco intentos por IP. Frenarlo pide el almacen
+   compartido del punto 1.
+4. **La inundacion puede resetear a una victima que este quieta.** Si un atacante
+   sostiene la inundacion el tiempo suficiente, el contador de una cuenta que
+   lleva rato sin intentar entra en la parte vieja y se va. Solo hace falta que
+   haya 10 000 cuentas distintas fallando, porque un email que no existe ni llega
+   a contar, asi que es un caso limite. Cierra con el mismo almacen compartido.
+5. **Siguen pendientes los otros puntos de la revision**, que no se tocaron aqui
+   por ser de otra naturaleza: los dos generadores de JWT que discrepan
+   (`JwtService` firma con subject=email y `JwtUtil` verifica con subject=userId,
+   y leen properties distintas), el `update()` muerto con escalada de privilegios
+   en `AppUserService`, y el `GET /api/roles` sin `@PreAuthorize`.
