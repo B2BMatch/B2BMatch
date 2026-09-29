@@ -1240,3 +1240,99 @@ resenias         BUILD SUCCESS   20 tests
 90 tests. Cada fix de los tres bloques de arriba se verifico por mutacion: el
 test tiene que ponerse rojo al deshacer el codigo, y solo en los tests que le
 toca.
+
+---
+
+## Bloque de seguridad 4 — CORS configurable por ambiente (y el gateway no tenia CORS)
+
+### Lo que habia
+
+Siete sitios con la misma lista escrita a mano: un bean `CorsConfigurationSource`
+en cada uno de los seis microservicios, con los literales
+`["http://localhost:5173", "http://127.0.0.1:5173"]` dentro del codigo, y un bloque
+`globalcors` en el `application.yaml` del gateway. Ni una property `cors.*` en
+ningun sitio, ni una variable de entorno, ni un solo test. Los valores coincidian
+en los siete, osea que el problema no era que estuvieran distintos, sino que
+cambiarlos obligaba a recompilar los seis servicios y tocar siete ficheros.
+
+El valor no era solo incomodo. En produccion el frontend se sirve desde
+Cloudflare Pages y la API desde otro dominio (el `Caddyfile` solo hace
+`reverse_proxy gateway:8080`), asi que no habria habido ni un origen valido: el
+navegador bloqueaba todas las peticiones cross-origin.
+
+### El bug que no se estaba buscando
+
+El bloque del gateway vivia en `spring.cloud.gateway.globalcors`, que es el
+prefijo de Gateway 4. En la 5 el prefijo lleva `server.webflux` delante, asi que
+el mapa llegaba **vacio** y el gateway se quedaba sin ninguna configuracion de
+CORS. Como es el unico punto de entrada en produccion, ahi se rechazaba todo lo
+cross-origin.
+
+Esto es justo el fallo que se le escapa a una revision de codigo: el YAML parece
+correcto, el bean se autowirea sin error, y lo unico que falta son las cabeceras.
+Solo se ve preguntando al bean por su contenido, que es lo que hacen los tests
+nuevos.
+
+### El cambio
+
+`CORS_ALLOWED_ORIGINS`, separada por coma, en los seis microservicios (property
+`app.cors.allowed-origins`) y en el gateway. En `docker-compose.yml` lleva el
+default de desarrollo; en `docker-compose.prod.yml` es **obligatoria**, con la
+sintaxis `:?` que ya usaban los secretos: si falta, el compose falla al arrancar
+en vez de desplegar con una lista que no sirve. Fallar cerrado aqui es lo
+correcto, porque el alternativa es levantar produccion con los dos localhost del
+dev server como unica lista de origenes.
+
+La variable **sustituye**, no acumula: si anadiera a la lista por defecto, un
+despliegue con los dominios de produccion seguiria dejando entrar al dev server.
+Hay test para eso.
+
+### Tests (9 nuevos, todos por mutacion)
+
+`gateway` (2 + 2) sobre `GlobalCorsProperties`: el valor por defecto, que la
+variable sustituye, y que `allowedOrigins` no se ha convertido en un `*` con
+`allowCredentials` activo (la combinacion que dejaria llamar a la API desde
+cualquier pagina con cookies). Nota: en Gateway 5.0.2 la clase se llama
+`GlobalCorsProperties`, no `CorsProperties`.
+
+`usuarios` (4 + 5) con la cadena de filtros real via MockMvc, no solo el bean:
+preflight `OPTIONS` y un `GET` corriente, con origen permitido y con origen ajeno.
+Importa comprobar las dos cosas: que el `CorsFilter` conteste, y que el `GET`
+tambien traiga la cabecera, porque el bloqueo del navegador ocurre igual aunque
+el preflight pase. Requiere `spring-security-test`, que no estaba en el pom de
+`usuarios` (si estaba en el de `catalogo`).
+
+Verificado por mutacion: volver a la lista hardcodeada deja 4 tests de `usuarios`
+en rojo, y devolver el gateway al prefijo viejo deja los 4 del gateway en rojo.
+
+### Estado
+
+```
+usuarios         BUILD SUCCESS   34 tests
+gateway          BUILD SUCCESS    4 tests
+perfiles         BUILD SUCCESS    7 tests
+catalogo         BUILD SUCCESS    8 tests
+ofertas          BUILD SUCCESS   30 tests
+resenias         BUILD SUCCESS   20 tests
+notificaciones   BUILD SUCCESS    (sin tests)
+```
+
+103 tests, +13 respecto a los 90 de antes.
+
+### Lo que sigue sin resolver
+
+1. **La lista sigue replicada en los seis `SecurityConfig`**, porque el monorepo no
+   tiene modulo comun. Ahora lo unico que hay que mantener a mano es el nombre de
+   la property, y la lista de verdad esta en un sitio (la variable), pero un
+   `starter` propio seria lo que dejaria de permitir que uno se quede sin tocar.
+2. **`docker-compose.override.yml` no se ha tocado**: hereda `CORS_ALLOWED_ORIGINS`
+   por merge de `environment`, que se comprobó con `docker compose config`.
+3. **El CORS de los microservicios no se ha probado mas alla de `usuarios`**, que es
+   el unico con la cadena completa montada. Los otros cinco tienen el cambio
+   identico byte a byte, asi que el riesgo es que a uno se le olvide en una
+   modificacion futura, no que hoy esten mal.
+4. **No hay prueba en vivo.** La lista por defecto es la de desarrollo, y en
+   desarrollo el proxy de Vite manda las peticiones directo a cada microservicio
+   (`vite.config.js`), osea same-origin, asi que el CORS ni se ejercita. Para verlo
+   funcionar haria falta un origen cruzado de verdad, osea levantar el frontend
+   contra un dominio distinto al suyo.
