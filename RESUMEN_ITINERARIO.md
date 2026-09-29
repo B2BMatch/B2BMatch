@@ -1094,3 +1094,149 @@ unicamente para crearlas, listarlas y comprobar el duplicado; ninguno borra
 una, que es el unico camino que cambia.
 
 Lo que sigue sin cubrir: `notificaciones` y `gateway`.
+
+---
+
+## Bloque de seguridad 1 — dar de baja ya impide autenticarse
+
+`AppUserService.login` buscaba por `findByEmail`, que no mira `deleted_at`. Una
+cuenta dada de baja conservaba `status = 'ACTIVE'` —la baja vive solo en
+`deleted_at`— asi que el login la aceptaba con la clave correcta. El filtro tiene
+que ir en el mismo SELECT que trae la clave, no en un `if` aparte.
+
+`findVivaByEmail` filtra por `deletedAt IS NULL` y trae el rol con `JOIN FETCH`. El
+registro sigue usando `findByEmail` sin filtro a proposito: el email de una cuenta
+dada de baja tiene que seguir reservado por el `UNIQUE` de `app_user.email`.
+
+La baja responde el mismo error generico que una cuenta inexistente. Al principio
+se decia "cuenta dada de baja" y eso convertia el login en un oraculo de que
+emails estan dados de baja. 4 tests nuevos en `UsuarioBajaTest` (8 -> 12).
+
+## Bloque de seguridad 2 — lecturas que no dependan de open-in-view
+
+`toDto` lee el rol, y el rol es LAZY. `findAll`, `findById` y `findByRole` no lo
+traian y sus servicios no son transaccionales, asi que el proxy salia desligado
+del repositorio y reventaba con `LazyInitializationException`.
+
+No se notaba porque Spring Boot deja `spring.jpa.open-in-view` en `true` por
+defecto, que mantiene la sesion abierta durante la peticion. Es un default, no
+una decision: el dia que alguien lo ponga en `false` —que es lo que recomienda el
+framework— el listado, el detalle, el listado por rol y el cambio de estado
+empiezan a devolver 500. Los tests de integracion no pasan por ese filtro, asi que
+lo detectan antes. 6 tests nuevos en `AppUserLecturaTest`.
+
+`updateStatus` lleva transaccion en vez de fetch, y merece la pena explicar por que
+se descarto el fetch: el DTO se arma sobre lo que devuelve `save()`, y el
+resultado de un `merge` sale con un proxy de rol nuevo que ya no tiene a quien
+preguntarle. El fetch en la carga no arregla nada, porque la entidad que se lee
+despues no es la que se cargo. La transaccion ademas cierra un agujero de
+concurrencia que tenia: es un leer-modificar-escribir y dos cambios de estado
+simultaneos se pisaban sin que nadie lo notara.
+
+## Bloque de seguridad 3 — allowlist de roles en el registro
+
+El registro publico comprobaba unicamente que el rol elegido no fuera `ADMIN`, y
+dejaba pasar cualquier otro. Eso convierte en una escalada trivial anadir un rol
+privilegiado a la semilla: en el momento en que exista, cualquiera que lo pida
+desde el formulario de alta se registra con el, sin tocar una linea de Java.
+
+Lo que decide ahora es una `Set` con los tres roles de autoservicio (`CUSTOMER`,
+`PROFESSIONAL`, `COMPANY`) y se rechaza todo lo demas, que es el orden que falla
+cerrado: un rol nuevo no es registrable hasta que alguien lo decida a mano, en
+vez de serlo hasta que alguien se acuerde de bloquearlo.
+
+El corte va antes de la consulta de rol y el mensaje es el mismo tanto si el rol
+existe pero no es de autoservicio como si no existe. Con el codigo anterior los
+dos casos respondian distinto, y esa diferencia ya permitia enumerar los nombres
+de la tabla `role` desde un endpoint publico.
+
+7 tests nuevos en `RegistroRolTest`, incluido el que crea un rol privilegiado
+inventado (`SUPERADMIN`) que el codigo no conoce y comprueba que se rechaza y que
+no queda ningun usuario con el. Con el codigo anterior ese alta tendria exito.
+
+---
+
+## INCIDENTE — 4 secretos de desarrollo publicados en el repositorio publico
+
+### Que paso
+
+El commit `de348ed` ("ajjaja", 6 ago 2026) subio un `.env` a la raiz con valores
+reales, no placeholders:
+
+- `POSTGRES_PASSWORD`
+- `JWT_SECRET`
+- `ADMIN_BOOTSTRAP_KEY` (protege `POST /api/auth/register-admin`)
+- `INTERNAL_SERVICE_KEY` (protege `POST /api/notifications/internal`)
+
+El repositorio es publico. El commit `638e19e` (24 sep) ya habia sacado el `.env`
+del arbol y anadio `.gitignore` y `.env.example` con placeholders, pero eso no
+borra nada del historial: el blob seguia siendo legible por cualquiera que clonara.
+
+Puesto que el `.env` lleva los valores, no van aqui. Lo que hace falta es
+generarlos nuevos y actualizar el `.env` local de cada quien.
+
+### Alcance
+
+- Solo la rama `testeo` contenia el commit. Las otras 5 (`main`, `backend`,
+  `Front-End`, `db_dev`, `feature-mg`) no lo tienen y no se tocaron.
+- `JWT_SECRET` estuvo ~7 semanas publico: cualquiera pudo firmar tokens validos del
+  stack de desarrollo. Si el stack de dev comparte esa clave con `db_dev` u otro
+  ambiente, hay que rotarla ahi tambien.
+- No hay despliegue en produccion todavia, asi que la exposicion es del entorno de
+  desarrollo. Eso baja la gravedad, no la elimina.
+
+### Reescritura del historial (hecha)
+
+`git filter-repo --refs refs/heads/testeo --invert-paths --path .env`, luego
+`push --force-with-lease`. Se reescribieron 17 commits:
+
+| antes | ahora |
+|---|---|
+| `31132fe` allowlist de roles | `882cc7f` |
+| `c21822e` lecturas sin open-in-view | `a479317` |
+| `66dcd49` baja impide autenticarse | `1613d9d` |
+| `a5766b8` itinerario | `8676876` |
+
+El arbol de `HEAD` quedo byte a byte identico (`git diff 31132fe..882cc7f` sale
+vacio): lo unico que cambio fueron los SHA. El repo local quedo limpio (ref
+obsoleta borrada, reflog caducado, `gc --prune=now`, blob destruido) y se borro el
+bundle de respaldo.
+
+### Lo que la reescritura NO resuelve
+
+`GET /contents/.env?ref=testeo` ya responde 404, pero
+`GET /commits/de348ed` **sigue devolviendo el `.env` en claro**. Los objetos sin
+referencia los sirve GitHub igualmente en repos publicos, y eso no se arregla
+desde el cliente: hay que pedirlo a soporte.
+
+Ademas, mientras el commit estuvo publicado, el contenido pudo quedar en caches, en
+clones de otra gente y en indexadores. La reescritura reduce la exposicion, no la
+anula. Por eso la rotacion de abajo no es opcional en ningun caso.
+
+### Pendiente (acciones de Gustavo, no automatizables)
+
+1. **Rotar los 4 valores** con `openssl rand -base64 48` (24 para bootstrap e
+   internal) y actualizar el `.env` local. Con la clave nueva, regenerar el `.env`
+   de cada quien. Revisar tambien cualquier ambiente que reutilice los valores
+   viejos.
+2. **Pedir a soporte de GitHub la purga de los objetos sin referencia.** Ventana de
+   24h desde el push, asi que hay que hacerlo cuanto antes:
+   https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository
+3. **Avisar al equipo**: quien tenga `testeo` clonado tiene que volver a clonarlo.
+   Un `pull` normal falla al divergir; la via es `rm -rf .git` y clonar de nuevo,
+   o `git fetch && git reset --hard origin/testeo` y perder los commits locales no
+   pusheados.
+
+### Estado de la suite tras la reescritura
+
+```
+usuarios         BUILD SUCCESS   25 tests
+perfiles         BUILD SUCCESS    7 tests
+catalogo         BUILD SUCCESS    8 tests
+ofertas          BUILD SUCCESS   30 tests
+resenias         BUILD SUCCESS   20 tests
+```
+
+90 tests. Cada fix de los tres bloques de arriba se verifico por mutacion: el
+test tiene que ponerse rojo al deshacer el codigo, y solo en los tests que le
+toca.
