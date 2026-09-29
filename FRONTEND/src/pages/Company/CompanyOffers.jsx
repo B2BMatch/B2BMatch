@@ -16,6 +16,12 @@ const offerStatusInfo = (status) => {
   return { cls: 'badge-status--neutral' };
 };
 
+const applicationStatusInfo = (status) => {
+  if (status === 'ACCEPTED') return { cls: 'badge-status--active', label: 'ACCEPTED' };
+  if (status === 'REJECTED') return { cls: 'badge-status--suspended', label: 'REJECTED' };
+  return { cls: 'badge-status--neutral', label: 'PENDING' };
+};
+
 export const CompanyOffers = () => {
   const { user } = useAuth();
   const [offers, setOffers] = useState([]);
@@ -28,6 +34,7 @@ export const CompanyOffers = () => {
   const [reviewForm, setReviewForm] = useState({});
   const [loadingApplicants, setLoadingApplicants] = useState(false);
   const [sendingReviewUserId, setSendingReviewUserId] = useState(null);
+  const [processingApplicationId, setProcessingApplicationId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -112,6 +119,38 @@ export const CompanyOffers = () => {
     }
   };
 
+  const handleApplicationDecision = async (offerId, applicationId, decision) => {
+    const isAccept = decision === 'accept';
+    const confirmed = window.confirm(
+      isAccept
+        ? '¿Aceptar esta postulación? Las demás postulaciones de la oferta quedarán rechazadas.'
+        : '¿Rechazar esta postulación?'
+    );
+    if (!confirmed) return;
+
+    setProcessingApplicationId(applicationId);
+    setError('');
+    try {
+      if (isAccept) {
+        await applicationsService.acceptApplication(applicationId);
+      } else {
+        await applicationsService.rejectApplication(applicationId);
+      }
+      const list = await applicationsService.getApplicationsByJobOfferId(offerId);
+      setApplicantsByOffer((prev) => ({ ...prev, [offerId]: list || [] }));
+    } catch (err) {
+      console.error(`Error ${decision === 'accept' ? 'aceptando' : 'rechazando'} postulación`, err);
+      setError(
+        err?.response?.data?.message ||
+          (isAccept
+            ? 'No se pudo aceptar la postulación. Intenta de nuevo.'
+            : 'No se pudo rechazar la postulación. Intenta de nuevo.')
+      );
+    } finally {
+      setProcessingApplicationId(null);
+    }
+  };
+
   const handleReviewChange = (userId, field, value) => {
     setReviewForm((prev) => ({ ...prev, [userId]: { ...prev[userId], [field]: value } }));
   };
@@ -180,7 +219,8 @@ export const CompanyOffers = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {offers.map((offer) => {
             const status = offerStatusInfo(offer.status || 'ACTIVE');
-            const hasApplicants = (applicantsByOffer[offer.id] || []).length > 0;
+            const applicants = applicantsByOffer[offer.id] || [];
+            const isOfferActive = (offer.status || 'ACTIVE') === 'ACTIVE';
             return (
               <div key={offer.id} className="offer-card">
                 <div className="offer-card-head">
@@ -200,7 +240,7 @@ export const CompanyOffers = () => {
                       Editar
                     </Link>
                     <button onClick={() => handleToggleApplicants(offer.id)} className="btn-b2b-outline btn-xs">
-                      {expandedOfferId === offer.id ? 'Ocultar Postulantes' : hasApplicants ? `Postulantes (${hasApplicants})` : 'Ver Postulantes'}
+                      {expandedOfferId === offer.id ? 'Ocultar Postulantes' : applicants.length > 0 ? `Postulantes (${applicants.length})` : 'Ver Postulantes'}
                     </button>
                     <button onClick={() => handleDelete(offer.id)} className="btn-b2b-outline btn-xs btn-danger">
                       Eliminar
@@ -224,14 +264,47 @@ export const CompanyOffers = () => {
                               ? (existingReviews.reduce((acc, r) => acc + (r.rating || 0), 0) / existingReviews.length).toFixed(1)
                               : null;
                           const form = reviewForm[applicantUserId] || { rating: '5', comment: '' };
+                          const appStatus = applicationStatusInfo(app.status);
+                          const canDecide = app.status === 'PENDING' && isOfferActive;
+                          const isProcessing = processingApplicationId === app.id;
 
                           return (
                             <div key={app.id} className="gig-row">
-                              <UserCard
-                                name={getApplicantName(applicantUserId)}
-                                role={app.proposal || 'Sin propuesta adjunta'}
-                                skills={`Precio esperado: $${app.expectedPrice ?? 0} · ${existingReviews.length} reseña${existingReviews.length === 1 ? '' : 's'}${avg ? ` · Promedio: ${avg}★` : ''}`}
-                              />
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                <UserCard
+                                  name={getApplicantName(applicantUserId)}
+                                  role={app.proposal || 'Sin propuesta adjunta'}
+                                  skills={`Precio esperado: $${app.expectedPrice ?? 0} · ${existingReviews.length} reseña${existingReviews.length === 1 ? '' : 's'}${avg ? ` · Promedio: ${avg}★` : ''}`}
+                                />
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span className={`badge-status ${appStatus.cls}`}>{appStatus.label}</span>
+                                  {canDecide && (
+                                    <>
+                                      <button
+                                        className="btn-b2b-primary btn-xs"
+                                        onClick={() => handleApplicationDecision(offer.id, app.id, 'accept')}
+                                        disabled={isProcessing}
+                                      >
+                                        {isProcessing ? 'Procesando...' : 'Aceptar'}
+                                      </button>
+                                      <button
+                                        className="btn-b2b-outline btn-xs btn-danger"
+                                        onClick={() => handleApplicationDecision(offer.id, app.id, 'reject')}
+                                        disabled={isProcessing}
+                                      >
+                                        Rechazar
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+
+                              {app.status === 'PENDING' && !isOfferActive && (
+                                <p style={{ margin: '10px 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                  No podés decidir sobre esta postulación porque la oferta ya no está activa.
+                                </p>
+                              )}
 
                               {existingReviews.length > 0 && (
                                 <div style={{ marginTop: '16px' }}>

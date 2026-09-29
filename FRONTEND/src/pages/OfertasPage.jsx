@@ -18,22 +18,23 @@ const OfertasPage = () => {
   const { currentUser } = useAuth();
   const [ofertas, setOfertas] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [companies, setCompanies] = useState([]);
+  const [companiesByUser, setCompaniesByUser] = useState({});
   const [loading, setLoading] = useState(true);
   const [applyingOfferId, setApplyingOfferId] = useState(null);
+  const [appliedOfferIds, setAppliedOfferIds] = useState([]);
+  const [applicationForms, setApplicationForms] = useState({});
+  const [feedback, setFeedback] = useState({});
   const [error, setError] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [jobs, cats, comps] = await Promise.all([
+        const [jobs, cats] = await Promise.all([
           getOfertas(),
           catalogoService.getCategories(),
-          perfilesService.getCompanyProfiles(),
         ]);
-        setOfertas(jobs);
-        setCategories(cats);
-        setCompanies(comps || []);
+        setOfertas(Array.isArray(jobs) ? jobs : []);
+        setCategories(Array.isArray(cats) ? cats : []);
       } catch (err) {
         console.error('Error al cargar ofertas', err);
         setError('No se pudieron cargar las ofertas.');
@@ -44,22 +45,78 @@ const OfertasPage = () => {
     loadData();
   }, []);
 
+  // El listado público devuelve userId enmascarado (null), así que el nombre de la
+  // empresa se resuelve consulta por userId, deduplicado y cacheado.
+  useEffect(() => {
+    if (ofertas.length === 0) return;
+    const resolveCompanies = async () => {
+      const userIds = [...new Set(ofertas.map((o) => o.userId).filter((id) => id != null))];
+      const entries = await Promise.all(
+        userIds.map(async (userId) => {
+          try {
+            const profile = await perfilesService.getCompanyProfileByUser(userId);
+            return [userId, profile?.companyName || null];
+          } catch (err) {
+            console.error('Error cargando perfil de empresa', err);
+            return [userId, null];
+          }
+        })
+      );
+      setCompaniesByUser((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
+    };
+    resolveCompanies();
+  }, [ofertas]);
+
+  // Carga las postulaciones del candidato para no ofrecer "Aplicar" donde ya se postuló.
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setAppliedOfferIds([]);
+      return;
+    }
+    const loadApplications = async () => {
+      try {
+        const list = await applicationsService.getApplicationsByUserId(currentUser.id);
+        setAppliedOfferIds((Array.isArray(list) ? list : []).map((a) => a.jobOfferId));
+      } catch (err) {
+        console.error('Error cargando mis postulaciones', err);
+      }
+    };
+    loadApplications();
+  }, [currentUser?.id]);
+
   const getCategoryName = (categoryId) => {
     return categories.find((category) => category.id === categoryId)?.name || 'General';
   };
 
   const getCompanyName = (userId) => {
-    return companies.find((company) => company.userId === userId)?.companyName || `Empresa ${userId ?? ''}`.trim();
+    if (userId == null) return 'Empresa';
+    return companiesByUser[userId] || `Empresa #${userId}`;
+  };
+
+  const handleFormChange = (offerId, field, value) => {
+    setApplicationForms((prev) => ({ ...prev, [offerId]: { ...prev[offerId], [field]: value } }));
   };
 
   const handleApply = async (offer) => {
     if (!currentUser) {
-      alert('Debes iniciar sesión como candidato para postular.');
+      setFeedback((prev) => ({ ...prev, [offer.id]: { type: 'error', text: 'Debes iniciar sesión como candidato para postular.' } }));
       return;
     }
 
     if (currentUser.role !== 'candidate') {
-      alert('Solo los candidatos pueden postular a las ofertas.');
+      setFeedback((prev) => ({ ...prev, [offer.id]: { type: 'error', text: 'Solo los candidatos pueden postular a las ofertas.' } }));
+      return;
+    }
+
+    const form = applicationForms[offer.id] || {};
+    const proposal = (form.proposal || '').trim();
+    if (!proposal) {
+      setFeedback((prev) => ({ ...prev, [offer.id]: { type: 'error', text: 'Escribí una carta de presentación para postular.' } }));
+      return;
+    }
+    const expectedPrice = form.expectedPrice !== undefined && form.expectedPrice !== '' ? Number(form.expectedPrice) : null;
+    if (expectedPrice !== null && (Number.isNaN(expectedPrice) || expectedPrice < 0)) {
+      setFeedback((prev) => ({ ...prev, [offer.id]: { type: 'error', text: 'El precio esperado debe ser un número válido mayor o igual a 0.' } }));
       return;
     }
 
@@ -67,19 +124,31 @@ const OfertasPage = () => {
       setApplyingOfferId(offer.id);
       const profile = await perfilesService.getProfessionalProfileByUser(currentUser.id);
       if (!profile?.id) {
-        alert('Completa tu perfil profesional antes de postular.');
+        setFeedback((prev) => ({ ...prev, [offer.id]: { type: 'error', text: 'Completa tu perfil profesional antes de postular.' } }));
         return;
       }
 
       await applicationsService.createApplication({
         jobOfferId: offer.id,
-        proposal: `Estoy interesado en la vacante ${offer.title}.`,
-        expectedPrice: offer.budget || 0
+        proposal,
+        expectedPrice,
       });
-      alert('Postulación enviada con éxito.');
+      setAppliedOfferIds((prev) => [...new Set([...prev, offer.id])]);
+      setApplicationForms((prev) => ({ ...prev, [offer.id]: { proposal: '', expectedPrice: '' } }));
+      setFeedback((prev) => ({ ...prev, [offer.id]: { type: 'success', text: 'Postulación enviada con éxito.' } }));
     } catch (err) {
       console.error('Error al postular a la oferta', err);
-      alert('Error al enviar la postulación. Intenta nuevamente.');
+      const conflict = err?.response?.status === 409;
+      if (conflict) setAppliedOfferIds((prev) => [...new Set([...prev, offer.id])]);
+      setFeedback((prev) => ({
+        ...prev,
+        [offer.id]: {
+          type: 'error',
+          text: conflict
+            ? 'Ya te postulaste a esta oferta.'
+            : err?.response?.data?.message || 'No se pudo enviar la postulación. Intenta nuevamente.',
+        },
+      }));
     } finally {
       setApplyingOfferId(null);
     }
@@ -87,6 +156,10 @@ const OfertasPage = () => {
 
   if (loading) return <p style={{ padding: '20px' }}>Cargando ofertas...</p>;
   if (error) return <p style={{ padding: '20px', color: 'red' }}>{error}</p>;
+
+  // El backend solo excluye DELETED/CLOSED/EXPIRED: las ofertas SUSPENDED o INACTIVE
+  // igual llegan al listado público, pero no admiten postulaciones.
+  const openOffers = ofertas.filter((oferta) => (oferta.status || 'ACTIVE') === 'ACTIVE');
 
   return (
     <div>
@@ -98,18 +171,22 @@ const OfertasPage = () => {
 
       <div className="list-page">
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>
-          {ofertas.length} oferta{ofertas.length === 1 ? '' : 's'} disponible{ofertas.length === 1 ? '' : 's'}
+          {openOffers.length} oferta{openOffers.length === 1 ? '' : 's'} disponible{openOffers.length === 1 ? '' : 's'}
         </p>
 
-        {ofertas.length === 0 ? (
+        {openOffers.length === 0 ? (
           <div className="empty-state">
             <strong>Sin ofertas publicadas</strong>
             <span>Volvé más tarde: las empresas están cargando nuevas vacantes.</span>
           </div>
         ) : (
           <div className="result-grid">
-            {ofertas.map((oferta) => {
+            {openOffers.map((oferta) => {
               const companyName = getCompanyName(oferta.userId);
+              const alreadyApplied = appliedOfferIds.includes(oferta.id);
+              const isApplying = applyingOfferId === oferta.id;
+              const form = applicationForms[oferta.id] || {};
+              const offerFeedback = feedback[oferta.id];
               return (
                 <article key={oferta.id} className="gig-card">
                   <div className="gig-cover">
@@ -135,19 +212,50 @@ const OfertasPage = () => {
                     <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                       {oferta.deadline ? `Cierra el ${new Date(oferta.deadline).toLocaleDateString()}` : 'Oferta abierta'}
                     </p>
-                    {currentUser ? (
-                      <button
-                        className="btn-pill"
-                        onClick={() => handleApply(oferta)}
-                        disabled={applyingOfferId === oferta.id}
-                        style={{ alignSelf: 'flex-start', marginTop: '4px' }}
-                      >
-                        {applyingOfferId === oferta.id ? 'Postulando...' : 'Aplicar'}
-                      </button>
-                    ) : (
+
+                    {!currentUser ? (
                       <Link to="/login" className="btn-pill btn-pill--outline" style={{ alignSelf: 'flex-start', marginTop: '4px' }}>
                         Iniciar sesión para postular
                       </Link>
+                    ) : alreadyApplied ? (
+                      <button className="btn-pill" disabled style={{ alignSelf: 'flex-start', marginTop: '4px' }}>
+                        Ya te postulaste ✓
+                      </button>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                        <textarea
+                          className="form-textarea"
+                          rows="3"
+                          placeholder="Contale a la empresa por qué sos el perfil indicado..."
+                          value={form.proposal || ''}
+                          onChange={(e) => handleFormChange(oferta.id, 'proposal', e.target.value)}
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          className="form-input"
+                          placeholder="Tu precio esperado (opcional)"
+                          value={form.expectedPrice ?? ''}
+                          onChange={(e) => handleFormChange(oferta.id, 'expectedPrice', e.target.value)}
+                        />
+                        <button
+                          className="btn-pill"
+                          onClick={() => handleApply(oferta)}
+                          disabled={isApplying}
+                          style={{ alignSelf: 'flex-start' }}
+                        >
+                          {isApplying ? 'Postulando...' : 'Aplicar'}
+                        </button>
+                      </div>
+                    )}
+
+                    {offerFeedback && (
+                      <div
+                        className={`alert-banner alert-banner--${offerFeedback.type}`}
+                        style={{ marginTop: '10px', padding: '8px 12px', fontSize: '0.85rem' }}
+                      >
+                        {offerFeedback.text}
+                      </div>
                     )}
                   </div>
                 </article>

@@ -3,18 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   getNotificationsByUser,
-  countUnreadNotifications,
   markAsRead,
 } from '../services/notificationsService';
 import '../styles/navbar.css';
 import '../styles/buttons.css';
 
 const fetchNotifications = async (userId) => {
-  const [list, count] = await Promise.all([
-    getNotificationsByUser(userId),
-    countUnreadNotifications(userId),
-  ]);
-  return [Array.isArray(list) ? list : [], count || 0];
+  const list = await getNotificationsByUser(userId);
+  const items = Array.isArray(list) ? list : [];
+  return [items, items.filter((n) => !n.isRead).length];
 };
 
 export const Navbar = ({ logo, theme, onToggleTheme, onOpenModal }) => {
@@ -78,12 +75,13 @@ export const Navbar = ({ logo, theme, onToggleTheme, onOpenModal }) => {
   };
 
   const handleMarkRead = async (id) => {
+    const wasUnread = notifications.some((n) => n.id === id && !n.isRead);
     try {
       await markAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+      if (wasUnread) setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (err) {
       console.error('Error al marcar leída', err);
     }
@@ -91,9 +89,9 @@ export const Navbar = ({ logo, theme, onToggleTheme, onOpenModal }) => {
 
   const handleMarkAllRead = async () => {
     try {
-      const unread = notifications.filter((n) => !n.read);
+      const unread = notifications.filter((n) => !n.isRead);
       await Promise.all(unread.map((n) => markAsRead(n.id)));
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {
       console.error('Error al marcar todas leídas', err);
@@ -185,13 +183,13 @@ export const Navbar = ({ logo, theme, onToggleTheme, onOpenModal }) => {
                         notifications.map((n) => (
                           <button
                             key={n.id}
-                            className={`notif-item ${n.read ? 'read' : 'unread'}`}
+                            className={`notif-item ${n.isRead ? 'read' : 'unread'}`}
                             onClick={() => handleMarkRead(n.id)}
                             type="button"
                           >
                             <div className="notif-item-title">
                               {n.title}
-                              {!n.read && <span className="notif-dot"></span>}
+                              {!n.isRead && <span className="notif-dot"></span>}
                             </div>
                             {n.message && <div className="notif-item-message">{n.message}</div>}
                             <div className="notif-item-date">

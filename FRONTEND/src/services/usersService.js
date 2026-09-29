@@ -1,12 +1,7 @@
 import api from './api';
 
-export const getUsers = async () => {
-  const res = await api.get('/users');
-  return res.data;
-};
-
-export const getUsersByRole = async (roleName) => {
-  const res = await api.get(`/users/role/${roleName}`);
+export const getUsers = async (params = {}) => {
+  const res = await api.get('/users', { params });
   return res.data;
 };
 
@@ -25,4 +20,4 @@ export const updateUserStatus = async (id, status) => {
   return res.data;
 };
 
-export default { getUsers, getUsersByRole, deleteUser, reactivateUser, updateUserStatus };
+export default { getUsers, deleteUser, reactivateUser, updateUserStatus };

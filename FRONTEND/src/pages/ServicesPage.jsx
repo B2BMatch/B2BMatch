@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import catalogoService from '../services/catalogoService';
 import perfilesService from '../services/perfilesService';
@@ -18,16 +18,23 @@ const getInitials = (name = '') => {
 
 const ServicesPage = () => {
   const { currentUser } = useAuth();
+  const [searchParams] = useSearchParams();
+  const queryFromUrl = (searchParams.get('q') || '').trim();
   const [services, setServices] = useState([]);
   const [categories, setCategories] = useState([]);
   const [professionals, setProfessionals] = useState([]);
   const [myQuotations, setMyQuotations] = useState([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(queryFromUrl);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quotationMessage, setQuotationMessage] = useState({});
   const [sendingServiceId, setSendingServiceId] = useState(null);
+  const [quotationFeedback, setQuotationFeedback] = useState({});
+
+  useEffect(() => {
+    setQuery(queryFromUrl);
+  }, [queryFromUrl]);
 
   useEffect(() => {
     const load = async () => {
@@ -88,12 +95,12 @@ const list = await quotationsService.getQuotationsByUser(currentUser.id);
 
   const handleRequestQuotation = async (serviceId) => {
     if (!currentUser) {
-      alert('Debes iniciar sesión para solicitar una cotización.');
+      setQuotationFeedback((prev) => ({ ...prev, [serviceId]: { type: 'error', text: 'Debes iniciar sesión para solicitar una cotización.' } }));
       return;
     }
     const message = (quotationMessage[serviceId] || '').trim();
     if (!message) {
-      alert('Escribe un mensaje describiendo lo que necesitas.');
+      setQuotationFeedback((prev) => ({ ...prev, [serviceId]: { type: 'error', text: 'Escribe un mensaje describiendo lo que necesitas.' } }));
       return;
     }
 
@@ -103,13 +110,16 @@ const list = await quotationsService.getQuotationsByUser(currentUser.id);
         serviceId,
         message,
       });
-      alert('Cotización solicitada correctamente.');
+      setQuotationFeedback((prev) => ({ ...prev, [serviceId]: { type: 'success', text: 'Cotización solicitada correctamente.' } }));
       setQuotationMessage((prev) => ({ ...prev, [serviceId]: '' }));
       const list = await quotationsService.getQuotationsByUser(currentUser.id);
       setMyQuotations(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error('Error solicitando cotización', err);
-      alert('No se pudo solicitar la cotización. Intenta de nuevo.');
+      setQuotationFeedback((prev) => ({
+        ...prev,
+        [serviceId]: { type: 'error', text: err?.response?.data?.message || 'No se pudo solicitar la cotización. Intenta de nuevo.' },
+      }));
     } finally {
       setSendingServiceId(null);
     }
@@ -188,6 +198,14 @@ const list = await quotationsService.getQuotationsByUser(currentUser.id);
                           >
                             {sendingServiceId === service.id ? 'Enviando...' : 'Solicitar Cotización'}
                           </Button>
+                          {quotationFeedback[service.id] && (
+                            <div
+                              className={`alert-banner alert-banner--${quotationFeedback[service.id].type}`}
+                              style={{ marginTop: '8px', padding: '8px 12px', fontSize: '0.85rem' }}
+                            >
+                              {quotationFeedback[service.id].text}
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <Link to="/login" className="btn-pill btn-pill--outline">

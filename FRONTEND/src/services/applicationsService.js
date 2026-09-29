@@ -20,9 +20,21 @@ export const createApplication = async (payload) => {
   return res.data;
 };
 
+export const acceptApplication = async (id) => {
+  const res = await api.patch(`/job-applications/${id}/accept`);
+  return res.data;
+};
+
+export const rejectApplication = async (id) => {
+  const res = await api.patch(`/job-applications/${id}/reject`);
+  return res.data;
+};
+
 export default {
   getApplications,
   getApplicationsByUserId,
   getApplicationsByJobOfferId,
   createApplication,
+  acceptApplication,
+  rejectApplication,
 };

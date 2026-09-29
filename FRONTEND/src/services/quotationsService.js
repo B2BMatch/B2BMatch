@@ -35,6 +35,16 @@ export const deleteQuotation = async (id) => {
   return true;
 };
 
+export const acceptQuotation = async (id) => {
+  const res = await api.patch(`/quotations/${id}/accept`);
+  return res.data;
+};
+
+export const rejectQuotation = async (id) => {
+  const res = await api.patch(`/quotations/${id}/reject`);
+  return res.data;
+};
+
 export default {
   getQuotations,
   getQuotationById,
@@ -43,4 +53,6 @@ export default {
   createQuotation,
   updateQuotation,
   deleteQuotation,
+  acceptQuotation,
+  rejectQuotation,
 };

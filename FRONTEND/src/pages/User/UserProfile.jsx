@@ -6,11 +6,25 @@ import catalogoService from '../../services/catalogoService';
 import quotationsService from '../../services/quotationsService';
 import '../../styles/catalog.css';
 import '../../styles/profile.css';
+import '../../styles/admin.css';
 
 const getInitials = (firstName = '', lastName = '') => {
     const first = firstName.trim()[0] || '';
     const last = lastName.trim()[0] || '';
     return (first + last).toUpperCase() || 'P';
+};
+
+const quotationStatusInfo = (status) => {
+    if (status === 'ACCEPTED') return { cls: 'badge-status--active', label: 'ACCEPTED' };
+    if (status === 'REJECTED') return { cls: 'badge-status--suspended', label: 'REJECTED' };
+    return { cls: 'badge-status--neutral', label: 'PENDING' };
+};
+
+const serviceStatusInfo = (status) => {
+    if (status === 'ACTIVE') return { cls: 'badge-status--active', label: 'Publicado' };
+    if (status === 'SUSPENDED') return { cls: 'badge-status--suspended', label: 'Suspendido' };
+    if (status === 'INACTIVE') return { cls: 'badge-status--neutral', label: 'Pausado' };
+    return { cls: 'badge-status--neutral', label: status || '—' };
 };
 
 export const UserProfile = () => {
@@ -39,6 +53,7 @@ export const UserProfile = () => {
   const [serviceForm, setServiceForm] = useState({ title: '', description: '', price: '', category_id: '' });
   const [savingService, setSavingService] = useState(false);
   const [serviceError, setServiceError] = useState('');
+  const [processingQuotationId, setProcessingQuotationId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -81,16 +96,14 @@ export const UserProfile = () => {
 
   useEffect(() => {
     const loadServices = async () => {
-      if (!profileId) return;
+      if (!user?.id) return;
       try {
         const [cats, servicesList] = await Promise.all([
           catalogoService.getCategories(),
-          catalogoService.getProfessionalServices(),
+          catalogoService.getMyProfessionalServices(),
         ]);
         setCategories(Array.isArray(cats) ? cats : []);
-        const own = (Array.isArray(servicesList) ? servicesList : []).filter(
-          (s) => String(s.professional_id) === String(profileId)
-        );
+        const own = Array.isArray(servicesList) ? servicesList : [];
         setMyServices(own);
 
         for (const service of own) {
@@ -108,7 +121,7 @@ export const UserProfile = () => {
       }
     };
     loadServices();
-  }, [profileId]);
+  }, [user?.id]);
 
   const handleServiceChange = (e) => {
     setServiceForm({ ...serviceForm, [e.target.name]: e.target.value });
@@ -141,6 +154,41 @@ export const UserProfile = () => {
       setServiceError('No se pudo publicar el servicio.');
     } finally {
       setSavingService(false);
+    }
+  };
+
+  const refreshQuotations = async (serviceId) => {
+    try {
+      const quotes = await quotationsService.getQuotationsByService(serviceId);
+      setQuotationsByService((prev) => ({ ...prev, [serviceId]: Array.isArray(quotes) ? quotes : [] }));
+    } catch (err) {
+      console.error('Error actualizando cotizaciones del servicio', err);
+      setQuotationsByService((prev) => ({ ...prev, [serviceId]: [] }));
+    }
+  };
+
+  const handleQuotationDecision = async (serviceId, quotationId, decision) => {
+    const isAccept = decision === 'accept';
+    const confirmed = window.confirm(isAccept ? '¿Aceptar esta solicitud de cotización?' : '¿Rechazar esta solicitud de cotización?');
+    if (!confirmed) return;
+
+    setProcessingQuotationId(quotationId);
+    setServiceError('');
+    try {
+      if (isAccept) {
+        await quotationsService.acceptQuotation(quotationId);
+      } else {
+        await quotationsService.rejectQuotation(quotationId);
+      }
+      await refreshQuotations(serviceId);
+    } catch (err) {
+      console.error(`Error ${decision === 'accept' ? 'aceptando' : 'rechazando'} cotización`, err);
+      setServiceError(
+        err?.response?.data?.message ||
+          (isAccept ? 'No se pudo aceptar la cotización. Intenta de nuevo.' : 'No se pudo rechazar la cotización. Intenta de nuevo.')
+      );
+    } finally {
+      setProcessingQuotationId(null);
     }
   };
 
@@ -378,6 +426,9 @@ export const UserProfile = () => {
                   <div className="gig-row-header">
                     <h3>{service.title}</h3>
                     <span className="badge-gold">{categories.find((c) => c.id === service.category_id)?.name || 'General'}</span>
+                    <span className={`badge-status ${serviceStatusInfo(service.status).cls}`}>
+                      {serviceStatusInfo(service.status).label}
+                    </span>
                   </div>
                   <p style={{ margin: '4px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     {service.description || 'Sin descripción.'}
@@ -393,15 +444,40 @@ export const UserProfile = () => {
                     </p>
                   ) : (
                     <div className="item-list">
-                      {quotes.map((quote) => (
-                        <div key={quote.id} className="item-row">
-                          <div className="item-row-header">
-                            <span>Solicitante #{quote.userId}</span>
-                            <span className="badge-gold">{quote.status || 'PENDING'}</span>
+                      {quotes.map((quote) => {
+                        const quoteStatus = quotationStatusInfo(quote.status);
+                        const canDecide = quote.status === 'PENDING';
+                        const isProcessing = processingQuotationId === quote.id;
+                        return (
+                          <div key={quote.id} className="item-row">
+                            <div className="item-row-header">
+                              <span>Solicitante #{quote.userId}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span className={`badge-status ${quoteStatus.cls}`}>{quoteStatus.label}</span>
+                                {canDecide && (
+                                  <>
+                                    <button
+                                      className="btn-b2b-primary btn-xs"
+                                      onClick={() => handleQuotationDecision(service.id, quote.id, 'accept')}
+                                      disabled={isProcessing}
+                                    >
+                                      {isProcessing ? 'Procesando...' : 'Aceptar'}
+                                    </button>
+                                    <button
+                                      className="btn-b2b-outline btn-xs btn-danger"
+                                      onClick={() => handleQuotationDecision(service.id, quote.id, 'reject')}
+                                      disabled={isProcessing}
+                                    >
+                                      Rechazar
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                            <p>{quote.message}</p>
                           </div>
-                          <p>{quote.message}</p>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

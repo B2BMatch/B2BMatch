@@ -1,44 +1,8 @@
 import api from './api';
 
-// Customer profiles
-export const getCustomerProfiles = async () => {
-  const res = await api.get('/customer-profiles');
-  return res.data;
-};
-
-export const getCustomerProfileById = async (id) => {
-  const res = await api.get(`/customer-profiles/${id}`);
-  return res.data;
-};
-
-export const getCustomerProfileByUser = async (userId) => {
-  const res = await api.get(`/customer-profiles/user/${userId}`);
-  return res.data;
-};
-
-export const createCustomerProfile = async (payload) => {
-  const res = await api.post('/customer-profiles', payload);
-  return res.data;
-};
-
-export const updateCustomerProfile = async (id, payload) => {
-  const res = await api.put(`/customer-profiles/${id}`, payload);
-  return res.data;
-};
-
-export const deleteCustomerProfile = async (id) => {
-  await api.delete(`/customer-profiles/${id}`);
-  return true;
-};
-
 // Company profiles
 export const getCompanyProfiles = async () => {
   const res = await api.get('/company-profiles');
-  return res.data;
-};
-
-export const getCompanyProfileById = async (id) => {
-  const res = await api.get(`/company-profiles/${id}`);
   return res.data;
 };
 
@@ -73,11 +37,6 @@ export const getProfessionalProfiles = async () => {
   return res.data;
 };
 
-export const getProfessionalProfileById = async (id) => {
-  const res = await api.get(`/professional-profiles/${id}`);
-  return res.data;
-};
-
 export const getProfessionalProfileByUser = async (userId) => {
   try {
     const res = await api.get(`/professional-profiles/user/${userId}`);
@@ -104,23 +63,14 @@ export const deleteProfessionalProfile = async (id) => {
 };
 
 export default {
-  // customer
-  getCustomerProfiles,
-  getCustomerProfileById,
-  getCustomerProfileByUser,
-  createCustomerProfile,
-  updateCustomerProfile,
-  deleteCustomerProfile,
   // company
   getCompanyProfiles,
-  getCompanyProfileById,
   getCompanyProfileByUser,
   createCompanyProfile,
   updateCompanyProfile,
   deleteCompanyProfile,
   // professional
   getProfessionalProfiles,
-  getProfessionalProfileById,
   getProfessionalProfileByUser,
   createProfessionalProfile,
   updateProfessionalProfile,

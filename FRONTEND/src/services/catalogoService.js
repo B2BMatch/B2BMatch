@@ -54,6 +54,11 @@ export const getProfessionalServices = async () => {
   return res.data;
 };
 
+export const getMyProfessionalServices = async () => {
+  const res = await api.get('/catalogo/professional-services/mine');
+  return res.data;
+};
+
 export const createProfessionalService = async (payload) => {
   const res = await api.post('/catalogo/professional-services', payload);
   return res.data;
@@ -70,5 +75,6 @@ export default {
   updateCompanyService,
   deleteCompanyService,
   getProfessionalServices,
+  getMyProfessionalServices,
   createProfessionalService,
 };
