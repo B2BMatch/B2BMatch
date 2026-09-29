@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -74,6 +76,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        if (ex instanceof ErrorResponse er && er.getStatusCode().value() < 500) {
+            int code = er.getStatusCode().value();
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("timestamp", LocalDateTime.now().toString());
+            body.put("status", code);
+            body.put("error", HttpStatus.valueOf(code).getReasonPhrase());
+            body.put("message", er.getBody().getDetail());
+            return ResponseEntity.status(HttpStatus.valueOf(code)).body(body);
+        }
         log.error("Error inesperado en perfiles", ex);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
@@ -83,15 +94,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 
-    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, Object>> handleTypeMismatch(
-            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadable(HttpMessageNotReadableException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
-        body.put("message", "Parámetro inválido: " + ex.getName()
-                + " (ruta o recurso no encontrado en el microservicio de perfiles)");
+        body.put("message", "El cuerpo de la solicitud es inválido, está mal formado o un campo tiene el tipo incorrecto");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+        String required = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "válido";
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+        body.put("message", "Parámetro inválido: '" + ex.getName() + "' debe ser de tipo " + required
+                + " (valor recibido: '" + ex.getValue() + "')");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 

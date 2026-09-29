@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,8 +69,24 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Error de base de datos");
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String required = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "válido";
+        return build(HttpStatus.BAD_REQUEST, "Parámetro inválido: '" + ex.getName() + "' debe ser de tipo "
+                + required + " (valor recibido: '" + ex.getValue() + "')");
+    }
+
+    @ExceptionHandler(NumberFormatException.class)
+    public ResponseEntity<Map<String, Object>> handleNumberFormat(NumberFormatException ex) {
+        return build(HttpStatus.BAD_REQUEST, "El valor recibido no es un número válido");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        if (ex instanceof ErrorResponse er && er.getStatusCode().value() < 500) {
+            int code = er.getStatusCode().value();
+            return build(HttpStatus.valueOf(code), er.getBody().getDetail());
+        }
         log.error("Error inesperado en catalogo", ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");
     }

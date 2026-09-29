@@ -11,12 +11,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@DynamicUpdate
 @Table(name = "job_offer")
 @Getter
 @Setter
@@ -48,6 +50,21 @@ public class JobOffer {
 
     @Column(nullable = false, length = 20)
     private String status = "ACTIVE";
+
+    // `deleted_at` es la unica fuente de verdad sobre el borrado; `status` es
+    // solo estado de negocio. `previous_status` guarda el estado previo para
+    // que el borrado sea reversible en lugar de perderlo.
+    // @DynamicUpdate limita el UPDATE a las columnas realmente modificadas, lo
+    // que protege a una entidad **gestionada** cargada antes de que el cascade
+    // de `usuarios` borrara la fila. No protege a una copia desactualizada que
+    // se vuelve a guardar: `save()` sobre una entidad desligada hace merge, y el
+    // merge marca como sucias todas las columnas que difieren, `deleted_at`
+    // incluida, escribiendo un null y resucitando la fila.
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "previous_status", length = 20)
+    private String previousStatus;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

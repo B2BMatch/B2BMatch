@@ -9,12 +9,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@DynamicUpdate
 @Table(name = "company_profile")
 @Getter
 @Setter
@@ -64,6 +66,29 @@ public class CompanyProfile {
 
     @Column(nullable=false, length=20)
     private String status;
+
+    // `deleted_at` es la unica fuente de verdad sobre el borrado; `status` es
+    // solo estado de negocio. `previous_status` se conserva por compatibilidad
+    // con el esquema, pero queda inerte: ni el borrado ni la reactivacion lo
+    // escriben, y el CHECK de status de V1 solo admite 'ACTIVE'/'DELETED'.
+    //
+    // @DynamicUpdate limita el UPDATE a las columnas realmente modificadas.
+    // Eso protege a una entidad **gestionada** cargada antes de que el cascade
+    // de `usuarios` borrara la fila: su `deleted_at` en memoria es null pero no
+    // esta sucio, asi que no entra en el SET.
+    //
+    // No protege, en cambio, a una copia **desactualizada** que se vuelve a
+    // guardar: `save()` sobre una entidad desligada hace merge, y el merge
+    // marca como sucias todas las columnas que difieren, `deleted_at`
+    // incluida, escribe un null y resucitando la fila. La garantia real de que un
+    // perfil dado de baja no vuelve es el guard explicito de los metodos
+    // update ("el perfil esta eliminado, no se puede modificar"), no esta
+    // anotacion.
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "previous_status", length = 20)
+    private String previousStatus;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

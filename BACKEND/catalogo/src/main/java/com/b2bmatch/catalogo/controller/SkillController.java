@@ -30,7 +30,7 @@ public class SkillController {
 
 	@GetMapping
 	public ResponseEntity<List<Map<String, Object>>> findAll() {
-		List<Map<String, Object>> rows = jdbc.queryForList("SELECT " + SELECT_COLUMNS + " FROM catalogo.skill WHERE status <> 'DELETED' ORDER BY name");
+		List<Map<String, Object>> rows = jdbc.queryForList("SELECT " + SELECT_COLUMNS + " FROM catalogo.skill WHERE deleted_at IS NULL ORDER BY name");
 		return ResponseEntity.ok(rows);
 	}
 
@@ -58,7 +58,7 @@ public class SkillController {
 			return ResponseEntity.badRequest().build();
 		}
 		try {
-			int updated = jdbc.update("UPDATE catalogo.skill SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status <> 'DELETED'", name, id);
+			int updated = jdbc.update("UPDATE catalogo.skill SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL", name, id);
 			if (updated == 0) {
 				return ResponseEntity.notFound().build();
 			}
@@ -72,11 +72,25 @@ public class SkillController {
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		int updated = jdbc.update("UPDATE catalogo.skill SET status = 'DELETED', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status <> 'DELETED'", id);
+		int updated = jdbc.update("UPDATE catalogo.skill SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL", id);
 		if (updated == 0) {
 			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.noContent().build();
+	}
+
+	@PutMapping("/{id}/restore")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Map<String, Object>> restore(@PathVariable Long id) {
+		// Restore solo despeja la marca de borrado; `status` es estado de negocio
+		// y `delete` no lo modifica, asi que restaurarlo no debe escribirlo.
+		// `previous_status` quedo vestigial y se drena aqui.
+		int updated = jdbc.update("UPDATE catalogo.skill SET deleted_at = NULL, previous_status = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NOT NULL", id);
+		if (updated == 0) {
+			return ResponseEntity.notFound().build();
+		}
+		Map<String, Object> row = jdbc.queryForMap("SELECT " + SELECT_COLUMNS + " FROM catalogo.skill WHERE id = ?", id);
+		return ResponseEntity.ok(row);
 	}
 
 	private String requireText(Object value) {

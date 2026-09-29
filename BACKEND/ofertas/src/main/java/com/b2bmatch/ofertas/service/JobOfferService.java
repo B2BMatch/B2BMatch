@@ -22,7 +22,7 @@ public class JobOfferService {
     private final ProfileOwnerResolver profileOwnerResolver;
 
     public List<JobOfferResponse> findAll() {
-        return repository.findByStatusNot("DELETED").stream()
+        return repository.findByDeletedAtIsNull().stream()
                 .filter(offer -> !List.of("CLOSED", "EXPIRED").contains(offer.getStatus()))
                 .map(JobOfferResponse::fromEntity)
                 .toList();
@@ -31,15 +31,14 @@ public class JobOfferService {
     public JobOfferResponse findById(Long id) {
         JobOffer entity = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
-        if ("DELETED".equals(entity.getStatus())) {
+        if (entity.getDeletedAt() != null) {
             throw new OfferNotFoundException("Job offer not found with id: " + id);
         }
         return JobOfferResponse.fromEntity(entity);
     }
 
     public List<JobOfferResponse> findByUserId(Long userId) {
-        return repository.findByUserId(userId).stream()
-                .filter(offer -> !"DELETED".equals(offer.getStatus()))
+        return repository.findByUserIdAndDeletedAtIsNull(userId).stream()
                 .map(JobOfferResponse::fromEntity)
                 .toList();
     }
@@ -75,7 +74,7 @@ public class JobOfferService {
         JobOffer existing = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
 
-        if ("DELETED".equals(existing.getStatus())) {
+        if (existing.getDeletedAt() != null) {
             throw new OfferNotFoundException("Job offer not found with id: " + id);
         }
 
@@ -98,14 +97,13 @@ public class JobOfferService {
         JobOffer existing = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
 
-        if ("DELETED".equals(existing.getStatus())) {
-            throw new OfferNotFoundException("Job offer not found with id: " + id);
-        }
-
+        // Sin guard de "borrada" aqui a proposito: este es el unico camino para
+        // reactivar una oferta eliminada, y el guard lo hacia inalcanzable. El
+        // permiso lo resuelve el chequeo de ADMIN mas abajo.
         checkOwnership(existing, requesterId, requesterRole);
 
         String newStatus = status.toUpperCase();
-        if (!List.of("ACTIVE", "INACTIVE", "SUSPENDED", "DELETED").contains(newStatus)) {
+        if (!List.of("ACTIVE", "INACTIVE", "SUSPENDED", "CLOSED", "EXPIRED").contains(newStatus)) {
             throw new IllegalArgumentException("Estado no válido");
         }
 
@@ -123,10 +121,16 @@ public class JobOfferService {
             throw new ForbiddenException("Solo ADMIN puede des-suspender una oferta");
         }
 
-        if ("DELETED".equals(existing.getStatus()) && !"DELETED".equals(newStatus) && !isAdmin) {
+        if (existing.getDeletedAt() != null && !isAdmin) {
             throw new ForbiddenException("Solo ADMIN puede reactivar una oferta eliminada");
         }
 
+        // `status` es estado de negocio y el borrado vive en deleted_at, asi que
+        // este endpoint ya no mezcla las dos cosas: cambiar de estado restaura
+        // la oferta si estaba dada de baja, sin inventarse un estado previo.
+        if (existing.getDeletedAt() != null) {
+            existing.setDeletedAt(null);
+        }
         existing.setStatus(newStatus);
         existing.setUpdatedAt(LocalDateTime.now());
         return JobOfferResponse.fromEntity(repository.save(existing));
@@ -136,13 +140,14 @@ public class JobOfferService {
         JobOffer existing = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job offer not found with id: " + id));
 
-        if ("DELETED".equals(existing.getStatus())) {
+        if (existing.getDeletedAt() != null) {
             throw new OfferNotFoundException("Job offer not found with id: " + id);
         }
 
         checkOwnership(existing, requesterId, requesterRole);
 
-        existing.setStatus("DELETED");
+        // No se toca `status`: es estado de negocio y el borrado vive en deleted_at.
+        existing.setDeletedAt(LocalDateTime.now());
         existing.setUpdatedAt(LocalDateTime.now());
         repository.save(existing);
     }

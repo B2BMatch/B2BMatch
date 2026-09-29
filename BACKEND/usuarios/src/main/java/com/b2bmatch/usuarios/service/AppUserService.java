@@ -206,7 +206,14 @@ public class AppUserService {
     }
 
     public List<AppUserResponseDto> findAll() {
-        return appUserRepository.findByStatusNot("DELETED").stream()
+        return findAll(false);
+    }
+
+    public List<AppUserResponseDto> findAll(boolean includeDeleted) {
+        List<AppUser> users = includeDeleted
+                ? appUserRepository.findAll()
+                : appUserRepository.findByDeletedAtIsNull();
+        return users.stream()
                 .map(this::toDto)
                 .toList();
     }
@@ -218,7 +225,7 @@ public class AppUserService {
     }
 
     public List<AppUserResponseDto> findByRole(String roleName) {
-        return appUserRepository.findByRole_NameAndStatusNot(roleName.toUpperCase(), "DELETED").stream()
+        return appUserRepository.findByRole_NameAndDeletedAtIsNull(roleName.toUpperCase()).stream()
                 .map(this::toDto)
                 .toList();
     }
@@ -228,11 +235,14 @@ public class AppUserService {
         AppUser appUser = appUserRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
 
-        if ("DELETED".equals(appUser.getStatus())) {
+        if (appUser.getDeletedAt() != null) {
             throw new IllegalArgumentException("El usuario ya está eliminado");
         }
 
-        appUser.setStatus("DELETED");
+        // `status` es estado de negocio: no se pisa al dar de baja. El borrado
+        // vive solo en deleted_at, y por eso la restauracion no necesita adivinar
+        // el estado previo.
+        appUser.setDeletedAt(LocalDateTime.now());
         appUser.setUpdatedAt(LocalDateTime.now());
         appUserRepository.save(appUser);
 
@@ -240,51 +250,47 @@ public class AppUserService {
     }
 
     private void cascadeSoftDeleteDependentData(Long userId) {
-        jdbcTemplate.update(
-                "UPDATE perfiles.company_profile SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE user_id=? AND status<>'DELETED'", userId);
-        jdbcTemplate.update(
-                "UPDATE perfiles.professional_profile SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE user_id=? AND status<>'DELETED'", userId);
-        jdbcTemplate.update(
-                "UPDATE perfiles.customer_profile SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE user_id=? AND status<>'DELETED'", userId);
+        softDelete("perfiles.company_profile", "user_id = ?", userId);
+        softDelete("perfiles.professional_profile", "user_id = ?", userId);
+        softDelete("perfiles.customer_profile", "user_id = ?", userId);
+        softDelete("ofertas.job_offer", "user_id = ?", userId);
+        softDelete("catalogo.professional_service", "professional_id IN "
+                + "(SELECT id FROM perfiles.professional_profile WHERE user_id = ?)", userId);
+        softDelete("catalogo.company_service", "company_id IN "
+                + "(SELECT id FROM perfiles.company_profile WHERE user_id = ?)", userId);
+
         jdbcTemplate.update("DELETE FROM notificaciones.notification WHERE user_id=?", userId);
-        jdbcTemplate.update(
-                "UPDATE ofertas.job_offer SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE status<>'DELETED' AND user_id=?", userId);
-        jdbcTemplate.update(
-                "UPDATE ofertas.application_table SET status='REJECTED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE status='PENDING' AND job_offer_id IN "
-                        + "(SELECT id FROM ofertas.job_offer WHERE user_id=?)", userId);
-        jdbcTemplate.update(
-                "UPDATE catalogo.professional_service SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE status<>'DELETED' AND professional_id IN "
-                        + "(SELECT id FROM perfiles.professional_profile WHERE user_id=?)", userId);
-        jdbcTemplate.update(
-                "UPDATE catalogo.company_service SET status='DELETED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE status<>'DELETED' AND company_id IN "
-                        + "(SELECT id FROM perfiles.company_profile WHERE user_id=?)", userId);
-        jdbcTemplate.update(
-                "UPDATE ofertas.application_table SET status='REJECTED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE status='PENDING' AND user_id=?", userId);
-        jdbcTemplate.update(
-                "UPDATE ofertas.quotation SET status='EXPIRED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE status='PENDING' AND user_id=?", userId);
-        jdbcTemplate.update(
-                "UPDATE ofertas.quotation SET status='EXPIRED', updated_at=CURRENT_TIMESTAMP "
-                        + "WHERE status='PENDING' AND service_id IN "
-                        + "(SELECT ps.id FROM catalogo.professional_service ps "
-                        + "JOIN perfiles.professional_profile pp ON pp.id = ps.professional_id WHERE pp.user_id=?)",
-                userId);
         jdbcTemplate.update("DELETE FROM resenias.review WHERE user_id=?", userId);
+    }
+
+    private void softDelete(String table, String condition, Long userId) {
+        jdbcTemplate.update("UPDATE " + table
+                + " SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP"
+                + " WHERE deleted_at IS NULL AND " + condition, userId);
+    }
+
+    private void cascadeRestoreDependentData(Long userId) {
+        restore("perfiles.company_profile", "user_id = ?", userId);
+        restore("perfiles.professional_profile", "user_id = ?", userId);
+        restore("perfiles.customer_profile", "user_id = ?", userId);
+        restore("ofertas.job_offer", "user_id = ?", userId);
+        restore("catalogo.professional_service", "professional_id IN "
+                + "(SELECT id FROM perfiles.professional_profile WHERE user_id = ?)", userId);
+        restore("catalogo.company_service", "company_id IN "
+                + "(SELECT id FROM perfiles.company_profile WHERE user_id = ?)", userId);
+    }
+
+    private void restore(String table, String condition, Long userId) {
+        jdbcTemplate.update("UPDATE " + table
+                + " SET deleted_at = NULL, updated_at = CURRENT_TIMESTAMP"
+                + " WHERE deleted_at IS NOT NULL AND " + condition, userId);
     }
 
     public AppUserResponseDto updateStatus(Long id, String status) {
         AppUser appUser = appUserRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
 
-        if ("DELETED".equals(appUser.getStatus())) {
+        if (appUser.getDeletedAt() != null) {
             throw new IllegalArgumentException("No se puede cambiar el estado de una cuenta eliminada");
         }
 
@@ -298,17 +304,21 @@ public class AppUserService {
         return toDto(appUserRepository.save(appUser));
     }
 
+    @Transactional
     public AppUserResponseDto reactivate(Long id) {
         AppUser appUser = appUserRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
 
-        if (!"DELETED".equals(appUser.getStatus())) {
+        if (appUser.getDeletedAt() == null) {
             throw new IllegalArgumentException("El usuario no está eliminado, no se puede reactivar");
         }
 
-        appUser.setStatus("ACTIVE");
+        appUser.setDeletedAt(null);
         appUser.setUpdatedAt(LocalDateTime.now());
-        return toDto(appUserRepository.save(appUser));
+        AppUserResponseDto restored = toDto(appUserRepository.save(appUser));
+
+        cascadeRestoreDependentData(id);
+        return restored;
     }
 
     private AppUserResponseDto toDto(AppUser appUser) {
@@ -319,7 +329,8 @@ public class AppUserService {
                 appUser.getStatus(),
                 appUser.getRole().getName(),
                 appUser.getCreatedAt(),
-                appUser.getUpdatedAt()
+                appUser.getUpdatedAt(),
+                appUser.getDeletedAt()
         );
     }
 }

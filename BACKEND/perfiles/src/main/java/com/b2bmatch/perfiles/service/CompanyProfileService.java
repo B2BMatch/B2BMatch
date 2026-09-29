@@ -23,7 +23,7 @@ public class CompanyProfileService {
 
     public List<CompanyProfileResponse> findAll(Long requesterId, String requesterRole) {
         boolean full = isFullAccess(null, requesterId, requesterRole);
-        return repository.findByStatusNot("DELETED").stream()
+        return repository.findByDeletedAtIsNull().stream()
                 .map(CompanyProfileResponse::fromEntity)
                 .map(dto -> full ? dto : mask(dto))
                 .toList();
@@ -32,7 +32,7 @@ public class CompanyProfileService {
     public CompanyProfileResponse findById(Long id, Long requesterId, String requesterRole) {
         CompanyProfile entity = repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException("Company profile not found with id: " + id));
-        if ("DELETED".equals(entity.getStatus())) {
+        if (entity.getDeletedAt() != null) {
             throw new ProfileNotFoundException("Company profile not found with id: " + id);
         }
         return toResponse(entity, requesterId, requesterRole);
@@ -41,7 +41,7 @@ public class CompanyProfileService {
     public CompanyProfileResponse findByUserId(Long userId, Long requesterId, String requesterRole) {
         CompanyProfile entity = repository.findByUserId(userId)
                 .orElseThrow(() -> new ProfileNotFoundException("Company profile not found for user id: " + userId));
-        if ("DELETED".equals(entity.getStatus())) {
+        if (entity.getDeletedAt() != null) {
             throw new ProfileNotFoundException("Company profile not found for user id: " + userId);
         }
         return toResponse(entity, requesterId, requesterRole);
@@ -112,7 +112,7 @@ public class CompanyProfileService {
             throw new ForbiddenException("Solo puedes modificar tu propio perfil, o ser ADMIN");
         }
 
-        if ("DELETED".equals(existing.getStatus())) {
+        if (existing.getDeletedAt() != null) {
             throw new IllegalArgumentException("El perfil está eliminado, no se puede modificar");
         }
 
@@ -148,11 +148,12 @@ public class CompanyProfileService {
             throw new ForbiddenException("Solo puedes eliminar tu propio perfil, o ser ADMIN");
         }
 
-        if ("DELETED".equals(entity.getStatus())) {
+        if (entity.getDeletedAt() != null) {
             throw new IllegalArgumentException("El perfil ya está eliminado");
         }
 
-        entity.setStatus("DELETED");
+        // No se toca `status`: es estado de negocio y el borrado vive en deleted_at.
+        entity.setDeletedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
         repository.save(entity);
     }
@@ -169,11 +170,13 @@ public class CompanyProfileService {
             throw new ForbiddenException("Solo puedes reactivar tu propio perfil, o ser ADMIN");
         }
 
-        if (!"DELETED".equals(entity.getStatus())) {
+        if (entity.getDeletedAt() == null) {
             throw new IllegalArgumentException("El perfil no está eliminado, no se puede reactivar");
         }
 
-        entity.setStatus("ACTIVE");
+        // `status` no se toco al dar de baja, asi que restaurar es solo limpiar
+        // el borrado: no hay que adivinar ningun estado previo.
+        entity.setDeletedAt(null);
         entity.setUpdatedAt(LocalDateTime.now());
         return CompanyProfileResponse.fromEntity(repository.save(entity));
     }

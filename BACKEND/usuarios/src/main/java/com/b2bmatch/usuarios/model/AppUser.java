@@ -55,5 +55,11 @@ public class AppUser {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "previous_status", length = 20)
+    private String previousStatus;
+
 }
 

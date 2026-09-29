@@ -30,7 +30,9 @@ public class ProfessionalServiceController {
 
 	private static final String SELECT_COLUMNS = "id, professional_id, category_id, title, description, price, status, created_at";
 
-	private static final String ACTIVE_FILTER = " status = 'ACTIVE' ";
+	// `status = 'ACTIVE'` ya no excluye los borrados: el borrado vive en
+	// deleted_at, asi que el filtro tiene que mirar las dos cosas.
+	private static final String ACTIVE_FILTER = " status = 'ACTIVE' AND deleted_at IS NULL ";
 
 	private final JdbcTemplate jdbc;
 	private final JwtUtil jwtUtil;
@@ -41,10 +43,33 @@ public class ProfessionalServiceController {
 		return ResponseEntity.ok(rows);
 	}
 
+	@GetMapping("/mine")
+	public ResponseEntity<List<Map<String, Object>>> findMine(@RequestHeader("Authorization") String authHeader) {
+		Claims claims = jwtUtil.parseToken(authHeader.substring(7));
+		String role = claims.get("role", String.class);
+		Long userId = claims.get("userId", Long.class);
+
+		if (!"PROFESSIONAL".equals(role) && !"ADMIN".equals(role)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		Long professionalId = jdbc.query(
+				"SELECT id FROM perfiles.professional_profile WHERE user_id = ? AND deleted_at IS NULL",
+				rs -> rs.next() ? rs.getLong(1) : null, userId);
+		if (professionalId == null) {
+			return ResponseEntity.ok(List.of());
+		}
+
+		List<Map<String, Object>> rows = jdbc.queryForList(
+				"SELECT " + SELECT_COLUMNS + " FROM catalogo.professional_service WHERE professional_id = ? AND deleted_at IS NULL ORDER BY created_at DESC",
+				professionalId);
+		return ResponseEntity.ok(rows);
+	}
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Map<String, Object>> findById(@PathVariable Long id) {
 		try {
-			Map<String, Object> row = jdbc.queryForMap("SELECT " + SELECT_COLUMNS + " FROM catalogo.professional_service WHERE id = ? AND status <> 'DELETED'", id);
+			Map<String, Object> row = jdbc.queryForMap("SELECT " + SELECT_COLUMNS + " FROM catalogo.professional_service WHERE id = ? AND deleted_at IS NULL", id);
 			return ResponseEntity.ok(row);
 		} catch (EmptyResultDataAccessException ex) {
 			return ResponseEntity.notFound().build();
@@ -76,7 +101,7 @@ public class ProfessionalServiceController {
 
 		if (!"ADMIN".equals(role)) {
 			Long profUserId = jdbc.query(
-					"SELECT user_id FROM perfiles.professional_profile WHERE id = ? AND status <> 'DELETED'",
+					"SELECT user_id FROM perfiles.professional_profile WHERE id = ? AND deleted_at IS NULL",
 					rs -> rs.next() ? rs.getLong(1) : null, professionalId);
 			if (profUserId == null) {
 				return ResponseEntity.badRequest().build();
@@ -152,7 +177,7 @@ public class ProfessionalServiceController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 
-		int updated = jdbc.update("UPDATE catalogo.professional_service SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status <> 'DELETED'",
+		int updated = jdbc.update("UPDATE catalogo.professional_service SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL",
 				newStatus, id);
 		if (updated == 0) {
 			return ResponseEntity.notFound().build();
@@ -178,7 +203,7 @@ public class ProfessionalServiceController {
 			}
 		}
 
-		int updated = jdbc.update("UPDATE catalogo.professional_service SET status = 'DELETED', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status <> 'DELETED'", id);
+		int updated = jdbc.update("UPDATE catalogo.professional_service SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL", id);
 		if (updated == 0) {
 			return ResponseEntity.notFound().build();
 		}

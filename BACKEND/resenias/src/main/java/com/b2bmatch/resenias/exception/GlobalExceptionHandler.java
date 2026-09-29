@@ -5,9 +5,12 @@ import java.time.LocalDateTime;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -75,6 +78,32 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex,
+            HttpServletRequest request) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "El cuerpo de la solicitud es inválido, está mal formado o un campo tiene el tipo incorrecto",
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        String required = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "válido";
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "Parámetro inválido: '" + ex.getName() + "' debe ser de tipo " + required
+                        + " (valor recibido: '" + ex.getValue() + "')",
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     // Captura cualquier excepción no controlada
     // Evita que la aplicación devuelva errores sin controlar
     @ExceptionHandler(IllegalArgumentException.class)
@@ -88,10 +117,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    // Captura cualquier excepción no controlada
-    // Evita que la aplicación devuelva errores sin controlar
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleException(Exception ex, HttpServletRequest request) {
+        if (ex instanceof ErrorResponse er && er.getStatusCode().value() < 500) {
+            int code = er.getStatusCode().value();
+            ApiError error = new ApiError(
+                    LocalDateTime.now(),
+                    code,
+                    HttpStatus.valueOf(code).getReasonPhrase(),
+                    er.getBody().getDetail(),
+                    request.getRequestURI());
+            return ResponseEntity.status(HttpStatus.valueOf(code)).body(error);
+        }
         log.error("Error inesperado en resenias", ex);
         ApiError error = new ApiError(
                 LocalDateTime.now(),

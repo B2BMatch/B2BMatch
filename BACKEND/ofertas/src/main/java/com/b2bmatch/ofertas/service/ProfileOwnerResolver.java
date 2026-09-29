@@ -14,14 +14,14 @@ public class ProfileOwnerResolver {
 
     public boolean hasActiveProfessionalProfile(Long userId) {
         return Boolean.TRUE.equals(jdbcTemplate.query(
-                "SELECT EXISTS (SELECT 1 FROM perfiles.professional_profile WHERE user_id = ? AND status <> 'DELETED')",
+                "SELECT EXISTS (SELECT 1 FROM perfiles.professional_profile WHERE user_id = ? AND deleted_at IS NULL)",
                 rs -> rs.next() && rs.getBoolean(1),
                 userId));
     }
 
     public boolean hasActiveCompanyProfile(Long userId) {
         return Boolean.TRUE.equals(jdbcTemplate.query(
-                "SELECT EXISTS (SELECT 1 FROM perfiles.company_profile WHERE user_id = ? AND status <> 'DELETED')",
+                "SELECT EXISTS (SELECT 1 FROM perfiles.company_profile WHERE user_id = ? AND deleted_at IS NULL)",
                 rs -> rs.next() && rs.getBoolean(1),
                 userId));
     }
@@ -37,14 +37,14 @@ public class ProfileOwnerResolver {
 
     public boolean isActiveService(Long serviceId) {
         return Boolean.TRUE.equals(jdbcTemplate.query(
-                "SELECT EXISTS (SELECT 1 FROM catalogo.professional_service WHERE id = ? AND status = 'ACTIVE')",
+                "SELECT EXISTS (SELECT 1 FROM catalogo.professional_service WHERE id = ? AND status = 'ACTIVE' AND deleted_at IS NULL)",
                 rs -> rs.next() && rs.getBoolean(1),
                 serviceId));
     }
 
     public boolean hasActiveCategory(Long categoryId) {
         return Boolean.TRUE.equals(jdbcTemplate.query(
-                "SELECT EXISTS (SELECT 1 FROM catalogo.category WHERE id = ? AND status <> 'DELETED')",
+                "SELECT EXISTS (SELECT 1 FROM catalogo.category WHERE id = ? AND deleted_at IS NULL)",
                 rs -> rs.next() && rs.getBoolean(1),
                 categoryId));
     }

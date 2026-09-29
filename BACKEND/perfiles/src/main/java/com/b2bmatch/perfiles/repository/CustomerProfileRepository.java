@@ -12,6 +12,6 @@ import com.b2bmatch.perfiles.model.CustomerProfile;
 public interface CustomerProfileRepository extends JpaRepository<CustomerProfile, Long> {
 
     Optional<CustomerProfile> findByUserId(Long userId);
-    List<CustomerProfile> findByStatusNot(String status);
+    List<CustomerProfile> findByDeletedAtIsNull();
 
 }

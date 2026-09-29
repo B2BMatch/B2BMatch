@@ -1,0 +1,26 @@
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: resenias
+  jpa:
+    properties:
+      hibernate:
+        default_schema: resenias
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+# NotificationClient no hace nada con la clave interna vacia (es best-effort y
+# corta antes de la llamada HTTP), asi que los tests no necesitan el servicio de
+# notificaciones ni su URL.
+app:
+  internal-service-key: ""
+  notifications-base-url: http://notificaciones:8086
+  jwt:
+    secret: clave-de-prueba-solo-para-tests-no-usar-en-ningun-ambiente-real
+    expiration-ms: 86400000
+
+jwt:
+  secret: clave-de-prueba-solo-para-tests-no-usar-en-ningun-ambiente-real
+  expiration-ms: 86400000

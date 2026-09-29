@@ -17,4 +17,5 @@ public class AppUserResponseDto {
     private String roleName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 }

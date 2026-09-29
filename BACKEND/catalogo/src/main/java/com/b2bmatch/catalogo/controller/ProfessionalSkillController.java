@@ -36,9 +36,9 @@ public class ProfessionalSkillController {
 		List<Map<String, Object>> rows = jdbc.queryForList(
 				"SELECT " + SKILL_COLUMNS
 						+ " FROM catalogo.professional_skill ps JOIN catalogo.skill s ON s.id = ps.skill_id "
-						+ "WHERE ps.professional_id = ? AND s.status <> 'DELETED' "
+						+ "WHERE ps.professional_id = ? AND s.deleted_at IS NULL "
 						+ "AND EXISTS (SELECT 1 FROM perfiles.professional_profile pp "
-						+ "WHERE pp.id = ps.professional_id AND pp.status <> 'DELETED') ORDER BY s.name",
+						+ "WHERE pp.id = ps.professional_id AND pp.deleted_at IS NULL) ORDER BY s.name",
 				professionalId);
 		return ResponseEntity.ok(rows);
 	}
@@ -59,7 +59,7 @@ public class ProfessionalSkillController {
 		}
 
 		Boolean skillExists = jdbc.query(
-				"SELECT EXISTS(SELECT 1 FROM catalogo.skill WHERE id = ? AND status <> 'DELETED')",
+				"SELECT EXISTS(SELECT 1 FROM catalogo.skill WHERE id = ? AND deleted_at IS NULL)",
 				(org.springframework.jdbc.core.ResultSetExtractor<Boolean>) rs -> rs.next() && rs.getBoolean(1), skillId);
 		if (!Boolean.TRUE.equals(skillExists)) {
 			return ResponseEntity.notFound().build();
@@ -111,7 +111,7 @@ public class ProfessionalSkillController {
 
 	private Long professionalOwnerUserId(Long professionalId) {
 		return jdbc.query(
-				"SELECT user_id FROM perfiles.professional_profile WHERE id = ? AND status <> 'DELETED'",
+				"SELECT user_id FROM perfiles.professional_profile WHERE id = ? AND deleted_at IS NULL",
 				rs -> rs.next() ? rs.getLong(1) : null, professionalId);
 	}
 }

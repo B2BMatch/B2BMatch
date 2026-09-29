@@ -12,6 +12,6 @@ import com.b2bmatch.perfiles.model.ProfessionalProfile;
 public interface ProfessionalProfileRepository extends JpaRepository<ProfessionalProfile, Long> {
 
     Optional<ProfessionalProfile> findByUserId(Long userId);
-    List<ProfessionalProfile> findByStatusNot(String status);
+    List<ProfessionalProfile> findByDeletedAtIsNull();
 
 }

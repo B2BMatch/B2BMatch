@@ -27,8 +27,8 @@ public class AppUserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<AppUserResponseDto> getAll() {
-        return appUserService.findAll();
+    public List<AppUserResponseDto> getAll(@RequestParam(defaultValue = "false") boolean includeDeleted) {
+        return appUserService.findAll(includeDeleted);
     }
 
     @GetMapping("/{id}")

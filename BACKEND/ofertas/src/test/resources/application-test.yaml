@@ -1,0 +1,25 @@
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: ofertas
+  jpa:
+    properties:
+      hibernate:
+        default_schema: ofertas
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+jwt:
+  secret: clave-de-prueba-solo-para-tests-no-usar-en-ningun-ambiente-real
+  expiration-ms: 86400000
+
+app:
+  jwt:
+    secret: clave-de-prueba-solo-para-tests-no-usar-en-ningun-ambiente-real
+    expiration-ms: 86400000
+  notifications:
+    base-url: http://localhost:0
+  # Vacia a proposito: NotificationClient.notify() retorna sin llamar a la red.
+  internal-service-key: ""

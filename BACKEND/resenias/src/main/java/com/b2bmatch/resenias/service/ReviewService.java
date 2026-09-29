@@ -23,21 +23,24 @@ public class ReviewService {
     private final NotificationClient notificationClient;
 
     public List<Review> getAllReviews() {
-        return reviewRepository.findAll();
+        return reviewRepository.findByDeletedAtIsNull();
     }
 
-    
     public Review getReview(Long id) {
-        return reviewRepository.findById(id)
+        Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Review no encontrada"));
+        if (review.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Review no encontrada");
+        }
+        return review;
     }
 
     public List<Review> getReviewsByProfessional(Long professionalId) {
-        return reviewRepository.findByProfessionalId(professionalId);
+        return reviewRepository.findByProfessionalIdAndDeletedAtIsNull(professionalId);
     }
 
     public List<Review> getReviewsByUser(Long userId) {
-        return reviewRepository.findByUserId(userId);
+        return reviewRepository.findByUserIdAndDeletedAtIsNull(userId);
     }
 
     public Review createReview(Review review, Long requesterId, String requesterRole) {
@@ -56,7 +59,7 @@ public class ReviewService {
         }
 
         Long professionalUser = jdbcTemplate.query(
-                "SELECT user_id FROM perfiles.professional_profile WHERE id = ? AND status <> 'DELETED'",
+                "SELECT user_id FROM perfiles.professional_profile WHERE id = ? AND deleted_at IS NULL",
                 rs -> rs.next() ? rs.getLong(1) : null, review.getProfessionalId());
         if (professionalUser == null) {
             throw new IllegalArgumentException("El profesional indicado no existe o no está activo");
@@ -68,7 +71,7 @@ public class ReviewService {
             throw new IllegalArgumentException(
                     "Necesitas una transacción previa completada (postulación o cotización aceptada) para dejar una reseña");
         }
-        if (reviewRepository.existsByUserIdAndProfessionalId(requesterId, review.getProfessionalId())) {
+        if (reviewRepository.existsByUserIdAndProfessionalIdAndDeletedAtIsNull(requesterId, review.getProfessionalId())) {
             throw new IllegalArgumentException("Ya dejaste una reseña para este profesional");
         }
 
@@ -85,6 +88,12 @@ public class ReviewService {
 
         checkOwnership(existingReview, requesterId, requesterRole);
 
+        // Una reseña dada de baja no se edita: reactivarla en silencio al guardar
+        // seria una resurreccion, no una edicion.
+        if (existingReview.getDeletedAt() != null) {
+            throw new IllegalArgumentException("La reseña está dada de baja, no se puede modificar");
+        }
+
         if (review.getRating() == null || review.getRating() < 1 || review.getRating() > 5) {
             throw new IllegalArgumentException("rating debe estar entre 1 y 5");
         }
@@ -97,9 +106,21 @@ public class ReviewService {
     }
 
     public void deleteReview(Long id, Long requesterId, String requesterRole) {
-        Review review = getReview(id);
+        // findById sin filtro: una reseña dada de baja tiene que dar 400
+        // "ya está dada de baja", no 404 como en los lectores.
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review no encontrada para eliminar"));
+
         checkOwnership(review, requesterId, requesterRole);
-        reviewRepository.delete(review);
+
+        // El borrado no se decide en Java sino en la propia sentencia: la carga
+        // de arriba solo vale para el 404 y para la propiedad. Dos peticiones
+        // simultaneas pasan las dos por aqui, y la segunda se queda sin filas que
+        // tocar. No se borra la fila: el borrado vive en `deleted_at` y los
+        // lectores filtran por el.
+        if (reviewRepository.marcarBaja(id, LocalDateTime.now()) == 0) {
+            throw new IllegalArgumentException("La reseña ya está dada de baja");
+        }
     }
 
     private boolean hasCompletedTransaction(Long requesterId, String requesterRole, Long professionalUserId) {

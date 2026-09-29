@@ -13,8 +13,8 @@ import jakarta.persistence.LockModeType;
 
 @Repository
 public interface JobOfferRepository extends JpaRepository<JobOffer, Long> {
-    List<JobOffer> findByUserId(Long userId);
-    List<JobOffer> findByStatusNot(String status);
+    List<JobOffer> findByUserIdAndDeletedAtIsNull(Long userId);
+    List<JobOffer> findByDeletedAtIsNull();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from JobOffer o where o.id = :id")

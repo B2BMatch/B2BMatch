@@ -101,6 +101,11 @@ public class JobApplicationService {
         return JobApplicationResponse.fromEntity(saved);
     }
 
+    // Transaccional porque mas abajo se toca `existing.getJobOffer()`, una
+    // asociacion lazy: sin sesion abierta Hibernate lanza
+    // LazyInitializationException y el usuario recibe un 500 en vez del 400 de
+    // "no puedes mover la postulacion a otra oferta".
+    @Transactional
     public JobApplicationResponse update(Long id, JobApplicationRequest request, Long requesterId, String requesterRole) {
         JobApplication existing = repository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException("Job application not found with id: " + id));
@@ -176,6 +181,9 @@ public class JobApplicationService {
                 other.setStatus("REJECTED");
                 other.setUpdatedAt(LocalDateTime.now());
                 repository.save(other);
+                notificationClient.notify(other.getUserId(), "Postulación rechazada",
+                        "La empresa aceptó otra postulación para la oferta \"" + jobOffer.getTitle()
+                                + "\" y la oferta quedó cerrada.");
             }
         }
 

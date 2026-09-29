@@ -15,6 +15,6 @@ public interface CompanyProfileRepository extends JpaRepository<CompanyProfile, 
 
     Optional<CompanyProfile> findByTaxId(String taxId);
 
-    List<CompanyProfile> findByStatusNot(String status);
+    List<CompanyProfile> findByDeletedAtIsNull();
 
 }
