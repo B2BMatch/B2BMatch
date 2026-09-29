@@ -10,9 +10,9 @@
 /* Tarjeta de presentación del perfil */
 .profile-hero {
   background:
-    radial-gradient(circle at 12% 15%, rgba(255, 111, 77, 0.25), transparent 50%),
-    radial-gradient(circle at 88% 85%, rgba(217, 164, 65, 0.3), transparent 45%),
-    linear-gradient(135deg, #16233F 0%, #27375C 100%);
+    radial-gradient(circle at 12% 15%, rgba(var(--brand-rgb), 0.25), transparent 50%),
+    radial-gradient(circle at 88% 85%, rgba(var(--brand-light-rgb), 0.3), transparent 45%),
+    linear-gradient(135deg, var(--ink) 0%, var(--brand) 100%);
   border-radius: 18px;
   padding: 30px 32px;
   color: #FFFFFF;
@@ -42,12 +42,12 @@
 }
 
 .profile-hero-name .badge-verified {
-  background: rgba(255, 111, 77, 0.9);
+  background: rgba(var(--brand-rgb), 0.9);
   color: #FFFFFF;
 }
 
 .profile-hero-sub {
-  color: rgba(247, 243, 236, 0.78);
+  color: rgba(var(--cream-rgb), 0.78);
   font-size: 0.92rem;
   margin: 0;
 }

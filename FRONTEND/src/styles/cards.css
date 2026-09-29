@@ -9,7 +9,7 @@
 }
 
 .card-b2b:hover {
-  border-color: rgba(255, 111, 77, 0.45);
+  border-color: rgba(var(--brand-rgb), 0.45);
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -20,7 +20,7 @@
 
 .card-b2b-lift:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 111, 77, 0.45);
+  border-color: rgba(var(--brand-rgb), 0.45);
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -40,7 +40,7 @@
 
 .gig-card:hover {
   transform: translateY(-5px);
-  border-color: rgba(255, 111, 77, 0.4);
+  border-color: rgba(var(--brand-rgb), 0.4);
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -52,9 +52,9 @@
   align-items: flex-start;
   justify-content: flex-end;
   background:
-    radial-gradient(circle at 18% 22%, rgba(255, 111, 77, 0.22), transparent 55%),
-    radial-gradient(circle at 85% 10%, rgba(217, 164, 65, 0.28), transparent 45%),
-    linear-gradient(135deg, #16233F 0%, #27375C 100%);
+    radial-gradient(circle at 18% 22%, rgba(var(--brand-rgb), 0.22), transparent 55%),
+    radial-gradient(circle at 85% 10%, rgba(var(--brand-light-rgb), 0.28), transparent 45%),
+    linear-gradient(135deg, var(--ink) 0%, var(--brand) 100%);
 }
 
 /* Cuerpo de la tarjeta */
@@ -177,7 +177,7 @@
 }
 
 .btn-pill:hover {
-  background: #F05A36;
+  background: var(--coral-hover);
   color: #FFFFFF;
   transform: translateY(-1px);
 }
@@ -197,7 +197,7 @@
 .btn-pill--outline:hover {
   background: var(--bg-soft);
   color: var(--navy);
-  border-color: rgba(255, 111, 77, 0.4);
+  border-color: rgba(var(--brand-rgb), 0.4);
 }
 
 [data-theme="dark"] .btn-pill--outline {
@@ -206,5 +206,5 @@
 
 [data-theme="dark"] .btn-pill--outline:hover {
   color: var(--text-main);
-  background: rgba(247, 243, 236, 0.08);
+  background: rgba(var(--cream-rgb), 0.08);
 }

@@ -1,61 +1,107 @@
 /* ==========================================================================
    B2BMATCH — DESIGN TOKENS
-   Identidad visual: Navy #16233F · Coral #FF6F4D · Oro #D9A441 · Crema #F7F3EC
+   Identidad visual: Ladrillo #96160c · Crema #fffce8
    Tipografía: Sora (titulares) / Work Sans (cuerpo)
+
+   Paleta de dos colores. Todo lo demas es un derivado de estos dos:
+   - los "casi negros" son el ladrillo oscurecido, no un gris neutro, para que
+     el texto tenga el mismo tono que la marca;
+   - los lavados y superficies son la crema movida hacia el ladrillo.
+
+   Contraste medido (WCAG 2.1) sobre los fondos donde cada token se usa:
+     ink            / cream   17.51:1   cuerpo de texto
+     brand          / cream    8.42:1   acentos y enlaces
+     brand          / blanco   8.69:1   acentos sobre tarjetas
+     ink-muted      / cream    6.26:1   texto secundario
+     cream          / brand    8.42:1   texto e iconos sobre relleno de marca
+     brand-light    / brand    4.90:1   acento sobre superficie de marca
+     cream          / brand-hover 10.64:1
+     brand          / brand-wash  7.00:1
    ========================================================================== */
 
 :root {
   /* Fondo y superficies */
-  --bg-main: #F7F3EC;            /* Crema */
-  --bg-card: #FFFFFF;            /* Blanco tarjetas */
-  --bg-navbar: rgba(255, 255, 255, 0.92);
+  --bg-main: #FFFCE8;            /* Crema: fondo de la app */
+  --bg-card: #FFFFFF;            /* Blanco: elevacion sobre la crema */
+  --bg-navbar: rgba(255, 252, 232, 0.92);
   --bg-modal: #FFFFFF;
-  --bg-input: #F7F3EC;
-  --bg-soft: #F1EBE0;            /* Crestas sutiles sobre crema */
-  --bg-footer: #16233F;          /* Navy */
+  --bg-input: #F7EFD4;           /* Crema profunda: campo de formulario */
+  --bg-soft: #F7EFD4;            /* Crestas sutiles sobre crema */
+  --bg-footer: #96160C;          /* Ladrillo: ancla oscura de la pagina */
 
-  /* Textos */
-  --text-main: #16233F;          /* Navy */
-  --text-muted: #5B6472;
-  --text-accent: #FF6F4D;        /* Coral */
-  --texto-claro: #16233F;
+  /* Tinta: el ladrillo oscurecido hasta casi negro. Es el color del texto
+     principal y tambien el "oscuro de marca" que antes ocupaba el navy. */
+  --ink: #2E0A05;
+  --ink-muted: #6B5B54;
+
+  /* Textos
+     El cuerpo usa un ladrillo muy oscuro (ink) en vez de un gris: en una
+     paleta de dos colores, un gris neutro delata que falta un color. */
+  --text-main: var(--ink);       /* 17.51:1 sobre crema */
+  --text-muted: var(--ink-muted); /* Apagado, 6.26:1 */
+  --text-accent: #96160C;        /* Marca como texto, 8.42:1 sobre crema */
+  --texto-claro: var(--ink);
 
   /* Marca */
-  --navy: #16233F;
-  --coral: #FF6F4D;
-  --gold: #D9A441;
-  --cream: #F7F3EC;
+  --brand: #96160C;
+  --brand-hover: #7A1108;
+  --brand-light: #F5B3A1;        /* Acento sobre superficies de marca */
+  --brand-wash: #F6E3D9;         /* Relleno tenue de marca (chips, hover) */
+  --cream: #FFFCE8;
+
+  /* Tripleta RGB para capas translucidas: rgba(var(--brand-rgb), 0.18).
+     La capa translucida DEBE derivar del token, no repetir el literal: si se
+     repite, cambiar la paleta deja restos invisibles que solo aparecen al
+     minificar (rgb(218,56,18) se reescribe a #da3812 en el bundle). */
+  --brand-rgb: 150, 22, 12;      /* #96160C */
+  --brand-hover-rgb: 122, 17, 8; /* #7A1108 */
+  --brand-light-rgb: 245, 179, 161; /* #F5B3A1 */
+  --cream-rgb: 255, 252, 232;    /* #FFFCE8 */
+  --ink-rgb: 46, 10, 5;           /* #2E0A05 */
 
   /* Detalles y bordes */
-  --border-color: #ECE7DC;
-  --red-glow: #FF6F4D;           /* Alias legacy → coral */
-  --regent-st-blue: #FF6F4D;     /* Alias legacy para hovers → coral */
-  --hippie-blue: #5B6472;
-  --cornflower: #D9A441;
-  --shadow-card: 0 4px 14px rgba(22, 35, 63, 0.08);
-  --shadow-card-hover: 0 12px 28px rgba(22, 35, 63, 0.14);
+  --border-color: #EADFC0;
+  --shadow-card: 0 4px 14px rgba(46, 10, 5, 0.08);
+  --shadow-card-hover: 0 12px 28px rgba(46, 10, 5, 0.14);
+
+  /* Alias legacy. La paleta anterior (navy + coral + oro) tiene ~30 usos
+     repartidos en 12 hojas de estilo; estos alias los mantienen apuntando a la
+     paleta nueva para no reescribir todo de golpe. Se pueden migrar a los
+     nombres semanticos de arriba de forma mecanica cuando quiera.
+     --gold  -> brand: el dorado desaparece, y los precios quedaban con 4.43:1
+                si se usaba un tinte claro, por debajo de AA para texto normal.
+     --navy  -> ink: el navy ocupaba el turno de "oscuro de marca". */
+  --navy: var(--ink);
+  --coral: var(--brand);
+  --coral-hover: var(--brand-hover);
+  --coral-light: var(--brand-light);
+  --gold: var(--brand);
+  --hippie-blue: var(--text-muted);
+  --cornflower: var(--brand);
+  --red-glow: var(--brand);      /* Alias legacy */
+  --regent-st-blue: var(--brand-hover); /* Alias legacy para hovers */
 
   /* Tipografía */
   --font-display: 'Sora', 'Plus Jakarta Sans', sans-serif;
   --font-body: 'Work Sans', 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Modo oscuro: variante navy de la misma identidad */
+/* Modo oscuro: variante profunda de la propia marca, no un navy distinto. */
 [data-theme="dark"] {
-  --bg-main: #0F1A2E;
-  --bg-card: #16233F;
-  --bg-navbar: rgba(15, 26, 46, 0.92);
-  --bg-modal: #1B2A47;
-  --bg-input: rgba(255, 255, 255, 0.06);
-  --bg-soft: #1B2A47;
-  --bg-footer: #0B1424;
+  --bg-main: #1A0704;
+  --bg-card: #2A0C07;
+  --bg-navbar: rgba(26, 7, 4, 0.92);
+  --bg-modal: #2A0C07;
+  --bg-input: rgba(255, 252, 232, 0.06);
+  --bg-soft: #2A0C07;
+  --bg-footer: #140503;
 
-  --text-main: #F7F3EC;
-  --text-muted: #AEB6C5;
-  --text-accent: #FF8A6E;
-  --texto-claro: #F7F3EC;
+  --text-main: #FFFCE8;          /* 18.90:1 sobre el fondo oscuro */
+  --text-muted: #D9B5AC;         /* 10.37:1 */
+  --text-accent: #F5B3A1;        /* Acento sobre oscuro, no el relleno */
+  --texto-claro: #FFFCE8;
 
-  --border-color: rgba(247, 243, 236, 0.14);
+  --border-color: rgba(255, 252, 232, 0.14);
   --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.4);
   --shadow-card-hover: 0 16px 36px rgba(0, 0, 0, 0.5);
 }

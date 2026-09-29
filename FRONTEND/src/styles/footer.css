@@ -4,7 +4,7 @@
   padding: 36px 32px 22px;
   margin-top: auto;
   text-align: center;
-  color: rgba(247, 243, 236, 0.75);
+  color: rgba(var(--cream-rgb), 0.75);
 }
 
 .footer-b2b strong {
@@ -13,13 +13,14 @@
 }
 
 .footer-b2b a {
-  color: rgba(247, 243, 236, 0.75);
+  color: rgba(var(--cream-rgb), 0.75);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .footer-b2b a:hover {
-  color: #FF6F4D;
+  /* El footer es navy: aqui va el coral claro, no el relleno de marca. */
+  color: var(--coral-light);
 }
 
 /* =====================================================
@@ -29,7 +30,7 @@
   padding: 56px 24px 28px;
   text-align: left;
   background:
-    radial-gradient(900px 400px at 90% -10%, rgba(255, 111, 77, 0.1), transparent 55%),
+    radial-gradient(900px 400px at 90% -10%, rgba(var(--brand-rgb), 0.1), transparent 55%),
     var(--bg-footer);
 }
 
@@ -61,7 +62,7 @@
 .footer-mega-tagline {
   font-size: 0.88rem;
   line-height: 1.6;
-  color: rgba(247, 243, 236, 0.65);
+  color: rgba(var(--cream-rgb), 0.65);
   margin: 0;
   max-width: 300px;
 }
@@ -80,20 +81,20 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   padding: 7px 10px;
-  color: rgba(247, 243, 236, 0.85);
+  color: rgba(var(--cream-rgb), 0.85);
   font-size: 0.76rem;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 .footer-mega-social:hover {
-  background: rgba(255, 111, 77, 0.2);
-  border-color: rgba(255, 111, 77, 0.5);
+  background: rgba(var(--brand-rgb), 0.2);
+  border-color: rgba(var(--brand-rgb), 0.5);
   transform: translateY(-2px);
 }
 
 .footer-mega-social-label {
-  color: rgba(247, 243, 236, 0.85);
+  color: rgba(var(--cream-rgb), 0.85);
 }
 
 .footer-mega-heading {
@@ -115,7 +116,7 @@
 
 .footer-mega-links a {
   font-size: 0.88rem;
-  color: rgba(247, 243, 236, 0.7);
+  color: rgba(var(--cream-rgb), 0.7);
   white-space: nowrap;
 }
 
@@ -134,20 +135,20 @@
 .footer-mega-legal {
   margin: 0;
   font-size: 0.85rem;
-  color: rgba(247, 243, 236, 0.7);
+  color: rgba(var(--cream-rgb), 0.7);
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
 
 .footer-mega-legal a {
-  color: rgba(247, 243, 236, 0.7);
+  color: rgba(var(--cream-rgb), 0.7);
 }
 
 .footer-mega-copy {
   margin: 0;
   font-size: 0.78rem;
-  color: rgba(247, 243, 236, 0.5);
+  color: rgba(var(--cream-rgb), 0.5);
 }
 
 .footer-mega-locale {
@@ -164,7 +165,7 @@
   padding: 7px 14px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: rgba(247, 243, 236, 0.85);
+  color: rgba(var(--cream-rgb), 0.85);
 }
 
 @media (max-width: 1024px) {

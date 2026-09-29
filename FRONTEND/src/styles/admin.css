@@ -77,8 +77,8 @@
 
 .stat-change {
   display: inline-block;
-  background: rgba(217, 164, 65, 0.16);
-  color: #9A7A10;
+  background: rgba(var(--brand-light-rgb), 0.16);
+  color: var(--brand);
   font-size: 0.78rem;
   font-weight: 600;
   border-radius: 999px;
@@ -170,7 +170,7 @@
 }
 
 .admin-table tbody tr:hover {
-  background: rgba(22, 35, 63, 0.04);
+  background: rgba(var(--ink-rgb), 0.04);
 }
 
 .cell-strong { font-weight: 600; }
@@ -186,9 +186,14 @@
   font-weight: 600;
 }
 
-.badge-status--active { background: rgba(217, 164, 65, 0.16); color: #9A7A10; }
+/* El dorado #9A7A10 era el texto de "active" sobre el wash de marca. Ahora el
+   texto es --brand: 7.86:1 sobre el fondo resultante, muy por encima de AA. */
+.badge-status--active { background: rgba(var(--brand-light-rgb), 0.16); color: var(--brand); }
 .badge-status--suspended { background: rgba(239, 68, 68, 0.12); color: #DC2626; }
-.badge-status--neutral { background: rgba(22, 35, 63, 0.08); color: var(--navy); }
+/* Mismo fondo que --suspended pero con un rojo mas oscuro: #DC2626 sobre este
+   fondo queda en 4.14:1 y no alcanza AA (4.5:1). #B91C1C llega a 5.5:1. */
+.badge-status--deleted { background: rgba(239, 68, 68, 0.12); color: #B91C1C; }
+.badge-status--neutral { background: rgba(var(--ink-rgb), 0.08); color: var(--navy); }
 
 /* Botones chicos dentro de tablas */
 .admin-table .btn-b2b-outline {

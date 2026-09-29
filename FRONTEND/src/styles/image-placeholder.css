@@ -13,14 +13,14 @@
   min-height: 120px;
   background: repeating-linear-gradient(
     135deg,
-    var(--bg-soft, #f1ebe0) 0px,
-    var(--bg-soft, #f1ebe0) 14px,
-    rgba(22, 35, 63, 0.06) 14px,
-    rgba(22, 35, 63, 0.06) 28px
+    var(--bg-soft, #f7efd4) 0px,
+    var(--bg-soft, #f7efd4) 14px,
+    rgba(var(--ink-rgb), 0.06) 14px,
+    rgba(var(--ink-rgb), 0.06) 28px
   );
-  border: 2px dashed var(--border-color, #ece7dc);
+  border: 2px dashed var(--border-color, #eadfc0);
   border-radius: 12px;
-  color: var(--text-muted, #5b6472);
+  color: var(--text-muted, #6b5b54);
   text-align: center;
   padding: 16px;
 }
@@ -53,8 +53,8 @@
     rgba(0, 0, 0, 0.18) 14px,
     rgba(0, 0, 0, 0.18) 28px
   );
-  border-color: rgba(247, 243, 236, 0.28);
-  color: rgba(247, 243, 236, 0.75);
+  border-color: rgba(var(--cream-rgb), 0.28);
+  color: rgba(var(--cream-rgb), 0.75);
 }
 
 /* Anexo: siempre cuadrado para cubiertas tipo gig */

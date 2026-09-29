@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(22, 35, 63, 0.5);
+  background: rgba(var(--ink-rgb), 0.5);
   backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
@@ -31,7 +31,7 @@
   left: 24px;
   right: 24px;
   height: 3px;
-  background: linear-gradient(90deg, var(--coral), var(--gold));
+  background: linear-gradient(90deg, var(--brand), var(--brand-hover));
   border-radius: 0 0 6px 6px;
 }
 

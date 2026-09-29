@@ -4,7 +4,7 @@
 .fv-home {
   width: 100%;
   overflow-x: hidden;
-  background: #F7F3EC;
+  background: var(--cream);
 }
 
 [data-theme='dark'] .fv-home {
@@ -49,9 +49,9 @@
    ===================================================== */
 .fv-hero {
   background:
-    radial-gradient(1200px 600px at 85% -10%, rgba(255, 111, 77, 0.18), transparent 55%),
-    radial-gradient(900px 500px at 10% 20%, rgba(217, 164, 65, 0.14), transparent 50%),
-    #0D1526;
+    radial-gradient(1200px 600px at 85% -10%, rgba(var(--brand-rgb), 0.18), transparent 55%),
+    radial-gradient(900px 500px at 10% 20%, rgba(var(--brand-light-rgb), 0.14), transparent 50%),
+    var(--ink);
   padding: 72px 24px 48px;
   color: #FFFFFF;
 }
@@ -76,7 +76,7 @@
 }
 
 .fv-hero-title-accent {
-  color: #FF6F4D;
+  color: var(--coral-light);
 }
 
 /* Buscador tipo Fiverr */
@@ -93,13 +93,13 @@
 }
 
 .fv-hero-search:focus-within {
-  box-shadow: 0 18px 44px rgba(255, 111, 77, 0.35);
+  box-shadow: 0 18px 44px rgba(var(--brand-rgb), 0.35);
 }
 
 .fv-hero-search-icon {
   width: 20px;
   height: 20px;
-  color: #7A8494;
+  color: var(--ink-muted);
   flex-shrink: 0;
 }
 
@@ -109,17 +109,17 @@
   outline: none;
   font-size: 1rem;
   font-family: var(--font-body, sans-serif);
-  color: #16233F;
+  color: var(--ink);
   background: transparent;
   min-width: 0;
 }
 
 .fv-hero-search input::placeholder {
-  color: #8A93A6;
+  color: var(--ink-muted);
 }
 
 .fv-hero-search-btn {
-  background: #0D1526;
+  background: var(--ink);
   color: #FFFFFF;
   border: none;
   border-radius: 10px;
@@ -133,7 +133,7 @@
 }
 
 .fv-hero-search-btn:hover {
-  background: #FF6F4D;
+  background: var(--coral);
   transform: translateY(-1px);
 }
 
@@ -150,21 +150,21 @@
   align-items: center;
   gap: 6px;
   background: #FFFFFF;
-  border: 1px solid var(--border-color, #ECE7DC);
+  border: 1px solid var(--border-color);
   border-radius: 999px;
   padding: 9px 16px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #16233F;
+  color: var(--ink);
   text-decoration: none;
   white-space: nowrap;
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .fv-chip:hover {
-  border-color: rgba(255, 111, 77, 0.55);
+  border-color: rgba(var(--brand-rgb), 0.55);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(22, 35, 63, 0.1);
+  box-shadow: 0 6px 16px rgba(var(--ink-rgb), 0.1);
 }
 
 .fv-chip--hero {
@@ -176,12 +176,12 @@
 
 .fv-chip--hero:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 111, 77, 0.7);
+  border-color: rgba(var(--brand-rgb), 0.7);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .fv-chip--hot {
-  border: 1.5px solid rgba(217, 164, 65, 0.55);
+  border: 1.5px solid rgba(var(--brand-light-rgb), 0.55);
 }
 
 .fv-hero-media {
@@ -202,7 +202,7 @@
   font-size: 0.78rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(247, 243, 236, 0.65);
+  color: rgba(var(--cream-rgb), 0.65);
   margin-bottom: 16px;
 }
 
@@ -239,18 +239,18 @@
   align-items: flex-start;
   gap: 14px;
   background: #FFFFFF;
-  border: 1px solid var(--border-color, #ECE7DC);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 20px 18px;
   text-decoration: none;
-  color: #16233F;
+  color: var(--ink);
   box-shadow: var(--shadow-card, none);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .fv-category-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 111, 77, 0.45);
+  border-color: rgba(var(--brand-rgb), 0.45);
   box-shadow: var(--shadow-card-hover, none);
 }
 
@@ -293,7 +293,7 @@
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
-  border: 1px solid var(--border-color, #ECE7DC);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow-card, none);
@@ -337,9 +337,9 @@
   flex-shrink: 0;
 }
 
-.fv-gig-avatar--coral { background: #FF6F4D; }
-.fv-gig-avatar--navy { background: #16233F; }
-.fv-gig-avatar--gold { background: #D9A441; }
+.fv-gig-avatar--coral { background: var(--coral); }
+.fv-gig-avatar--navy { background: var(--ink); }
+.fv-gig-avatar--gold { background: var(--brand); }
 
 .fv-gig-provider-meta {
   min-width: 0;
@@ -349,7 +349,7 @@
 .fv-gig-provider-name {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #16233F;
+  color: var(--ink);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -359,21 +359,21 @@
 [data-theme='dark'] .fv-gig-provider-name { color: var(--text-main); }
 
 .fv-gig-heart {
-  color: #B9BEC9;
+  color: var(--ink-muted);
   font-size: 1.05rem;
   cursor: pointer;
   transition: color 0.2s ease, transform 0.15s ease;
 }
 
 .fv-gig-heart:hover {
-  color: #FF6F4D;
+  color: var(--text-accent);
   transform: scale(1.15);
 }
 
 .fv-gig-title {
   font-size: 1.02rem;
   font-weight: 700;
-  color: #16233F;
+  color: var(--ink);
   line-height: 1.35;
   margin: 0 0 6px;
 }
@@ -406,13 +406,13 @@
   gap: 4px;
   font-size: 0.84rem;
   font-weight: 600;
-  color: #16233F;
+  color: var(--ink);
 }
 
 .fv-star {
   width: 15px;
   height: 15px;
-  color: #D9A441;
+  color: var(--brand);
 }
 
 .fv-gig-reviews {
@@ -435,7 +435,7 @@
 .fv-gig-price span {
   font-size: 1rem;
   font-weight: 700;
-  color: #16233F;
+  color: var(--ink);
 }
 
 [data-theme='dark'] .fv-gig-price span { color: var(--text-main); }
@@ -450,8 +450,8 @@
    ===================================================== */
 .fv-usp {
   background:
-    radial-gradient(800px 400px at 10% 0%, rgba(255, 111, 77, 0.1), transparent 55%),
-    #0D1526;
+    radial-gradient(800px 400px at 10% 0%, rgba(var(--brand-rgb), 0.1), transparent 55%),
+    var(--ink);
   padding: 72px 0;
   color: #FFFFFF;
 }
@@ -504,7 +504,7 @@
 }
 
 .fv-usp-item p {
-  color: rgba(247, 243, 236, 0.75);
+  color: rgba(var(--cream-rgb), 0.75);
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 0;
@@ -521,7 +521,7 @@
 .fv-sourcing {
   padding: 72px 0;
   background: #FFFFFF;
-  border-top: 1px solid var(--border-color, #ECE7DC);
+  border-top: 1px solid var(--border-color);
 }
 
 [data-theme='dark'] .fv-sourcing { background: var(--bg-card); }
@@ -540,7 +540,7 @@
   text-transform: uppercase;
   letter-spacing: 1.5px;
   font-weight: 700;
-  color: #FF6F4D;
+  color: var(--text-accent);
   margin-bottom: 12px;
 }
 
@@ -577,8 +577,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 111, 77, 0.14);
-  color: #FF6F4D;
+  background: rgba(var(--brand-rgb), 0.14);
+  color: var(--text-accent);
   font-size: 0.8rem;
   font-weight: 800;
   margin-top: 2px;
@@ -594,9 +594,9 @@
    ===================================================== */
 .fv-guarantee {
   padding: 40px 0;
-  background: rgba(217, 164, 65, 0.09);
-  border-top: 1px solid rgba(217, 164, 65, 0.2);
-  border-bottom: 1px solid rgba(217, 164, 65, 0.2);
+  background: rgba(var(--brand-light-rgb), 0.09);
+  border-top: 1px solid rgba(var(--brand-light-rgb), 0.2);
+  border-bottom: 1px solid rgba(var(--brand-light-rgb), 0.2);
 }
 
 .fv-guarantee-layout {
@@ -649,7 +649,7 @@
 .fv-see-more {
   font-weight: 700;
   font-size: 0.95rem;
-  color: #FF6F4D;
+  color: var(--text-accent);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -659,7 +659,7 @@
 
 .fv-see-more:hover {
   gap: 10px;
-  color: #FF6F4D;
+  color: var(--text-accent);
 }
 
 .fv-guides-grid {
@@ -670,7 +670,7 @@
 
 .fv-guide {
   background: #FFFFFF;
-  border: 1px solid var(--border-color, #ECE7DC);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow-card, none);
@@ -702,9 +702,9 @@
    ===================================================== */
 .fv-final-cta {
   background:
-    radial-gradient(900px 450px at 50% -10%, rgba(255, 111, 77, 0.2), transparent 55%),
-    radial-gradient(700px 400px at 90% 100%, rgba(217, 164, 65, 0.16), transparent 55%),
-    #0D1526;
+    radial-gradient(900px 450px at 50% -10%, rgba(var(--brand-rgb), 0.2), transparent 55%),
+    radial-gradient(700px 400px at 90% 100%, rgba(var(--brand-light-rgb), 0.16), transparent 55%),
+    var(--ink);
   padding: 72px 24px;
   text-align: center;
   color: #FFFFFF;
@@ -726,7 +726,7 @@
 }
 
 .fv-final-cta p {
-  color: rgba(247, 243, 236, 0.8);
+  color: rgba(var(--cream-rgb), 0.8);
   font-size: 1.02rem;
   margin: 0 0 10px;
 }
